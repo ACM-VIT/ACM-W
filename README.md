@@ -1,150 +1,75 @@
-<div align="center">
+# React + TypeScript + Vite
 
-![Forktober GIF](https://raw.githubusercontent.com/ACM-VIT/.github/master/profile/acm_gif_banner.gif)
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-<!-- Project Title -->
-<h2>PROJECT TITLE</h2>
+Currently, two official plugins are available:
 
-<p>Short description about the project. One or two lines that explain what it does and who it’s for.</p>
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-<p>
-  <a href="https://acmvit.in/" target="_blank">
-    <img alt="made-by-acm" src="https://img.shields.io/badge/MADE%20BY-ACM%20VIT-orange?style=flat-square&logo=acm&link=acmvit.in" />
-  </a>
-  <!-- Uncomment the below line to add the license badge. Make sure the right license badge is reflected. -->
-  <!-- <img alt="license" src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" /> -->
-  <!-- Add forks/stars/tech stack badges from https://shields.io/ as needed -->
-</p>
+## React Compiler
 
-</div>
+The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
 
----
+Note: This will impact Vite dev & build performances.
 
-## Table of Contents
-- [About](#about)
-- [Quick Start](#quick-start)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [Hacktoberfest](#hacktoberfest)
-- [Submitting a Pull Request](#submitting-a-pull-request)
-- [Guidelines for Pull Request](#guidelines-for-pull-request)
-- [Authors](#authors)
+## Expanding the ESLint configuration
 
----
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-## About
-Write a compelling overview about the project: the problem it solves, the motivation, and what makes it unique. Include a short roadmap or key features if helpful.
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
----
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-## Quick Start
-
-```bash
-# 1) Fork and clone
-# Click Fork on GitHub, then:
- git clone https://github.com/<your-username>/<repo>.git
- cd <repo>
-
-# 2) Create a branch
- git checkout -b feat/your-feature
-
-# 3) Install dependencies
-# paste your install command(s) here
-
-# 4) Run the project
-# paste your run command(s) here
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
----
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-## Usage
-Provide examples and code snippets showing how to use the project. Add screenshots or GIFs if applicable.
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-```console
-# examples
-<your-cli> init
-<your-cli> run
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
----
-
-## Contributing
-We welcome contributions of all kinds! Please read our [Contributing Guidelines](contributing.md) to get started quickly and make your PRs count.
-
----
-
-## Hacktoberfest
-
-<p>
-  <a href="https://hacktoberfest.com/" target="_blank">
-<img alt="hactoberfest" src="https://img.shields.io/github/hacktoberfest/2025/tmrowco/tmrowapp-contrib?style=flat-square&logo=acm&labelColor=indigo&link=hacktoberfest.com"/>
-  </a>
-
-<!-- Badge Format 
-https://img.shields.io/github/hacktoberfest/:year/:user/:repo
--->
-
-Join us for Hacktoberfest! Quality > quantity.
-- Aim for meaningful, well‑scoped PR/MRs that solve real issues.
-- Non‑code contributions (docs, design, tutorials) are welcome via PR.
-- Full participation details: https://hacktoberfest.com/participation
-
----
-
-## Submitting a Pull Request
-
-1. Fork the repository (top‑right on GitHub)
-2. Clone your fork locally:
-   ```bash
-   git clone <HTTPS-ADDRESS>
-   cd <NAME-OF-REPO>
-   ```
-3. Create a new branch:
-   ```bash
-   git checkout -b <your-branch-name>
-   ```
-4. Make your changes and stage them:
-   ```bash
-   git add .
-   ```
-5. Commit your changes:
-   ```bash
-   git commit -m "feat: your message"
-   ```
-6. Push to your fork:
-   ```bash
-   git push origin <your-branch-name>
-   ```
-7. Open a Pull Request and clearly describe what you changed and why. Link related issues (e.g., “Fixes #123”).
-
-<!-- <img src="https://img.shields.io/github/:variant/:user/:repo?style=flat-square&labelColor=orange" alt="Open a Pull Request" /> -->
-
----
-
-## Guidelines for Pull Request
-- Avoid PRs that are automated/scripted or plagiarized from someone else’s work.
-- Don’t spam; keep each PR focused and meaningful.
-- The project maintainer’s decision on PR validity is final.
-- For more, see our [Contributing Guidelines](contributing.md) and the Hacktoberfest [participation rules](https://hacktoberfest.com/participation).
-
----
-
-## Authors
-
-**Authors:** <!-- [author1's name](link), [author2's name](link) -->  
-**Contributors:** <!-- Generate contributors list using https://contributors-img.web.app/preview -->
-
----
-
-## Community & Conduct
-By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
-
----
-
-<div align="center">
-  
-🤍 Crafted with love by <a href="https://acmvit.in/" target="_blank">ACM‑VIT</a>
-
-![Footer GIF](https://raw.githubusercontent.com/ACM-VIT/.github/master/profile/domains.gif)
-
-</div>
