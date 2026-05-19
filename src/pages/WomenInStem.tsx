@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import globe from "../assets/Globe.png";
+import Globe3D from "../assets/globe_3d";
+import type { Globe3DHandle } from "../assets/globe_3d";
 import india from "../assets/IN.png";
 import poland from "../assets/PL.png";
 import uk from "../assets/GB.png";
@@ -19,6 +20,12 @@ const scientists = [
     photo: kalpana,
     accentTop: "42%",
     accentLeft: "68%",
+    focus: {
+      lng: 78.9,
+      lat: 21.1,
+      x: -150,
+      y: 26,
+    },
     title: "Astronaut - India",
     text: `Kalpana Chawla was the first woman of Indian origin in space.
 She served as a mission specialist and primary robotic arm operator
@@ -31,6 +38,12 @@ to pursue science, aerospace and engineering.`,
     photo: marie,
     accentTop: "38%",
     accentLeft: "50%",
+    focus: {
+      lng: 19.1,
+      lat: 52.1,
+      x: -8,
+      y: 118,
+    },
     title: "Physicist - Poland",
     text: `Marie Curie pioneered research on radioactivity and became
 the first woman to win a Nobel Prize. She remains the only person
@@ -42,6 +55,12 @@ to win Nobel Prizes in two scientific fields - Physics and Chemistry.`,
     photo: ada,
     accentTop: "28%",
     accentLeft: "44%",
+    focus: {
+      lng: -3.4,
+      lat: 55.4,
+      x: 52,
+      y: 146,
+    },
     title: "Mathematician - United Kingdom",
     text: `Ada Lovelace is widely regarded as the world's first computer
 programmer. Her notes on Charles Babbage's Analytical Engine introduced
@@ -51,11 +70,33 @@ the idea that machines could go beyond calculations and manipulate symbols.`,
 
 export default function WomenInStem() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const globeRefs = useRef<Array<Globe3DHandle | null>>([]);
+  const [globeSizes, setGlobeSizes] = useState({ hero: 520, section: 460 });
+
+  useEffect(() => {
+    const updateGlobeSizes = () => {
+      setGlobeSizes({
+        hero: Math.min(520, Math.max(280, window.innerWidth * 0.58)),
+        section: Math.min(460, Math.max(240, window.innerWidth * 0.5)),
+      });
+    };
+
+    updateGlobeSizes();
+    window.addEventListener("resize", updateGlobeSizes);
+
+    return () => {
+      window.removeEventListener("resize", updateGlobeSizes);
+    };
+  }, []);
 
   useEffect(() => {
     const sections = gsap.utils.toArray<HTMLElement>(".scientist-section");
 
-    sections.forEach((section) => {
+    sections.forEach((section, index) => {
+      const globe = section.querySelector(".globe");
+      const targetX = Number(section.dataset.focusX ?? 0);
+      const targetY = Number(section.dataset.focusY ?? 0);
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -63,17 +104,31 @@ export default function WomenInStem() {
           end: "+=250%",
           scrub: true,
           pin: true,
+          onEnter: () => {
+            const focus = scientists[index].focus;
+            globeRefs.current[index]?.resume();
+            globeRefs.current[index]?.rotateTo(focus.lng, focus.lat, 900);
+          },
+          onEnterBack: () => {
+            const focus = scientists[index].focus;
+            globeRefs.current[index]?.resume();
+            globeRefs.current[index]?.rotateTo(focus.lng, focus.lat, 900);
+          },
         },
       });
 
       tl.fromTo(
-        section.querySelector(".globe"),
+        globe,
         {
           scale: 1,
           opacity: 1,
+          x: 0,
+          y: 0,
         },
         {
-          scale: 6,
+          scale: 2.75,
+          x: targetX,
+          y: targetY,
           duration: 2,
           ease: "power2.inOut",
         },
@@ -82,11 +137,11 @@ export default function WomenInStem() {
           section.querySelector(".country"),
           {
             opacity: 0,
-            scale: 0.7,
+            scale: 0.35,
           },
           {
-            opacity: 1,
-            scale: 1.2,
+            opacity: 0.28,
+            scale: 0.52,
             duration: 1,
           },
           "-=1.5",
@@ -94,12 +149,24 @@ export default function WomenInStem() {
         .to(
           section.querySelector(".country"),
           {
-            x: "-35vw",
-            y: 40,
-            scale: 1,
+            x: "-32vw",
+            y: 72,
+            scale: 0.42,
             duration: 1.2,
           },
           "+=0.2",
+        )
+        .call(() => {
+          globeRefs.current[index]?.pause();
+        })
+        .to(
+          [globe, section.querySelector(".country")],
+          {
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.out",
+          },
+          "+=0.1",
         )
         .fromTo(
           section.querySelector(".content"),
@@ -112,7 +179,7 @@ export default function WomenInStem() {
             x: 0,
             duration: 1,
           },
-          "-=1",
+          "-=0.55",
         );
     });
 
@@ -124,7 +191,7 @@ export default function WomenInStem() {
   return (
     <div
       ref={containerRef}
-      className="bg-[#f4efe6] text-[#4f1919] overflow-x-hidden"
+      className="bg-[#fff9e9] text-[#580A0A] overflow-x-hidden"
     >
       <section className="h-screen w-full relative flex items-center justify-center">
         <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14]" />
@@ -138,31 +205,40 @@ export default function WomenInStem() {
           WOMEN IN STEM
         </h1>
 
-        <img
-          src={globe}
-          alt=""
-          className="w-[70vw] max-w-[900px] object-contain opacity-95"
+        <Globe3D
+          size={globeSizes.hero}
+          className="opacity-95"
+          lineColor="#5d0f14"
+          sphereColor="#fff9e9"
+          rotationSpeed={0.002}
         />
       </section>
 
       {scientists.map((item) => (
         <section
           key={item.name}
-          className="scientist-section relative h-screen w-full overflow-hidden bg-[#f4efe6]"
+          className="scientist-section relative h-screen w-full overflow-hidden bg-[#fff9e9]"
+          data-focus-x={item.focus.x}
+          data-focus-y={item.focus.y}
         >
           <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14] z-50" />
 
           <div className="absolute inset-0 flex items-center justify-center">
-            <img
-              src={globe}
-              alt=""
-              className="globe absolute w-[65vw] opacity-90"
+            <Globe3D
+              ref={(node) => {
+                globeRefs.current[scientists.indexOf(item)] = node;
+              }}
+              size={globeSizes.section}
+              className="globe absolute opacity-90"
+              lineColor="#5d0f14"
+              sphereColor="#fff9e9"
+              rotationSpeed={0.002}
             />
 
             <img
               src={item.country}
               alt=""
-              className="country absolute w-[28vw] max-w-[350px]"
+              className="country absolute w-[18vw] max-w-[220px] pointer-events-none"
               style={{
                 top: item.accentTop,
                 left: item.accentLeft,
@@ -188,6 +264,7 @@ export default function WomenInStem() {
                   className="text-[38px] leading-none mb-6"
                   style={{
                     fontFamily: "Georgia, serif",
+                    color: "#580A0A",
                   }}
                 >
                   {item.name}
