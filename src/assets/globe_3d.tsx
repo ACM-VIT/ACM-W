@@ -2,12 +2,14 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import * as THREE from "three";
 
 export type Globe3DHandle = {
-  rotateTo: (lng: number, lat?: number, durationMs?: number) => void;
-  zoomTo: (z?: number, durationMs?: number) => void;
-  pause: () => void;
-  resume: () => void;
-  group?: THREE.Group;
-  camera?: THREE.PerspectiveCamera;
+  /** The Three.js Group containing the globe sphere + country lines */
+  group: THREE.Group | undefined;
+  /** The Three.js camera (animate camera.position.z for zoom) */
+  camera: THREE.PerspectiveCamera | undefined;
+  /** Toggle idle auto-rotation on/off */
+  setAutoRotate: (enabled: boolean) => void;
+  /** Toggle pointer-drag rotation on/off */
+  setDragEnabled: (enabled: boolean) => void;
 };
 
 type Globe3DProps = {
@@ -16,6 +18,7 @@ type Globe3DProps = {
   sphereColor?: string;
   rotationSpeed?: number;
   initialRotY?: number;
+  enableDrag?: boolean;
   className?: string;
   style?: React.CSSProperties;
 };
@@ -41,11 +44,12 @@ type TopoJsonApi = {
 
 const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
   {
-    size = 620,
+    size = 420,
     lineColor = "#5d0f14",
     sphereColor = "#fff9e9",
-    rotationSpeed = 0.0025,
+    rotationSpeed = 0.002,
     initialRotY = -0.5,
+    enableDrag = true,
     className = "",
     style = {},
   },
@@ -53,36 +57,26 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
 ) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internals = useRef<GlobeInternals>({});
-  const isPaused = useRef(false);
+  const autoRotateRef = useRef(true);
+  const dragEnabledRef = useRef(enableDrag);
+
+  // Keep dragEnabledRef in sync with prop
+  useEffect(() => {
+    dragEnabledRef.current = enableDrag;
+  }, [enableDrag]);
 
   useImperativeHandle(ref, () => ({
-    rotateTo(lng: number, lat = 0, durationMs = 1200) {
-      const { group } = internals.current;
-      if (!group) return;
-
-      const targetY = Math.PI / 2 - ((lng + 180) * Math.PI) / 180;
-      const targetX = (-lat * Math.PI) / 180 * 0.5;
-
-      tweenProp(group.rotation, "y", targetY, durationMs);
-      tweenProp(group.rotation, "x", targetX, durationMs);
-    },
-    zoomTo(z = 2.6, durationMs = 1000) {
-      const { camera } = internals.current;
-      if (!camera) return;
-
-      tweenProp(camera.position, "z", z, durationMs);
-    },
-    pause() {
-      isPaused.current = true;
-    },
-    resume() {
-      isPaused.current = false;
-    },
     get group() {
       return internals.current.group;
     },
     get camera() {
       return internals.current.camera;
+    },
+    setAutoRotate(enabled: boolean) {
+      autoRotateRef.current = enabled;
+    },
+    setDragEnabled(enabled: boolean) {
+      dragEnabledRef.current = enabled;
     },
   }));
 
@@ -104,13 +98,14 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
     renderer.setClearColor(0x000000, 0);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
     camera.position.z = 2.6;
 
     const radius = 1;
     const group = new THREE.Group();
     scene.add(group);
 
+    // Sphere fill (the "body" of the globe)
     const sphereGeometry = new THREE.SphereGeometry(radius, 64, 64);
     group.add(
       new THREE.Mesh(
@@ -119,9 +114,11 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       ),
     );
 
+    // Subtle rim/outline shadow
+    const rimGeometry = new THREE.SphereGeometry(radius + 0.018, 64, 64);
     group.add(
       new THREE.Mesh(
-        new THREE.SphereGeometry(radius + 0.018, 64, 64),
+        rimGeometry,
         new THREE.MeshBasicMaterial({
           color: 0x333333,
           transparent: true,
@@ -131,6 +128,7 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       ),
     );
 
+    // Country border lines
     const lineMat = new THREE.LineBasicMaterial({
       color: new THREE.Color(lineColor),
     });
@@ -138,7 +136,6 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
     function ll2v(lat: number, lng: number) {
       const phi = ((90 - lat) * Math.PI) / 180;
       const theta = ((lng + 180) * Math.PI) / 180;
-
       return new THREE.Vector3(
         -radius * Math.sin(phi) * Math.cos(theta),
         radius * Math.cos(phi),
@@ -148,14 +145,11 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
 
     function addRing(coords: number[][]) {
       const pts: THREE.Vector3[] = [];
-
       for (let i = 0; i < coords.length - 1; i += 1) {
         pts.push(ll2v(coords[i][1], coords[i][0]));
         pts.push(ll2v(coords[i + 1][1], coords[i + 1][0]));
       }
-
       if (!pts.length) return;
-
       group.add(
         new THREE.LineSegments(
           new THREE.BufferGeometry().setFromPoints(pts),
@@ -168,7 +162,6 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       if (geom.type === "Polygon") {
         (geom.coordinates as number[][][]).forEach(addRing);
       }
-
       if (geom.type === "MultiPolygon") {
         (geom.coordinates as number[][][][]).forEach((polygon) =>
           polygon.forEach(addRing),
@@ -176,14 +169,15 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       }
     }
 
+    // Load world topology
     void (async () => {
       try {
         const [topoSrc, world] = await Promise.all([
           fetch(
             "https://unpkg.com/topojson-client@3/dist/topojson-client.min.js",
-          ).then((response) => response.text()),
+          ).then((r) => r.text()),
           fetch("https://unpkg.com/world-atlas@2/countries-110m.json").then(
-            (response) => response.json(),
+            (r) => r.json(),
           ),
         ]);
 
@@ -196,11 +190,14 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
         const topojson = topoModule.exports as TopoJsonApi;
         topojson
           .feature(world, world.objects.countries)
-          .features.forEach((feature) => addFeature(feature.geometry));
+          .features.forEach((f) => addFeature(f.geometry));
       } catch {
+        // Fallback: wireframe sphere
         group.add(
           new THREE.LineSegments(
-            new THREE.WireframeGeometry(new THREE.SphereGeometry(radius, 32, 32)),
+            new THREE.WireframeGeometry(
+              new THREE.SphereGeometry(radius, 32, 32),
+            ),
             new THREE.LineBasicMaterial({
               color: new THREE.Color(lineColor),
               opacity: 0.15,
@@ -214,12 +211,14 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
     group.rotation.x = 0.28;
     group.rotation.y = initialRotY;
 
+    /* ─── Pointer drag ─── */
     let isDragging = false;
     let prevX = 0;
     let prevY = 0;
     let animationId = 0;
 
     const onPointerDown = (event: PointerEvent) => {
+      if (!dragEnabledRef.current) return;
       isDragging = true;
       prevX = event.clientX;
       prevY = event.clientY;
@@ -228,14 +227,11 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
 
     const onPointerMove = (event: PointerEvent) => {
       if (!isDragging) return;
-
       const dx = event.clientX - prevX;
       const dy = event.clientY - prevY;
-
       group.rotation.y += dx * 0.005;
       group.rotation.x += dy * 0.003;
       group.rotation.x = Math.max(-1.2, Math.min(1.2, group.rotation.x));
-
       prevX = event.clientX;
       prevY = event.clientY;
     };
@@ -250,10 +246,12 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
     canvas.addEventListener("pointerup", onPointerUp);
     canvas.addEventListener("pointercancel", onPointerUp);
 
+    /* ─── Render loop ─── */
     function animate() {
       animationId = requestAnimationFrame(animate);
 
-      if (!isDragging && !isPaused.current) {
+      // Auto-rotate only when enabled and not dragging
+      if (!isDragging && autoRotateRef.current) {
         group.rotation.y += rotationSpeed;
       }
 
@@ -272,6 +270,7 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       canvas.removeEventListener("pointercancel", onPointerUp);
       renderer.dispose();
       sphereGeometry.dispose();
+      rimGeometry.dispose();
       lineMat.dispose();
     };
   }, [initialRotY, lineColor, rotationSpeed, size, sphereColor]);
@@ -282,10 +281,8 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       style={{
         width: size,
         height: size,
-        borderRadius: "50%",
-        overflow: "hidden",
         background: "transparent",
-        cursor: "grab",
+        cursor: enableDrag ? "grab" : "default",
         userSelect: "none",
         flexShrink: 0,
         touchAction: "none",
@@ -301,28 +298,3 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
 });
 
 export default Globe3D;
-
-function tweenProp(
-  obj: THREE.Euler | THREE.Vector3,
-  key: "x" | "y" | "z",
-  target: number,
-  durationMs: number,
-) {
-  const start = obj[key];
-  const delta = target - start;
-  const startTime = performance.now();
-
-  function tick(now: number) {
-    const t = Math.min((now - startTime) / durationMs, 1);
-    const ease =
-      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-    obj[key] = start + delta * ease;
-
-    if (t < 1) {
-      requestAnimationFrame(tick);
-    }
-  }
-
-  requestAnimationFrame(tick);
-}
