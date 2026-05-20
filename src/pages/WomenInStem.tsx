@@ -327,7 +327,6 @@ export default function WomenInStem() {
           style={{
             fontFamily: "Kovanov, Georgia, serif",
             color: "#580a0a",
-            WebkitTextStroke: "0.35px #580a0a",
           }}
         >
           WOMEN IN STEM

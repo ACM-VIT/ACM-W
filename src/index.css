@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Kovanov";
+  src: url("./assets/Kovanov-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kovanov";
+  src: url("./assets/Kovanov-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Quicksand";
+  src: url("./assets/Quicksand-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -53,17 +77,17 @@ body {
 
 /* ─── Scientist text styling ─── */
 .scientist-name {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 56px;
-  font-style: italic;
+  font-family: "Kovanov", Georgia, "Times New Roman", serif;
+  font-size: 64px;
+  font-weight: 700;
   line-height: 1.1;
-  color: #580A0A;
+  color: #580a0a;
   margin: 0 0 16px;
 }
 
 .scientist-subtitle {
   font-family: Georgia, serif;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 4px;
   text-transform: uppercase;
   color: #7a4444;
@@ -71,8 +95,8 @@ body {
 }
 
 .scientist-desc {
-  font-family: Georgia, serif;
-  font-size: 16px;
+  font-family: "Quicksand", Arial, sans-serif;
+  font-size: 18px;
   line-height: 1.85;
   color: #5e4d4d;
   margin: 0;
