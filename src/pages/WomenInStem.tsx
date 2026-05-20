@@ -7,46 +7,103 @@ import type { Globe3DHandle } from "../assets/globe_3d";
 import india from "../assets/IN.png";
 import poland from "../assets/PL.png";
 import uk from "../assets/GB.png";
+import austria from "../assets/AT.png";
+import us from "../assets/US.png";
 import kalpana from "../assets/kaplana.png";
 import marie from "../assets/curie.png";
 import ada from "../assets/ada.png";
+import hedy from "../assets/hedy.png";
+import margaret from "../assets/margaret.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Data ─── */
 
-const GLOBE_SIZE = 420;
+const GLOBE_SIZE = 600;
 
-const scientists = [
+/**
+ * Longitude/latitude to Three.js Euler rotation.
+ * The globe is oriented so that (rotY = π/2) points the
+ * prime-meridian (lng 0) toward the camera.
+ *
+ * rotX tilts the globe up/down to bring a latitude into view.
+ * The 0.6 factor keeps high latitudes from flipping the globe
+ * upside-down while still giving noticeable vertical travel.
+ */
+function lngLatToRot(lng: number, lat: number) {
+  const rotY = -((lng * Math.PI) / 180);
+  const rotX = ((lat * Math.PI) / 180) * 0.6;
+  return { rotX, rotY };
+}
+
+type ScientistData = {
+  name: string;
+  country: string;
+  photo: string;
+  focus: { lng: number; lat: number };
+  title: string;
+  text: string;
+  countryWidth: number;
+  photoRotation: number;
+  /** true when the photo PNG already has a vintage paper frame baked in */
+  hasFrame: boolean;
+};
+
+const scientists: ScientistData[] = [
   {
     name: "Kalpana Chawla",
     country: india,
     photo: kalpana,
-    focus: { lng: 78.9, lat: 21.1 },
+    focus: { lng: 79, lat: 22 },
     title: "Astronaut — India",
     text: `Kalpana Chawla was the first woman of Indian origin in space. She served as a mission specialist and primary robotic arm operator on Space Shuttle Columbia. Her journey inspired millions of women to pursue science, aerospace and engineering.`,
-    countryWidth: 340,
+    countryWidth: 460,
     photoRotation: -5,
+    hasFrame: false,
   },
   {
     name: "Marie Curie",
     country: poland,
     photo: marie,
-    focus: { lng: 19.1, lat: 52.1 },
+    focus: { lng: 20, lat: 52 },
     title: "Physicist — Poland",
     text: `Marie Curie pioneered research on radioactivity and became the first woman to win a Nobel Prize. She remains the only person to win Nobel Prizes in two scientific fields — Physics and Chemistry.`,
-    countryWidth: 300,
+    countryWidth: 420,
     photoRotation: -3,
+    hasFrame: false,
   },
   {
     name: "Ada Lovelace",
     country: uk,
     photo: ada,
-    focus: { lng: -3.4, lat: 55.4 },
+    focus: { lng: -2, lat: 54 },
     title: "Mathematician — United Kingdom",
     text: `Ada Lovelace is widely regarded as the world's first computer programmer. Her notes on Charles Babbage's Analytical Engine introduced the idea that machines could go beyond calculations and manipulate symbols.`,
-    countryWidth: 260,
+    countryWidth: 360,
     photoRotation: -6,
+    hasFrame: false,
+  },
+  {
+    name: "Hedy Lamarr",
+    country: austria,
+    photo: hedy,
+    focus: { lng: 14, lat: 47.5 },
+    title: "Inventor — Austria",
+    text: `Hedy Lamarr co-invented a frequency-hopping spread spectrum communication system during World War II that laid the groundwork for modern Wi-Fi, Bluetooth, and GPS technologies. Her dual legacy as a Hollywood icon and brilliant inventor defied every expectation placed upon her.`,
+    countryWidth: 440,
+    photoRotation: -4,
+    hasFrame: true,
+  },
+  {
+    name: "Margaret Hamilton",
+    country: us,
+    photo: margaret,
+    focus: { lng: -98, lat: 39 },
+    title: "Computer Scientist — United States",
+    text: `Margaret Hamilton led the team that developed the on-board flight software for NASA's Apollo missions. Her rigorous approach to software engineering — a term she coined — was critical to the success of the Moon landing and has influenced the discipline ever since.`,
+    countryWidth: 500,
+    photoRotation: -4,
+    hasFrame: true,
   },
 ];
 
@@ -58,10 +115,6 @@ export default function WomenInStem() {
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    // Short delay to ensure the Three.js objects exist
-    // (Globe3D's useEffect fires before this parent effect, but
-    // the imperative-handle getters read from a ref that's set
-    // synchronously inside the child effect, so a microtask is enough.)
     const timer = setTimeout(() => {
       const globe = globeRef.current;
       if (!globe?.group || !globe?.camera) return;
@@ -70,7 +123,7 @@ export default function WomenInStem() {
       const camera = globe.camera;
       const globeEl = globeContainerRef.current!;
 
-      /* ─── Hero exit trigger ─── */
+      /* ─── Hero exit: stop auto-rotate & drag ─── */
       ScrollTrigger.create({
         trigger: heroRef.current,
         start: "70% top",
@@ -93,12 +146,11 @@ export default function WomenInStem() {
         const sci = scientists[i];
         const isLast = i === sections.length - 1;
 
-        // Convert lng/lat → Three.js Euler angles
-        const targetRotY =
-          Math.PI / 2 - ((sci.focus.lng + 180) * Math.PI) / 180;
-        const targetRotX = ((-sci.focus.lat * Math.PI) / 180) * 0.5;
+        const { rotX: targetRotX, rotY: targetRotY } = lngLatToRot(
+          sci.focus.lng,
+          sci.focus.lat,
+        );
 
-        // Grab DOM elements inside this section
         const countryImg = section.querySelector(
           ".country-img",
         ) as HTMLElement;
@@ -109,27 +161,27 @@ export default function WomenInStem() {
           ".scientist-text",
         ) as HTMLElement;
 
-        // Set initial GSAP state (elements start invisible & centered)
+        // Initial GSAP state — everything invisible & centered
         gsap.set(countryImg, {
           xPercent: -50,
           yPercent: -50,
           opacity: 0,
-          scale: 0.35,
+          scale: 0.3,
         });
         gsap.set(photoFrame, {
           xPercent: -50,
           yPercent: -50,
           opacity: 0,
-          y: 30,
+          y: 40,
           rotation: sci.photoRotation,
         });
         gsap.set(textEl, {
           yPercent: -50,
           opacity: 0,
-          x: 50,
+          x: 60,
         });
 
-        /* ─── Build scroll-driven timeline ─── */
+        /* ─── Scroll-driven timeline ─── */
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: section,
@@ -141,10 +193,15 @@ export default function WomenInStem() {
           },
         });
 
-        // Phase 1 ▸ Rotate globe to face the country + zoom camera in
+        // Phase 1 ▸ Rotate globe to face country + camera zoom
         tl.to(
           group.rotation,
-          { y: targetRotY, x: targetRotX, duration: 2.5, ease: "power2.inOut" },
+          {
+            y: targetRotY,
+            x: targetRotX,
+            duration: 2.5,
+            ease: "power2.inOut",
+          },
           0,
         );
         tl.to(
@@ -153,15 +210,11 @@ export default function WomenInStem() {
           0,
         );
 
-        // Phase 2 ▸ Fade globe out + country silhouette appears (centered)
+        // Phase 2 ▸ Globe fades out, country silhouette fades in (centered)
         tl.to(globeEl, { opacity: 0, duration: 1.8 }, 2);
-        tl.to(
-          countryImg,
-          { opacity: 0.3, scale: 1, duration: 1.8 },
-          2.4,
-        );
+        tl.to(countryImg, { opacity: 0.3, scale: 1, duration: 1.8 }, 2.4);
 
-        // Phase 3 ▸ Country slides left + opacity up, photo frame appears
+        // Phase 3 ▸ Country slides left + opacity up, photo appears
         tl.to(
           countryImg,
           { x: "-22vw", opacity: 0.85, duration: 2 },
@@ -169,22 +222,16 @@ export default function WomenInStem() {
         );
         tl.to(
           photoFrame,
-          { opacity: 1, x: "-20vw", y: 0, duration: 1.6 },
+          { opacity: 1, x: "-18vw", y: 0, duration: 1.6 },
           4.8,
         );
 
-        // Phase 4 ▸ Text fades in from the right
-        tl.to(
-          textEl,
-          { opacity: 1, x: 0, duration: 1.4 },
-          6,
-        );
+        // Phase 4 ▸ Text fades in
+        tl.to(textEl, { opacity: 1, x: 0, duration: 1.4 }, 6);
 
         if (!isLast) {
-          // Phase 5 ▸ Hold visible
-          // (gap between 7.4 and 8 provides a pause)
-
-          // Phase 6 ▸ Fade out content + reset globe for next scientist
+          // Phase 5 ▸ Hold (7.4 → 8 gap)
+          // Phase 6 ▸ Fade out + reset globe for next scientist
           tl.to(
             [countryImg, photoFrame, textEl],
             { opacity: 0, duration: 1.2 },
@@ -194,7 +241,7 @@ export default function WomenInStem() {
           tl.to(camera.position, { z: 2.6, duration: 1.2 }, 9);
         }
       });
-    }, 80);
+    }, 100);
 
     return () => {
       clearTimeout(timer);
@@ -206,7 +253,7 @@ export default function WomenInStem() {
 
   return (
     <div className="bg-[#fff9e9] text-[#580A0A] overflow-x-hidden">
-      {/* ── Fixed globe behind everything ── */}
+      {/* ── Fixed globe ── */}
       <div ref={globeContainerRef} className="globe-fixed-container">
         <Globe3D
           ref={globeRef}
@@ -218,22 +265,22 @@ export default function WomenInStem() {
         />
       </div>
 
-      {/* ── Hero section ── */}
+      {/* ── Hero ── */}
       <section
         ref={heroRef}
         className="relative z-10 h-screen w-full flex flex-col items-center"
-        style={{ paddingTop: "120px" }}
+        style={{ paddingTop: "100px" }}
       >
         <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14]" />
         <h1
-          className="text-[22px] tracking-[6px]"
+          className="text-[24px] tracking-[8px]"
           style={{ fontFamily: "Georgia, serif", color: "#580A0A" }}
         >
           WOMEN IN STEM
         </h1>
       </section>
 
-      {/* ── Scientist sections ── */}
+      {/* ── Scientists ── */}
       {scientists.map((sci) => (
         <section
           key={sci.name}
@@ -242,7 +289,7 @@ export default function WomenInStem() {
           {/* Top-left icon */}
           <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14] z-50" />
 
-          {/* Country silhouette (starts centered, slides left) */}
+          {/* Country silhouette */}
           <img
             className="country-img absolute top-1/2 left-1/2 pointer-events-none opacity-0"
             src={sci.country}
@@ -250,17 +297,19 @@ export default function WomenInStem() {
             style={{ width: sci.countryWidth }}
           />
 
-          {/* Scientist photo in vintage frame (starts centered, slides left) */}
+          {/* Scientist photo */}
           <div
-            className="photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0"
+            className={`photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0${
+              sci.hasFrame ? "" : " photo-frame--needs-border"
+            }`}
           >
             <img src={sci.photo} alt={sci.name} />
           </div>
 
-          {/* Text content (right side) */}
+          {/* Text */}
           <div
             className="scientist-text absolute top-1/2 opacity-0"
-            style={{ left: "56%", width: "36%", maxWidth: 440 }}
+            style={{ left: "55%", width: "38%", maxWidth: 520 }}
           >
             <h2 className="scientist-name">{sci.name}</h2>
             <p className="scientist-subtitle">{sci.title}</p>
