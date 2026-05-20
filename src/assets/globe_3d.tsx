@@ -17,6 +17,7 @@ type Globe3DProps = {
   lineColor?: string;
   sphereColor?: string;
   rotationSpeed?: number;
+  initialRotX?: number;
   initialRotY?: number;
   enableDrag?: boolean;
   className?: string;
@@ -44,11 +45,12 @@ type TopoJsonApi = {
 
 const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
   {
-    size = 420,
+    size = 900,
     lineColor = "#5d0f14",
     sphereColor = "#fff9e9",
     rotationSpeed = 0.002,
-    initialRotY = -0.5,
+    initialRotX = 0.2,
+    initialRotY = 0,
     enableDrag = true,
     className = "",
     style = {},
@@ -98,12 +100,26 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
     renderer.setClearColor(0x000000, 0);
 
     const scene = new THREE.Scene();
+
+    /*
+     * Camera distance 3.0 ensures the unit-radius sphere
+     * (visual half-angle ≈ asin(1/3) ≈ 19.5°) fits comfortably
+     * within the 45° FOV (half = 22.5°), leaving ~3° margin
+     * on every side and eliminating the rectangular-clipping artifact.
+     */
     const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
-    camera.position.z = 2.6;
+    camera.position.z = 3.0;
 
     const radius = 1;
     const group = new THREE.Group();
     scene.add(group);
+
+    /*
+     * YXZ keeps horizontal globe spin isolated from the fixed presentation
+     * tilt. Country focus logic can then center latitude with translation
+     * instead of pitching the globe per country.
+     */
+    group.rotation.order = "YXZ";
 
     // Sphere fill (the "body" of the globe)
     const sphereGeometry = new THREE.SphereGeometry(radius, 64, 64);
@@ -208,7 +224,7 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       }
     })();
 
-    group.rotation.x = 0.28;
+    group.rotation.x = initialRotX;
     group.rotation.y = initialRotY;
 
     /* ─── Pointer drag ─── */
@@ -273,7 +289,7 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       rimGeometry.dispose();
       lineMat.dispose();
     };
-  }, [initialRotY, lineColor, rotationSpeed, size, sphereColor]);
+  }, [initialRotX, initialRotY, lineColor, rotationSpeed, size, sphereColor]);
 
   return (
     <div
@@ -291,7 +307,13 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
     >
       <canvas
         ref={canvasRef}
-        style={{ display: "block", width: size, height: size }}
+        style={{
+          display: "block",
+          width: size,
+          height: size,
+          border: "none",
+          outline: "none",
+        }}
       />
     </div>
   );

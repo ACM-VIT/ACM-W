@@ -17,35 +17,49 @@ import margaret from "../assets/margaret.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─── Data ─── */
+/* ─── Constants ─── */
 
-const GLOBE_SIZE = 600;
+const GLOBE_SIZE = 900;
+
+const DEG = Math.PI / 180;
+const HALF_PI = Math.PI / 2;
+const GLOBE_BASE_ROT_X = 0.2;
 
 /**
- * Longitude/latitude to Three.js Euler rotation.
- * The globe is oriented so that (rotY = π/2) points the
- * prime-meridian (lng 0) toward the camera.
+ * Focus a location without pitching the globe per country.
  *
- * rotX tilts the globe up/down to bring a latitude into view.
- * The 0.6 factor keeps high latitudes from flipping the globe
- * upside-down while still giving noticeable vertical travel.
+ * Longitude controls the horizontal spin. Latitude controls a vertical group
+ * offset after the fixed base tilt, so the globe stays upright while the
+ * requested country moves toward the center during the zoom.
  */
-function lngLatToRot(lng: number, lat: number) {
-  const rotY = -((lng * Math.PI) / 180);
-  const rotX = ((lat * Math.PI) / 180) * 0.6;
-  return { rotX, rotY };
+function lngLatToFocus(lng: number, lat: number) {
+  const latRad = lat * DEG;
+  const sinLat = Math.sin(latRad);
+  const cosLat = Math.cos(latRad);
+  const projectedY =
+    Math.cos(GLOBE_BASE_ROT_X) * sinLat -
+    Math.sin(GLOBE_BASE_ROT_X) * cosLat;
+
+  return {
+    rotY: -(HALF_PI + lng * DEG),
+    rotX: GLOBE_BASE_ROT_X,
+    y: -projectedY,
+  };
 }
+
+/* ─── Scientist Data ─── */
 
 type ScientistData = {
   name: string;
   country: string;
   photo: string;
+  /** Geographic centre of the country on the real globe */
   focus: { lng: number; lat: number };
   title: string;
   text: string;
   countryWidth: number;
   photoRotation: number;
-  /** true when the photo PNG already has a vintage paper frame baked in */
+  /** true when the photo PNG already includes a vintage paper frame */
   hasFrame: boolean;
 };
 
@@ -57,7 +71,7 @@ const scientists: ScientistData[] = [
     focus: { lng: 79, lat: 22 },
     title: "Astronaut — India",
     text: `Kalpana Chawla was the first woman of Indian origin in space. She served as a mission specialist and primary robotic arm operator on Space Shuttle Columbia. Her journey inspired millions of women to pursue science, aerospace and engineering.`,
-    countryWidth: 460,
+    countryWidth: 520,
     photoRotation: -5,
     hasFrame: false,
   },
@@ -68,7 +82,7 @@ const scientists: ScientistData[] = [
     focus: { lng: 20, lat: 52 },
     title: "Physicist — Poland",
     text: `Marie Curie pioneered research on radioactivity and became the first woman to win a Nobel Prize. She remains the only person to win Nobel Prizes in two scientific fields — Physics and Chemistry.`,
-    countryWidth: 420,
+    countryWidth: 460,
     photoRotation: -3,
     hasFrame: false,
   },
@@ -79,7 +93,7 @@ const scientists: ScientistData[] = [
     focus: { lng: -2, lat: 54 },
     title: "Mathematician — United Kingdom",
     text: `Ada Lovelace is widely regarded as the world's first computer programmer. Her notes on Charles Babbage's Analytical Engine introduced the idea that machines could go beyond calculations and manipulate symbols.`,
-    countryWidth: 360,
+    countryWidth: 400,
     photoRotation: -6,
     hasFrame: false,
   },
@@ -90,7 +104,7 @@ const scientists: ScientistData[] = [
     focus: { lng: 14, lat: 47.5 },
     title: "Inventor — Austria",
     text: `Hedy Lamarr co-invented a frequency-hopping spread spectrum communication system during World War II that laid the groundwork for modern Wi-Fi, Bluetooth, and GPS technologies. Her dual legacy as a Hollywood icon and brilliant inventor defied every expectation placed upon her.`,
-    countryWidth: 440,
+    countryWidth: 480,
     photoRotation: -4,
     hasFrame: true,
   },
@@ -101,11 +115,18 @@ const scientists: ScientistData[] = [
     focus: { lng: -98, lat: 39 },
     title: "Computer Scientist — United States",
     text: `Margaret Hamilton led the team that developed the on-board flight software for NASA's Apollo missions. Her rigorous approach to software engineering — a term she coined — was critical to the success of the Moon landing and has influenced the discipline ever since.`,
-    countryWidth: 500,
+    countryWidth: 560,
     photoRotation: -4,
     hasFrame: true,
   },
 ];
+
+/* ─── Camera distances ─── */
+
+/** Default zoom-out (globe fits comfortably in the viewport) */
+const CAM_DEFAULT_Z = 3.0;
+/** Full zoom-in (close-up of a country region) */
+const CAM_ZOOM_Z = 1.3;
 
 /* ─── Component ─── */
 
@@ -123,7 +144,7 @@ export default function WomenInStem() {
       const camera = globe.camera;
       const globeEl = globeContainerRef.current!;
 
-      /* ─── Hero exit: stop auto-rotate & drag ─── */
+      /* ─── Hero exit: lock rotation & drag ─── */
       ScrollTrigger.create({
         trigger: heroRef.current,
         start: "70% top",
@@ -146,7 +167,11 @@ export default function WomenInStem() {
         const sci = scientists[i];
         const isLast = i === sections.length - 1;
 
-        const { rotX: targetRotX, rotY: targetRotY } = lngLatToRot(
+        const {
+          rotX: targetRotX,
+          rotY: targetRotY,
+          y: targetY,
+        } = lngLatToFocus(
           sci.focus.lng,
           sci.focus.lat,
         );
@@ -161,7 +186,7 @@ export default function WomenInStem() {
           ".scientist-text",
         ) as HTMLElement;
 
-        // Initial GSAP state — everything invisible & centered
+        // Initial state — everything invisible & centered
         gsap.set(countryImg, {
           xPercent: -50,
           yPercent: -50,
@@ -186,62 +211,85 @@ export default function WomenInStem() {
           scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: isLast ? "+=250%" : "+=300%",
+            end: isLast ? "+=280%" : "+=340%",
             scrub: 1,
             pin: true,
             anticipatePin: 1,
           },
         });
 
-        // Phase 1 ▸ Rotate globe to face country + camera zoom
+        /*
+         * Phase 1a — Rotate globe to face the country (camera stays put).
+         * Auto-rotation is already off (hero exit trigger).  GSAP drives
+         * group.rotation directly, keeping the country locked in place.
+         */
         tl.to(
           group.rotation,
           {
             y: targetRotY,
             x: targetRotX,
-            duration: 2.5,
+            duration: 2.0,
             ease: "power2.inOut",
           },
           0,
         );
         tl.to(
-          camera.position,
-          { z: 1.2, duration: 2.5, ease: "power2.in" },
+          group.position,
+          {
+            y: targetY,
+            duration: 2.0,
+            ease: "power2.inOut",
+          },
           0,
         );
 
-        // Phase 2 ▸ Globe fades out, country silhouette fades in (centered)
-        tl.to(globeEl, { opacity: 0, duration: 1.8 }, 2);
-        tl.to(countryImg, { opacity: 0.3, scale: 1, duration: 1.8 }, 2.4);
+        /*
+         * Phase 1b — Camera zooms in (starts slightly after rotation
+         * begins so the country is roughly centred before zoom gets close).
+         */
+        tl.to(
+          camera.position,
+          { z: CAM_ZOOM_Z, duration: 2.8, ease: "power2.in" },
+          0.5,
+        );
 
-        // Phase 3 ▸ Country slides left + opacity up, photo appears
+        // Phase 2 — Globe fades out, country silhouette fades in (centered)
+        tl.to(globeEl, { opacity: 0, duration: 1.8 }, 2.8);
+        tl.to(countryImg, { opacity: 0.3, scale: 1, duration: 1.8 }, 3.2);
+
+        // Phase 3 — Country slides left + full opacity, photo appears
         tl.to(
           countryImg,
           { x: "-22vw", opacity: 0.85, duration: 2 },
-          4.2,
+          5,
         );
         tl.to(
           photoFrame,
           { opacity: 1, x: "-18vw", y: 0, duration: 1.6 },
-          4.8,
+          5.6,
         );
 
-        // Phase 4 ▸ Text fades in
-        tl.to(textEl, { opacity: 1, x: 0, duration: 1.4 }, 6);
+        // Phase 4 — Text fades in from the right
+        tl.to(textEl, { opacity: 1, x: 0, duration: 1.4 }, 7);
 
         if (!isLast) {
-          // Phase 5 ▸ Hold (7.4 → 8 gap)
-          // Phase 6 ▸ Fade out + reset globe for next scientist
+          // Phase 5 — Hold (gap 8.4 → 9.2)
+
+          // Phase 6 — Fade out content + reset globe for next scientist
           tl.to(
             [countryImg, photoFrame, textEl],
             { opacity: 0, duration: 1.2 },
-            8,
+            9.2,
           );
-          tl.to(globeEl, { opacity: 1, duration: 1 }, 9);
-          tl.to(camera.position, { z: 2.6, duration: 1.2 }, 9);
+          tl.to(globeEl, { opacity: 1, duration: 1 }, 10.2);
+          tl.to(
+            camera.position,
+            { z: CAM_DEFAULT_Z, duration: 1.2 },
+            10.2,
+          );
         }
       });
-    }, 100);
+    }, 120);
 
     return () => {
       clearTimeout(timer);
@@ -261,6 +309,8 @@ export default function WomenInStem() {
           lineColor="#5d0f14"
           sphereColor="#fff9e9"
           rotationSpeed={0.002}
+          initialRotX={GLOBE_BASE_ROT_X}
+          initialRotY={0}
           enableDrag={true}
         />
       </div>
@@ -269,11 +319,11 @@ export default function WomenInStem() {
       <section
         ref={heroRef}
         className="relative z-10 h-screen w-full flex flex-col items-center"
-        style={{ paddingTop: "100px" }}
+        style={{ paddingTop: "90px" }}
       >
         <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14]" />
         <h1
-          className="text-[24px] tracking-[8px]"
+          className="text-[26px] tracking-[9px]"
           style={{ fontFamily: "Georgia, serif", color: "#580A0A" }}
         >
           WOMEN IN STEM
@@ -309,7 +359,7 @@ export default function WomenInStem() {
           {/* Text */}
           <div
             className="scientist-text absolute top-1/2 opacity-0"
-            style={{ left: "55%", width: "38%", maxWidth: 520 }}
+            style={{ left: "55%", width: "38%", maxWidth: 560 }}
           >
             <h2 className="scientist-name">{sci.name}</h2>
             <p className="scientist-subtitle">{sci.title}</p>

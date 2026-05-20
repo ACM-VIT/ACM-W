@@ -38,15 +38,15 @@ body {
     0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Scientist photos that DON'T have baked-in frames get padding */
+/* Scientists whose PNG has no baked-in paper frame */
 .photo-frame--needs-border {
-  padding: 12px 12px 32px 12px;
+  padding: 14px 14px 36px 14px;
   background: linear-gradient(155deg, #d4c5a0 0%, #c9b98a 40%, #bba474 100%);
 }
 
 .photo-frame img {
   display: block;
-  width: 340px;
+  width: 380px;
   height: auto;
   object-fit: cover;
 }
@@ -54,17 +54,17 @@ body {
 /* ─── Scientist text styling ─── */
 .scientist-name {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 52px;
+  font-size: 56px;
   font-style: italic;
-  line-height: 1.12;
+  line-height: 1.1;
   color: #580A0A;
   margin: 0 0 16px;
 }
 
 .scientist-subtitle {
   font-family: Georgia, serif;
-  font-size: 12px;
-  letter-spacing: 3.5px;
+  font-size: 13px;
+  letter-spacing: 4px;
   text-transform: uppercase;
   color: #7a4444;
   margin: 0 0 28px;
@@ -72,8 +72,8 @@ body {
 
 .scientist-desc {
   font-family: Georgia, serif;
-  font-size: 15px;
-  line-height: 1.9;
+  font-size: 16px;
+  line-height: 1.85;
   color: #5e4d4d;
   margin: 0;
 }
