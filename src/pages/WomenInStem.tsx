@@ -319,12 +319,16 @@ export default function WomenInStem() {
       <section
         ref={heroRef}
         className="relative z-10 h-screen w-full flex flex-col items-center"
-        style={{ paddingTop: "90px" }}
+        style={{ paddingTop: "56px" }}
       >
         <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14]" />
         <h1
-          className="text-[26px] tracking-[9px]"
-          style={{ fontFamily: "Georgia, serif", color: "#580A0A" }}
+          className="text-[50px] tracking-[0.015em] font-bold leading-normal"
+          style={{
+            fontFamily: "Kovanov, Georgia, serif",
+            color: "#580a0a",
+            WebkitTextStroke: "0.35px #580a0a",
+          }}
         >
           WOMEN IN STEM
         </h1>
