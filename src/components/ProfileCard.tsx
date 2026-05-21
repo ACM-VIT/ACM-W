@@ -1,11 +1,6 @@
-
-
-
 import githubIcon from "../assets/teams/github.png";
 import linkedinIcon from "../assets/teams/linkedin.png";
 import cardBg from "../assets/teams/team-postcard.png";
-import googleScholarIcon from "../assets/teams/Google-Scholar.png";
-
 
 const iconColorFilter =
   "invert(12%) sepia(33%) saturate(4950%) hue-rotate(338deg) brightness(72%) contrast(104%)";
