@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import "../assets/Kovanov-Bold.ttf";
 import envelopeIcon from "../assets/teams/envelope.png";
 import cherukuri from "../assets/teams/cherukuri.png";
 import lavanya from "../assets/teams/lavanya.png";
@@ -11,7 +12,7 @@ import adheesh from "../assets/teams/adheesh.png";
 import aarjav from "../assets/teams/aarjav.png";
 import prakhar from "../assets/teams/prakhar.png";
 import rohit from "../assets/teams/rohit.png";
-import drushti from "../assets/teams/drashti.png";
+import drashti from "../assets/teams/drashti.png";
 import shaurya from "../assets/teams/shaurya.png";
 import ishaan from "../assets/teams/ishaan.png";
 import rishit from "../assets/teams/rishit.png";
@@ -93,9 +94,9 @@ const teamData = [
     linkedinLink: "#",
   },
   {
-    name: "Drushti Shukla",
+    name: "Drashti Shukla",
     role: "ACM Secretary",
-    imageSrc: "drushti",
+    imageSrc: "drashti",
     row: 5,
     githubLink: "#",
     linkedinLink: "#",
@@ -167,7 +168,7 @@ const imageMap: Record<string, string> = {
   aarjav,
   prakhar,
   rohit,
-  drushti,
+  drashti,
   shaurya,
   ishaan,
   rishit,
@@ -210,18 +211,26 @@ export default function TeamSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full overflow-hidden bg-[#B49880] py-16 text-[#580A0A] sm:py-20"
+      className="relative w-full overflow-visible bg-[#B49880] py-16 text-[#580A0A] sm:py-20"
     >
+      <div
+        className="pointer-events-none absolute inset-0 z-0 opacity-25 mix-blend-multiply"
+        style={{
+          backgroundImage:
+            "url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"160\" viewBox=\"0 0 160 160\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.8\" numOctaves=\"2\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"160\" height=\"160\" filter=\"url(%23n)\" opacity=\"0.5\"/%3E%3C/svg%3E')",
+          backgroundRepeat: "repeat",
+        }}
+      />
       <img
         src={envelopeIcon}
         alt=""
-        className="absolute left-6 top-6 h-7 w-7"
+        className="absolute left-6 top-6 z-10 h-7 w-7"
         style={{ filter: iconColorFilter }}
       />
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-6">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-6">
         <h2
-          className="text-center text-[32px] tracking-[0.08em] sm:text-[40px]"
+          className="text-center text-[32px] font-bold tracking-[0.08em] sm:text-[40px]"
           style={{
             fontFamily: "Kovanov, Georgia, serif",
             fontWeight: 700,

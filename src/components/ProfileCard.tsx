@@ -25,7 +25,7 @@ export default function ProfileCard({
 }: ProfileCardProps) {
   return (
     <article
-      className="team-card flex h-[200px] w-[340px] flex-col justify-center border border-[#5d0f14]/60 bg-cover bg-center p-4 shadow-md transition-all duration-300 ease-in-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-red-900/20 sm:h-[230px] sm:w-[420px]"
+      className="team-card relative flex h-[200px] w-[340px] flex-col justify-center border border-[#5d0f14]/60 bg-cover bg-center p-4 shadow-md transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/20 hover:z-10 sm:h-[230px] sm:w-[420px]"
       style={{ backgroundImage: `url(${cardBg})` }}
     >
       <div className="relative flex h-full w-full items-stretch">
@@ -67,7 +67,7 @@ export default function ProfileCard({
               <img
                 src={githubIcon}
                 alt=""
-                className="h-5 w-5"
+                className="h-6 w-6"
                 style={{ filter: iconColorFilter }}
               />
             </a>
@@ -80,7 +80,7 @@ export default function ProfileCard({
               <img
                 src={linkedinIcon}
                 alt=""
-                className="h-5 w-5"
+                className="h-6 w-6"
                 style={{ filter: iconColorFilter }}
               />
             </a>
