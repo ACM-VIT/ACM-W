@@ -1,4 +1,5 @@
 import BlogStamps from "./pages/BlogStamps";
+import TeamSection from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
 
 export default function App() {
@@ -21,6 +22,15 @@ export default function App() {
         }}
       >
         <WomenInStem />
+      </section>
+
+      <section
+        style={{
+          position: "relative",
+          zIndex: 5,
+        }}
+      >
+        <TeamSection />
       </section>
     </main>
   );
