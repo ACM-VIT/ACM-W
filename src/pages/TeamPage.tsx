@@ -20,6 +20,7 @@ import vansh from "../assets/teams/vansh.png";
 import nishtha from "../assets/teams/nishtha.png";
 import krishika from "../assets/teams/krishika.png";
 import harshit from "../assets/teams/harshit.png";
+import googleScholarIcon from "../assets/teams/Google-Scholar.png";
 
 import ProfileCard from "../components/ProfileCard";
 
@@ -34,7 +35,7 @@ const teamData = [
     role: "Faculty Co-ordinator",
     imageSrc: "cherukuri",
     row: 1,
-    githubLink: "",
+    githubLink: "https://scholar.google.com/citations?user=8vttwsYAAAAJ&hl=en",
     linkedinLink: "https://www.linkedin.com/in/cherukuri9/",
   },
   {
@@ -259,6 +260,11 @@ export default function TeamSection() {
                     imageSrc={imageMap[member.imageSrc]}
                     githubLink={member.githubLink}
                     linkedinLink={member.linkedinLink}
+                    githubIconSrc={
+                      member.name === "Dr. Aswani Kumar Cherukuri"
+                        ? googleScholarIcon
+                        : undefined
+                    }
                   />
                 ))}
               </div>

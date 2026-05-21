@@ -4,6 +4,8 @@
 import githubIcon from "../assets/teams/github.png";
 import linkedinIcon from "../assets/teams/linkedin.png";
 import cardBg from "../assets/teams/team-postcard.png";
+import googleScholarIcon from "../assets/teams/Google-Scholar.png";
+
 
 const iconColorFilter =
   "invert(12%) sepia(33%) saturate(4950%) hue-rotate(338deg) brightness(72%) contrast(104%)";
@@ -14,6 +16,7 @@ type ProfileCardProps = {
   imageSrc: string;
   githubLink: string;
   linkedinLink: string;
+  githubIconSrc?: string;
 };
 
 export default function ProfileCard({
@@ -22,7 +25,9 @@ export default function ProfileCard({
   imageSrc,
   githubLink,
   linkedinLink,
+  githubIconSrc,
 }: ProfileCardProps) {
+  const githubIconFinal = githubIconSrc ?? githubIcon;
   return (
     <article
       className="team-card relative flex h-[200px] w-[340px] flex-col justify-center border border-[#5d0f14]/60 bg-cover bg-center p-4 shadow-md transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/20 hover:z-10 sm:h-[230px] sm:w-[420px]"
@@ -65,7 +70,7 @@ export default function ProfileCard({
               aria-label={`${name} GitHub`}
             >
               <img
-                src={githubIcon}
+                src={githubIconFinal}
                 alt=""
                 className="h-6 w-6"
                 style={{ filter: iconColorFilter }}
