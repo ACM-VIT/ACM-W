@@ -117,7 +117,6 @@ export default function BlogStamps() {
   const [order, setOrder] = useState(() => blogs.map((_, i) => i));
 
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const hintRef = useRef<HTMLParagraphElement | null>(null);
   const n = blogs.length;
 
   useEffect(() => {
@@ -171,13 +170,6 @@ export default function BlogStamps() {
         }
       );
     });
-    if (hintRef.current) {
-      gsap.fromTo(
-        hintRef.current,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.6, delay: 0.9 }
-      );
-    }
   }, []);
 
   useEffect(() => {
@@ -199,18 +191,6 @@ export default function BlogStamps() {
       });
     });
   }, [order, activeIdx]);
-
-  const updateHint = (text: string) => {
-    if (!hintRef.current) return;
-    gsap.to(hintRef.current, {
-      opacity: 0,
-      duration: 0.18,
-      onComplete: () => {
-        if (hintRef.current) hintRef.current.textContent = text;
-        gsap.to(hintRef.current, { opacity: 1, duration: 0.3 });
-      },
-    });
-  };
 
   const zoomCard = (i: number) => {
     const el = cardRefs.current[i];
@@ -241,7 +221,6 @@ export default function BlogStamps() {
     });
     setActiveIdx(i);
     setIsFlipped(false);
-    updateHint("Click again to read");
   };
 
   const flipCard = (i: number) => {
@@ -255,10 +234,9 @@ export default function BlogStamps() {
       ease: "power2.inOut",
     });
     setIsFlipped(true);
-    updateHint("Click to close");
   };
 
-  const closeZoom = (silent = false) => {
+  const closeZoom = () => {
     if (activeIdx === null) return;
     const el = cardRefs.current[activeIdx];
     const inner = el?.querySelector<HTMLDivElement>(".stamp-inner");
@@ -293,7 +271,6 @@ export default function BlogStamps() {
     });
     setActiveIdx(null);
     setIsFlipped(false);
-    if (!silent) updateHint("Click a stamp to zoom in");
   };
 
   const handleCardClick = (cardIdx: number) => {
@@ -302,13 +279,13 @@ export default function BlogStamps() {
       if (!isFlipped) flipCard(cardIdx);
       else closeZoom();
     } else {
-      closeZoom(true);
+      closeZoom();
       setTimeout(() => zoomCard(cardIdx), 420);
     }
   };
 
   const navigate = (dir: number) => {
-    closeZoom(true);
+    closeZoom();
     setTimeout(() => {
       setOrder((prev) => {
         if (dir < 0) return [...prev.slice(1), prev[0]];
@@ -370,11 +347,12 @@ export default function BlogStamps() {
 
       <h2
         style={{
-          fontSize: 27,
-          fontFamily: "'Kovanov'",
-          color: "#3a1212",
-          letterSpacing: "0.28em",
+          fontSize: 50,
+          fontFamily: "Kovanov, Georgia, serif",
+          color: "#580a0a",
+          letterSpacing: "0.015em",
           fontWeight: "bold",
+          lineHeight: "normal",
           textTransform: "uppercase",
           position: "absolute",
           top: headingTop,
@@ -386,19 +364,6 @@ export default function BlogStamps() {
       >
         Blogs
       </h2>
-
-      <p
-        ref={hintRef}
-        style={{
-          fontSize: 11,
-          color: "#8b4040",
-          fontStyle: "italic",
-          margin: "2px 0 0",
-          opacity: 0,
-        }}
-      >
-        Click a stamp to zoom in
-      </p>
 
       <button
         onClick={() => navigate(-1)}
