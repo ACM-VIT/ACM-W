@@ -25,37 +25,39 @@ export default function ProfileCard({
 }: ProfileCardProps) {
   return (
     <article
-      className="team-card flex h-[170px] w-[280px] flex-col justify-center border border-[#5d0f14]/60 bg-cover bg-center p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:h-[180px] sm:w-[320px]"
+      className="team-card flex h-[200px] w-[340px] flex-col justify-center border border-[#5d0f14]/60 bg-cover bg-center p-4 shadow-md transition-all duration-300 ease-in-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-red-900/20 sm:h-[230px] sm:w-[420px]"
       style={{ backgroundImage: `url(${cardBg})` }}
     >
-      <div className="flex h-full w-full items-stretch">
-        <div className="w-[38%] pr-3">
-          <img
-            className="h-full w-full object-cover"
-            src={imageSrc}
-            alt={name}
-          />
+      <div className="relative flex h-full w-full items-stretch">
+        <div className="flex w-1/2 items-center justify-center pr-3">
+          <div className="h-full w-full">
+            <img
+              className="h-full w-full object-cover"
+              src={imageSrc}
+              alt={name}
+            />
+          </div>
         </div>
 
-        <div className="w-px bg-[#5d0f14]/60" />
+        <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-[#5d0f14]/60" />
 
-        <div className="flex flex-1 flex-col justify-between pl-3 py-1">
+        <div className="flex w-1/2 flex-col justify-between pl-3 py-2">
           <div>
             <h3
-              className="text-[14px] font-bold leading-tight text-[#2f1b1b] sm:text-[15px]"
+              className="text-[16px] font-bold leading-tight text-[#2f1b1b] sm:text-[18px]"
               style={{ fontFamily: "Kovanov, Georgia, serif" }}
             >
               {name}
             </h3>
             <p
-              className="mt-1 text-[11px] text-[#5b4a4a] sm:text-[12px]"
+              className="mt-1 text-[13px] text-[#5b4a4a] sm:text-[14px]"
               style={{ fontFamily: "Quicksand, Arial, sans-serif" }}
             >
               {role}
             </p>
           </div>
 
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-center gap-3">
             <a
               href={githubLink}
               target="_blank"
@@ -65,7 +67,7 @@ export default function ProfileCard({
               <img
                 src={githubIcon}
                 alt=""
-                className="h-4 w-4"
+                className="h-5 w-5"
                 style={{ filter: iconColorFilter }}
               />
             </a>
@@ -78,7 +80,7 @@ export default function ProfileCard({
               <img
                 src={linkedinIcon}
                 alt=""
-                className="h-4 w-4"
+                className="h-5 w-5"
                 style={{ filter: iconColorFilter }}
               />
             </a>

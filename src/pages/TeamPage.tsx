@@ -231,7 +231,7 @@ export default function TeamSection() {
           THE TEAM
         </h2>
 
-        <div className="mt-12 flex w-full flex-col gap-8">
+        <div className="mt-12 flex w-full flex-col gap-10">
           {rows.map((row) => {
             const rowMembers = teamData.filter(
               (member) => member.row === row,
@@ -240,7 +240,7 @@ export default function TeamSection() {
             return (
               <div
                 key={row}
-                className="flex flex-col items-center gap-6 md:flex-row md:justify-center"
+                className="flex flex-col items-center gap-6 md:flex-row md:justify-center md:gap-8"
               >
                 {rowMembers.map((member) => (
                   <ProfileCard
