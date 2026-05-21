@@ -196,6 +196,7 @@ export default function TeamSection() {
         ease: "power3.out",
         stagger: 0.1,
         immediateRender: false,
+        clearProps: "transform",
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top 75%",
