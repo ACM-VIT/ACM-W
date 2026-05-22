@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import "../assets/Kovanov-Bold.ttf";
 import envelopeIcon from "../assets/teams/envelope.png";
 import cherukuri from "../assets/teams/cherukuri.png";
 import lavanya from "../assets/teams/lavanya.png";
@@ -21,146 +20,14 @@ import nishtha from "../assets/teams/nishtha.png";
 import krishika from "../assets/teams/krishika.png";
 import harshit from "../assets/teams/harshit.png";
 import googleScholarIcon from "../assets/teams/Google-Scholar.png";
+import githubIcon from "../assets/teams/github.png";
+import linkedinIcon from "../assets/teams/linkedin.png";
 
 import ProfileCard from "../components/ProfileCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const iconColorFilter =
-  "invert(12%) sepia(33%) saturate(4950%) hue-rotate(338deg) brightness(72%) contrast(104%)";
-
-const teamData = [
-  {
-    name: "Dr. Aswani Kumar Cherukuri",
-    role: "Faculty Co-ordinator",
-    imageSrc: "cherukuri",
-    row: 1,
-    githubLink: "https://scholar.google.com/citations?user=8vttwsYAAAAJ&hl=en",
-    linkedinLink: "https://www.linkedin.com/in/cherukuri9/",
-  },
-  {
-    name: "Lavanya Jain",
-    role: "ACM-W Chairperson",
-    imageSrc: "lavanya",
-    row: 2,
-    githubLink: "https://github.com/lavanyajain14",
-    linkedinLink: "https://www.linkedin.com/in/lavanya-jain-556839287/",
-  },
-  {
-    name: "Mahendra Choudhary",
-    role: "ACM-W Vice Chairperson",
-    imageSrc: "mahendra",
-    row: 2,
-    githubLink: "https://github.com/mahendra785",
-    linkedinLink: "https://www.linkedin.com/in/mahendra-choudhary-a919002b8/",
-  },
-  {
-    name: "Navdha Sharma",
-    role: "ACM-W Secretary",
-    imageSrc: "navdha",
-    row: 2,
-    githubLink: "https://github.com/NavdhaSharma02",
-    linkedinLink: "#",
-  },
-  {
-    name: "Adheesh Garg",
-    role: "ACM-W Technical Director",
-    imageSrc: "adheesh",
-    row: 3,
-    githubLink: "https://github.com/qwerty-dvorak",
-    linkedinLink: "https://www.linkedin.com/in/adheesh-garg-409482229/",
-  },
-  {
-    name: "Aarjav Jain",
-    role: "ACM-W Design Lead",
-    imageSrc: "aarjav",
-    row: 3,
-    githubLink: "https://github.com/BharatwaleJain",
-    linkedinLink: "https://www.linkedin.com/in/bharatwalejain/",
-  },
-  {
-    name: "Prakhar Joshi",
-    role: "ACM Chairperson",
-    imageSrc: "prakhar",
-    row: 4,
-    githubLink: "https://github.com/pj4real",
-    linkedinLink: "https://www.linkedin.com/in/prakharjoshi23/",
-  },
-  {
-    name: "Rohit Sakamuri",
-    role: "ACM Vice Chairperson",
-    imageSrc: "rohit",
-    row: 4,
-    githubLink: "https://github.com/RohitPhaniramSakamuri",
-    linkedinLink: "https://www.linkedin.com/in/rohit-sakamuri-563878215/",
-  },
-  {
-    name: "Drashti Shukla",
-    role: "ACM Secretary",
-    imageSrc: "drashti",
-    row: 5,
-    githubLink: "https://github.com/drashtishukla",
-    linkedinLink: "https://www.linkedin.com/in/drashtishukla/",
-  },
-  {
-    name: "Shaurya Garg",
-    role: "ACM Co-Secretary",
-    imageSrc: "shaurya",
-    row: 5,
-    githubLink: "https://github.com/ShauryaGarg17",
-    linkedinLink: "https://www.linkedin.com/in/shauryagarg11/",
-  },
-  {
-    name: "Ishaan Samdani",
-    role: "ACM Technical Director",
-    imageSrc: "ishaan",
-    row: 5,
-    githubLink: "https://github.com/theg1239",
-    linkedinLink: "https://www.linkedin.com/in/ishaaans/",
-  },
-  {
-    name: "Rishit Shivam",
-    role: "ACM Research Lead",
-    imageSrc: "rishit",
-    row: 6,
-    githubLink: "https://github.com/pokymono",
-    linkedinLink: "https://www.linkedin.com/in/rishitshivam/",
-  },
-  {
-    name: "Vansh Dhir",
-    role: "ACM Projects Lead",
-    imageSrc: "vansh",
-    row: 6,
-    githubLink: "https://github.com/Van5sh",
-    linkedinLink: "https://www.linkedin.com/in/vansh-dhir-686b5028b/",
-  },
-  {
-    name: "Nishtha Aggarwal",
-    role: "ACM Design Lead",
-    imageSrc: "nishtha",
-    row: 6,
-    githubLink: "https://github.com/nishthaaggarwal24",
-    linkedinLink: "https://www.linkedin.com/in/nishtha-aggarwal-a7623426b/",
-  },
-  {
-    name: "Krishika Sureka",
-    role: "ACM Creative Lead",
-    imageSrc: "krishika",
-    row: 7,
-    githubLink: "https://github.com/Krishika09",
-    linkedinLink: "https://www.linkedin.com/in/krishikasureka/",
-  },
-  {
-    name: "Harshit Narang",
-    role: "ACM Competitions Lead",
-    imageSrc: "harshit",
-    row: 7,
-    githubLink: "https://github.com/harshitnarang28",
-    linkedinLink: "https://www.linkedin.com/in/harshitnarang28/",
-  },
-];
-
-const imageMap: Record<string, string> = {
+const imageMap = {
   cherukuri,
   lavanya,
   mahendra,
@@ -179,7 +46,283 @@ const imageMap: Record<string, string> = {
   harshit,
 };
 
-export default function TeamSection() {
+type ImageKey = keyof typeof imageMap;
+
+type SocialLink = {
+  href?: string;
+  iconSrc: string;
+  label: string;
+};
+
+type TeamMember = {
+  name: string;
+  role: string;
+  imageSrc: ImageKey;
+  row: number;
+  primaryLink?: SocialLink;
+  secondaryLink?: SocialLink;
+};
+
+const teamData: TeamMember[] = [
+  {
+    name: "Dr. Aswani Kumar Cherukuri",
+    role: "Faculty Co-ordinator",
+    imageSrc: "cherukuri",
+    row: 1,
+    primaryLink: {
+      href: "https://scholar.google.com/citations?user=8vttwsYAAAAJ&hl=en",
+      iconSrc: googleScholarIcon,
+      label: "Google Scholar",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/cherukuri9/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Lavanya Jain",
+    role: "ACM-W Chairperson",
+    imageSrc: "lavanya",
+    row: 2,
+    primaryLink: {
+      href: "https://github.com/lavanyajain14",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/lavanya-jain-556839287/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Mahendra Choudhary",
+    role: "ACM-W Vice Chairperson",
+    imageSrc: "mahendra",
+    row: 2,
+    primaryLink: {
+      href: "https://github.com/mahendra785",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/mahendra-choudhary-a919002b8/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Navdha Sharma",
+    role: "ACM-W Secretary",
+    imageSrc: "navdha",
+    row: 2,
+    primaryLink: {
+      href: "https://github.com/NavdhaSharma02",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/navdha-sharma-0217bb28a/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Adheesh Garg",
+    role: "ACM-W Technical Director",
+    imageSrc: "adheesh",
+    row: 3,
+    primaryLink: {
+      href: "https://github.com/qwerty-dvorak",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/adheesh-garg-409482229/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Aarjav Jain",
+    role: "ACM-W Design Lead",
+    imageSrc: "aarjav",
+    row: 3,
+    primaryLink: {
+      href: "https://github.com/BharatwaleJain",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/bharatwalejain/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Prakhar Joshi",
+    role: "ACM Chairperson",
+    imageSrc: "prakhar",
+    row: 4,
+    primaryLink: {
+      href: "https://github.com/pj4real",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/prakharjoshi23/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Rohit Sakamuri",
+    role: "ACM Vice Chairperson",
+    imageSrc: "rohit",
+    row: 4,
+    primaryLink: {
+      href: "https://github.com/RohitPhaniramSakamuri",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/rohit-sakamuri-563878215/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Drashti Shukla",
+    role: "ACM Secretary",
+    imageSrc: "drashti",
+    row: 5,
+    primaryLink: {
+      href: "https://github.com/drashtishukla",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/drashtishukla/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Shaurya Garg",
+    role: "ACM Co-Secretary",
+    imageSrc: "shaurya",
+    row: 5,
+    primaryLink: {
+      href: "https://github.com/ShauryaGarg17",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/shauryagarg11/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Ishaan Samdani",
+    role: "ACM Technical Director",
+    imageSrc: "ishaan",
+    row: 5,
+    primaryLink: {
+      href: "https://github.com/theg1239",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/ishaaans/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Rishit Shivam",
+    role: "ACM Research Lead",
+    imageSrc: "rishit",
+    row: 6,
+    primaryLink: {
+      href: "https://github.com/pokymono",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/rishitshivam/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Vansh Dhir",
+    role: "ACM Projects Lead",
+    imageSrc: "vansh",
+    row: 6,
+    primaryLink: {
+      href: "https://github.com/Van5sh",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/vansh-dhir-686b5028b/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Nishtha Aggarwal",
+    role: "ACM Design Lead",
+    imageSrc: "nishtha",
+    row: 6,
+    primaryLink: {
+      href: "https://github.com/nishthaaggarwal24",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/nishtha-aggarwal-a7623426b/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Krishika Sureka",
+    role: "ACM Creative Lead",
+    imageSrc: "krishika",
+    row: 7,
+    primaryLink: {
+      href: "https://github.com/Krishika09",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/krishikasureka/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Harshit Narang",
+    role: "ACM Competitions Lead",
+    imageSrc: "harshit",
+    row: 7,
+    primaryLink: {
+      href: "https://github.com/harshitnarang28",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/harshitnarang28/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+];
+
+export default function TeamPage() {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   const rows = useMemo(() => {
@@ -258,13 +401,8 @@ export default function TeamSection() {
                     name={member.name}
                     role={member.role}
                     imageSrc={imageMap[member.imageSrc]}
-                    githubLink={member.githubLink}
-                    linkedinLink={member.linkedinLink}
-                    githubIconSrc={
-                      member.name === "Dr. Aswani Kumar Cherukuri"
-                        ? googleScholarIcon
-                        : undefined
-                    }
+                    primaryLink={member.primaryLink}
+                    secondaryLink={member.secondaryLink}
                   />
                 ))}
               </div>

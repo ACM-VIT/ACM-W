@@ -1,5 +1,5 @@
 import BlogStamps from "./pages/BlogStamps";
-import TeamSection from "./pages/TeamPage";
+import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
 
 export default function App() {
@@ -30,7 +30,7 @@ export default function App() {
           zIndex: 5,
         }}
       >
-        <TeamSection />
+        <TeamPage />
       </section>
     </main>
   );

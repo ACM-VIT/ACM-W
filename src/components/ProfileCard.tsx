@@ -1,11 +1,7 @@
 
 
 
-import githubIcon from "../assets/teams/github.png";
-import linkedinIcon from "../assets/teams/linkedin.png";
 import cardBg from "../assets/teams/team-postcard.png";
-import googleScholarIcon from "../assets/teams/Google-Scholar.png";
-
 
 const iconColorFilter =
   "invert(12%) sepia(33%) saturate(4950%) hue-rotate(338deg) brightness(72%) contrast(104%)";
@@ -14,20 +10,26 @@ type ProfileCardProps = {
   name: string;
   role: string;
   imageSrc: string;
-  githubLink: string;
-  linkedinLink: string;
-  githubIconSrc?: string;
+  primaryLink?: {
+    href?: string;
+    iconSrc: string;
+    label: string;
+  };
+  secondaryLink?: {
+    href?: string;
+    iconSrc: string;
+    label: string;
+  };
 };
 
 export default function ProfileCard({
   name,
   role,
   imageSrc,
-  githubLink,
-  linkedinLink,
-  githubIconSrc,
+  primaryLink,
+  secondaryLink,
 }: ProfileCardProps) {
-  const githubIconFinal = githubIconSrc ?? githubIcon;
+  const isValidLink = (href?: string) => Boolean(href && href !== "#");
   return (
     <article
       className="team-card relative flex h-[200px] w-[340px] flex-col justify-center border border-[#5d0f14]/60 bg-cover bg-center p-4 shadow-md transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/20 hover:z-10 sm:h-[230px] sm:w-[420px]"
@@ -63,32 +65,36 @@ export default function ProfileCard({
           </div>
 
           <div className="flex items-center justify-center gap-3">
-            <a
-              href={githubLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${name} GitHub`}
-            >
-              <img
-                src={githubIconFinal}
-                alt=""
-                className="h-6 w-6"
-                style={{ filter: iconColorFilter }}
-              />
-            </a>
-            <a
-              href={linkedinLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${name} LinkedIn`}
-            >
-              <img
-                src={linkedinIcon}
-                alt=""
-                className="h-6 w-6"
-                style={{ filter: iconColorFilter }}
-              />
-            </a>
+            {primaryLink && isValidLink(primaryLink.href) && (
+              <a
+                href={primaryLink.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${name} ${primaryLink.label}`}
+              >
+                <img
+                  src={primaryLink.iconSrc}
+                  alt=""
+                  className="h-6 w-6"
+                  style={{ filter: iconColorFilter }}
+                />
+              </a>
+            )}
+            {secondaryLink && isValidLink(secondaryLink.href) && (
+              <a
+                href={secondaryLink.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${name} ${secondaryLink.label}`}
+              >
+                <img
+                  src={secondaryLink.iconSrc}
+                  alt=""
+                  className="h-6 w-6"
+                  style={{ filter: iconColorFilter }}
+                />
+              </a>
+            )}
           </div>
         </div>
       </div>
