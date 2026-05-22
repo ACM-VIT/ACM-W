@@ -31,11 +31,20 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  cursor: url("./assets/feather-cursor.png") 4 4, auto;
+}
+
 body {
   margin: 0;
   background: #fff9e9;
   overflow-x: hidden;
   color: #580A0A;
+  cursor: url("./assets/feather-cursor.png") 4 4, auto;
+}
+
+* {
+  cursor: url("./assets/feather-cursor.png") 4 4, auto !important;
 }
 
 #root {
