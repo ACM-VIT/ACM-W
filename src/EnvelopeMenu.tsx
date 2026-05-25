@@ -112,7 +112,7 @@ export default function EnvelopeMenu() {
                 }}
                 className="nav-card absolute w-24 h-16 flex flex-col items-center justify-center z-0 origin-center transition-transform hover:!scale-110"
               >
-                 <img src={card.img} alt="Menu Stamp" className="w-[70px] h-[50px] object-fit mix-blend-multiply drop-shadow-sm" />
+                 <img src={card.img} alt="Menu Stamp" className="w-[70px] h-[50px] object-contain mix-blend-multiply drop-shadow-sm" />
               </a>
             ))}
 
