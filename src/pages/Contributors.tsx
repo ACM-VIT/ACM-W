@@ -133,6 +133,21 @@ const contributors: Contributor[] = [
     },
   },
   {
+    name: "Ananya Bisht",
+    imageSrc: "contributor1",
+    bio: "Built the auth system & API layer.",
+    primaryLink: {
+      href: "https://github.com/janedoe",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://linkedin.com/in/janedoe",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
     name: "Nimesha Subramanian",
     imageSrc: "contributor1",
     bio: "Built the auth system & API layer.",
