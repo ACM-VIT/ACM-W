@@ -1,122 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from 'react';
+import EnvelopeMenu from './EnvelopeMenu';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+// A section placeholder for teammates to replace with their own components later
+function Section({ id, title }: { id: string, title: string }) {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <section id={id} className="min-h-screen flex flex-col items-center justify-center px-8 border-b border-[#4a1010]/20 text-[#4a1010]">
+      <h2 className="text-4xl font-serif font-bold mb-4">{title}</h2>
+      <p>This is the placeholder section for {title}. Your teammates will build here.</p>
+    </section>
+  );
 }
 
-export default App
+// Automatically manages showing the navbar when you scroll PAST the landing section
+function GlobalNavbar() {
+  const [showNavbar, setShowNavbar] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // If the scroll position is further down than half the window height (Landing Page), show it
+      if (window.scrollY > window.innerHeight * 0.5) {
+        setShowNavbar(true);
+      } else {
+        setShowNavbar(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    // run once on mount
+    handleScroll();
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <div 
+      className={`fixed top-12 left-12 z-50 transition-all duration-500 origin-center ${
+        showNavbar ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
+      }`}
+    >
+      <EnvelopeMenu />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <div className="bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] bg-[#e6ddd0] font-sans relative overflow-x-hidden">
+      {/* Global Nav that watches scroll */}
+      <GlobalNavbar />
+
+      {/* The Landing Page (Takes up exactly one full screen height) */}
+      <section id="home" className="h-screen flex flex-col items-center justify-center text-[#4a1010] border-b border-[#4a1010]/20">
+        <h1 className="text-6xl font-serif font-bold mb-4 tracking-wider text-center">Welcome to ACM-W</h1>
+        <p className="text-xl italic">Scroll down to see the envelope appear...</p>
+      </section>
+
+      {/* 
+        The Scrollable Sections your teammates will build!
+        Right now, they're placeholders, but they correspond to the Envelope links.
+      */}
+      <Section id="about-acmw" title="About ACM-W" />
+      <Section id="about-acm" title="About ACM" />
+      <Section id="contributors" title="Contributors" />
+      <Section id="team" title="The Team" />
+      <Section id="blogs" title="Blogs" />
+      <Section id="women-in-stem" title="Women in Stem" />
+      
+      <footer className="h-40 flex items-center justify-center text-[#4a1010]/60">
+        End of page
+      </footer>
+    </div>
+  );
+}
+
+export default App;
