@@ -1,11 +1,11 @@
 import { useRef, useLayoutEffect, useState } from 'react';
 import gsap from 'gsap';
-import { Link } from 'react-router-dom';
 
 // Import all SVG assets
 import closedEnv from './assets/closed.svg';
 import openEnv from './assets/open.svg';
 import contributorsImg from './assets/contributors.svg';
+import aboutAcmwImg from './assets/aboutacmw.svg';
 import aboutAcmwImg from './assets/aboutacmw.svg';
 import aboutAcmImg from './assets/abtacm.svg';
 import blogsImg from './assets/blogs.svg';
