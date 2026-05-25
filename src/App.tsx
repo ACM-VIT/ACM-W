@@ -46,7 +46,13 @@ function GlobalNavbar() {
 
 function App() {
   return (
-    <div className="bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] bg-[#e6ddd0] font-sans relative overflow-x-hidden">
+    <div
+      className="bg-[#e6ddd0] font-sans relative overflow-x-hidden"
+      style={{
+        backgroundImage:
+          `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' fill='%23e6ddd0'/%3E%3Cg fill='%234a1010' fill-opacity='0.05'%3E%3Ccircle cx='18' cy='24' r='1'/%3E%3Ccircle cx='62' cy='41' r='1'/%3E%3Ccircle cx='121' cy='29' r='1'/%3E%3Ccircle cx='33' cy='86' r='1'/%3E%3Ccircle cx='95' cy='74' r='1'/%3E%3Ccircle cx='142' cy='98' r='1'/%3E%3Ccircle cx='49' cy='131' r='1'/%3E%3Ccircle cx='109' cy='143' r='1'/%3E%3Ccircle cx='149' cy='151' r='1'/%3E%3C/g%3E%3C/svg%3E")`,
+      }}
+    >
       {/* Global Nav that watches scroll */}
       <GlobalNavbar />
 
