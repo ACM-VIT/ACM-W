@@ -17,20 +17,36 @@ function GlobalNavbar() {
   const [showNavbar, setShowNavbar] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      // If the scroll position is further down than half the window height (Landing Page), show it
-      if (window.scrollY > window.innerHeight * 0.5) {
-        setShowNavbar(true);
-      } else {
-        setShowNavbar(false);
+    let frameId: number | null = null;
+    let currentShowNavbar = false;
+
+    const updateNavbarVisibility = () => {
+      frameId = null;
+      const nextShowNavbar = window.scrollY > window.innerHeight * 0.5;
+
+      if (nextShowNavbar !== currentShowNavbar) {
+        currentShowNavbar = nextShowNavbar;
+        setShowNavbar(nextShowNavbar);
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+      if (frameId === null) {
+        frameId = window.requestAnimationFrame(updateNavbarVisibility);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     // run once on mount
-    handleScroll();
+    updateNavbarVisibility();
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
   }, []);
 
   return (
