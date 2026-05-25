@@ -91,9 +91,9 @@ export default function EnvelopeMenu() {
                 key={card.id}
                 href={card.link}
                 onClick={(e) => {
-                  e.preventDefault();
                   const target = document.querySelector(card.link);
                   if (target) {
+                    e.preventDefault();
                     target.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
