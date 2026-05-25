@@ -66,28 +66,41 @@ export default function EnvelopeMenu() {
   return (
     <div className="flex items-center justify-center overflow-visible">
       {/* We give it a generous relative wrapper so the hover hit-box covers the cards too */}
-      <div 
+      <div
         ref={containerRef}
-        className="relative w-48 h-48 cursor-pointer"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        className="relative w-48 h-48"
+        onPointerEnter={() => setIsHovered(true)}
+        onPointerLeave={() => setIsHovered(false)}
+        onFocus={() => setIsHovered(true)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+            setIsHovered(false);
+          }
+        }}
       >
         <div className="absolute top-0 left-0 w-full flex justify-center">
           <div className="menu-group relative w-16 h-12 flex items-center justify-center z-50">
-            
-            {/* The Closed Envelope */}
-            <div className="closed-env absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
-              <img src={closedEnv} alt="Closed Envelope" className="w-[120%] h-[120%] object-contain drop-shadow-md" />
-            </div>
-            
-            {/* The Open Envelope */}
-            <div className="open-env absolute inset-0 z-10 opacity-0 pointer-events-none flex items-center justify-center">
-              <img src={openEnv} alt="Open Envelope" className="w-[120%] h-[120%] object-contain drop-shadow-md" />
-            </div>
-            
+            <button
+              type="button"
+              aria-expanded={isHovered}
+              aria-label={isHovered ? 'Close envelope menu' : 'Open envelope menu'}
+              className="absolute inset-0 z-40 flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              onClick={() => setIsHovered((prev) => !prev)}
+            >
+              {/* The Closed Envelope */}
+              <div className="closed-env absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
+                <img src={closedEnv} alt="Closed Envelope" className="w-[120%] h-[120%] object-contain drop-shadow-md" />
+              </div>
+
+              {/* The Open Envelope */}
+              <div className="open-env absolute inset-0 z-10 opacity-0 pointer-events-none flex items-center justify-center">
+                <img src={openEnv} alt="Open Envelope" className="w-[120%] h-[120%] object-contain drop-shadow-md" />
+              </div>
+            </button>
+
             {/* The Cards/Stamps */}
             {cards.map((card) => (
-              <a 
+              <a
                 key={card.id}
                 href={card.link}
                 onClick={(e) => {
