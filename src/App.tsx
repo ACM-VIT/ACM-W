@@ -1,3 +1,4 @@
+import About from './pages/About';
 import BlogStamps from "./pages/BlogStamps";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
@@ -6,6 +7,14 @@ import ContributorsSection from "./pages/Contributors";
 export default function App() {
   return (
     <main className="overflow-x-hidden">
+      <section
+      style={{
+          position: "relative",
+          zIndex: 20,
+        }}>
+      <About />
+      </section>
+
       <section
         style={{
           position: "relative",
@@ -16,6 +25,7 @@ export default function App() {
       </section>
 
       <section
+        id="women-in-stem-section"
         style={{
           position: "relative",
           zIndex: 10,
