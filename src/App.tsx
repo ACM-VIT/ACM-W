@@ -2,6 +2,7 @@ import BlogStamps from "./pages/BlogStamps";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
 import ContributorsSection from "./pages/Contributors";
+import Footer from "./components/Footer";
 
 export default function App() {
   return (
@@ -42,6 +43,8 @@ export default function App() {
       >
         <ContributorsSection />
       </section>
+
+      <Footer />
     </main>
   );
 }
