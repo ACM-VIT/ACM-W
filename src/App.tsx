@@ -48,7 +48,12 @@ function GlobalNavbar() {
       }
     };
   }, []);
+import BlogStamps from "./pages/BlogStamps";
+import TeamPage from "./pages/TeamPage";
+import WomenInStem from "./pages/WomenInStem";
+import ContributorsSection from "./pages/Contributors";
 
+export default function App() {
   return (
     <div 
       className={`fixed top-12 left-12 z-50 transition-all duration-500 origin-center ${
@@ -97,3 +102,43 @@ function App() {
 }
 
 export default App;
+    <main className="overflow-x-hidden">
+      <section
+        style={{
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <BlogStamps />
+      </section>
+
+      <section
+        style={{
+          position: "relative",
+          zIndex: 10,
+          background: "#fff9e9",
+        }}
+      >
+        <WomenInStem />
+      </section>
+
+      <section
+        style={{
+          position: "relative",
+          zIndex: 5,
+        }}
+      >
+        <TeamPage />
+      </section>
+
+      <section
+        style={{
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <ContributorsSection />
+      </section>
+    </main>
+  );
+}
