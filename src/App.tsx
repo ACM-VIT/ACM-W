@@ -1,11 +1,21 @@
+import loaderAnimationPath from "./assets/loader.json?url";
+import { LottieAnimation } from "./components/LottieAnimation";
 import BlogStamps from "./pages/BlogStamps";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
 import ContributorsSection from "./pages/Contributors";
+import "./App.css";
 
 export default function App() {
   return (
     <main className="overflow-x-hidden">
+      <section className="fullscreen-lottie">
+        <LottieAnimation
+          animationPath={loaderAnimationPath}
+          className="fullscreen-animation"
+        />
+      </section>
+
       <section
         style={{
           position: "relative",
