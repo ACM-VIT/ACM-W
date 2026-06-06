@@ -68,8 +68,16 @@ export default function EnvelopeMenu() {
       <div
         ref={containerRef}
         className="relative w-48 h-48"
-        onPointerEnter={() => setIsHovered(true)}
-        onPointerLeave={() => setIsHovered(false)}
+        onPointerEnter={(e) => {
+          if (e.pointerType !== 'touch') {
+            setIsHovered(true);
+          }
+        }}
+        onPointerLeave={(e) => {
+          if (e.pointerType !== 'touch') {
+            setIsHovered(false);
+          }
+        }}
         onFocus={() => setIsHovered(true)}
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
