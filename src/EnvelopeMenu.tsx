@@ -6,19 +6,18 @@ import closedEnv from './assets/closed.svg';
 import openEnv from './assets/open.svg';
 import contributorsImg from './assets/contributors.svg';
 import aboutAcmwImg from './assets/aboutacmw.svg';
-import aboutAcmwImg from './assets/aboutacmw.svg';
 import aboutAcmImg from './assets/abtacm.svg';
 import blogsImg from './assets/blogs.svg';
 import womenInStemImg from './assets/womeninstem.svg';
 import teamImg from './assets/team.svg';
 
 const cards = [
-  { id: 1, img: contributorsImg, link: '#contributors', x: 0, y: -75 },
-  { id: 2, img: aboutAcmwImg, link: '#about-acmw', x: 80, y: -35 },
-  { id: 3, img: aboutAcmImg, link: '#about-acm', x: 80, y: 45 },
-  { id: 4, img: blogsImg, link: '#blogs', x: 0, y: 85 },
-  { id: 5, img: womenInStemImg, link: '#women-in-stem', x: -80, y: 45 },
-  { id: 6, img: teamImg, link: '#team', x: -80, y: -35 },
+  { id: 1, img: contributorsImg, alt: 'Contributors stamp', link: '#contributors', x: 0, y: -75 },
+  { id: 2, img: aboutAcmwImg, alt: 'About ACM-W stamp', link: '#about-acmw', x: 80, y: -35 },
+  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about-acm', x: 80, y: 45 },
+  { id: 4, img: blogsImg, alt: 'Blogs stamp', link: '#blogs', x: 0, y: 85 },
+  { id: 5, img: womenInStemImg, alt: 'Women in STEM stamp', link: '#women-in-stem', x: -80, y: 45 },
+  { id: 6, img: teamImg, alt: 'Team stamp', link: '#team', x: -80, y: -35 },
 ];
 
 export default function EnvelopeMenu() {
@@ -89,12 +88,12 @@ export default function EnvelopeMenu() {
             >
               {/* The Closed Envelope */}
               <div className="closed-env absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
-                <img src={closedEnv} alt="Closed Envelope" className="w-[120%] h-[120%] object-contain drop-shadow-md" />
+                <img src={closedEnv} alt="" className="w-[120%] h-[120%] object-contain drop-shadow-md" />
               </div>
 
               {/* The Open Envelope */}
               <div className="open-env absolute inset-0 z-10 opacity-0 pointer-events-none flex items-center justify-center">
-                <img src={openEnv} alt="Open Envelope" className="w-[120%] h-[120%] object-contain drop-shadow-md" />
+                <img src={openEnv} alt="" className="w-[120%] h-[120%] object-contain drop-shadow-md" />
               </div>
             </button>
 
@@ -112,7 +111,7 @@ export default function EnvelopeMenu() {
                 }}
                 className="nav-card absolute w-24 h-16 flex flex-col items-center justify-center z-0 origin-center transition-transform hover:!scale-110"
               >
-                 <img src={card.img} alt="Menu Stamp" className="w-[70px] h-[50px] object-contain mix-blend-multiply drop-shadow-sm" />
+                <img src={card.img} alt={card.alt} className="w-[70px] h-[50px] object-contain mix-blend-multiply drop-shadow-sm" />
               </a>
             ))}
 

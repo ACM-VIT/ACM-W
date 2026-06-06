@@ -48,17 +48,9 @@ function GlobalNavbar() {
       }
     };
   }, []);
-import loaderAnimationPath from "./assets/loader.json?url";
-import { LottieAnimation } from "./components/LottieAnimation";
-import BlogStamps from "./pages/BlogStamps";
-import TeamPage from "./pages/TeamPage";
-import WomenInStem from "./pages/WomenInStem";
-import ContributorsSection from "./pages/Contributors";
-import "./App.css";
 
-export default function App() {
   return (
-    <div 
+    <div
       className={`fixed top-12 left-12 z-50 transition-all duration-500 origin-center ${
         showNavbar ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
       }`}
@@ -68,7 +60,7 @@ export default function App() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <div
       className="bg-[#e6ddd0] font-sans relative overflow-x-hidden"
@@ -101,54 +93,5 @@ function App() {
         End of page
       </footer>
     </div>
-  );
-}
-
-export default App;
-    <main className="overflow-x-hidden">
-      <section className="fullscreen-lottie">
-        <LottieAnimation
-          animationPath={loaderAnimationPath}
-          className="fullscreen-animation"
-        />
-      </section>
-
-      <section
-        style={{
-          position: "relative",
-          zIndex: 20,
-        }}
-      >
-        <BlogStamps />
-      </section>
-
-      <section
-        style={{
-          position: "relative",
-          zIndex: 10,
-          background: "#fff9e9",
-        }}
-      >
-        <WomenInStem />
-      </section>
-
-      <section
-        style={{
-          position: "relative",
-          zIndex: 5,
-        }}
-      >
-        <TeamPage />
-      </section>
-
-      <section
-        style={{
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <ContributorsSection />
-      </section>
-    </main>
   );
 }
