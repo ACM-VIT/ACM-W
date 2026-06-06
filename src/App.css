@@ -1,1 +1,101 @@
 /* Custom CSS can go here */
+.fullscreen-lottie {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  overflow: hidden;
+}
+
+.fullscreen-animation {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100svh;
+  aspect-ratio: 1440 / 1024;
+  overflow: hidden;
+}
+
+.lottie-stage,
+.lottie-skeleton,
+.lottie-fallback {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+}
+
+.lottie-stage {
+  display: grid;
+  place-items: center;
+}
+
+.lottie-stage svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.lottie-skeleton {
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(180, 152, 128, 0.2), transparent 34%),
+    linear-gradient(180deg, rgba(242, 232, 207, 0.22), transparent 62%);
+  pointer-events: none;
+}
+
+.lottie-fallback {
+  position: relative;
+  display: grid;
+  place-items: center;
+  transform: translateZ(0);
+}
+
+.fallback-panel,
+.fallback-fold,
+.fallback-shadow {
+  position: absolute;
+  display: block;
+}
+
+.fallback-shadow {
+  width: 46%;
+  height: 9%;
+  bottom: 26%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.16);
+  filter: blur(16px);
+}
+
+.fallback-panel {
+  width: 34%;
+  height: 26%;
+  border-radius: 8px;
+  background: #f2e8cf;
+  box-shadow: 0 18px 42px rgba(88, 10, 10, 0.18);
+}
+
+.panel-back {
+  transform: translateY(-10%) rotate(-5deg);
+  background: #b49880;
+}
+
+.panel-front {
+  transform: translateY(6%) rotate(5deg);
+}
+
+.fallback-fold {
+  width: 19%;
+  height: 16%;
+  bottom: 37%;
+  background: #710819;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.fold-left {
+  transform: translateX(-54%) rotate(-16deg);
+}
+
+.fold-right {
+  transform: translateX(54%) rotate(16deg);
+  background: #580a0a;
+}
