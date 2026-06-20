@@ -60,9 +60,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
+  pointer-events: auto;
   will-change: opacity;
 }
 
