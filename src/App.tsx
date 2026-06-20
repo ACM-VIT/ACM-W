@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import EnvelopeMenu from './EnvelopeMenu';
+import EnvelopeFooter from './components/EnvelopeFooter';
 import './App.css';
 
 // A section placeholder for teammates to replace with their own components later
@@ -89,9 +90,8 @@ export default function App() {
       <Section id="blogs" title="Blogs" />
       <Section id="women-in-stem" title="Women in Stem" />
       
-      <footer className="h-40 flex items-center justify-center text-[#4a1010]/60">
-        End of page
-      </footer>
+      {/* Scroll-driven 3D envelope contact section / footer */}
+      <EnvelopeFooter />
     </div>
   );
 }
