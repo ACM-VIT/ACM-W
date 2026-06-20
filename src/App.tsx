@@ -1,4 +1,10 @@
+import { useEffect, useState } from "react";
+import EnvelopeMenu from "./EnvelopeMenu";
+import loaderAnimationPath from "./assets/loader.json?url";
+import { LottieAnimation } from "./components/LottieAnimation";
+import About from "./pages/About";
 import BlogStamps from "./pages/BlogStamps";
+import ContributorsSection from "./pages/Contributors";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
 import ContributorsSection from "./pages/Contributors";
@@ -7,7 +13,79 @@ import Footer from "./components/Footer";
 export default function App() {
   return (
     <main>
+import "./App.css";
+
+// Automatically manages showing the navbar when you scroll PAST the landing section
+function GlobalNavbar() {
+  const [showNavbar, setShowNavbar] = useState(false);
+
+  useEffect(() => {
+    let frameId: number | null = null;
+    let currentShowNavbar = false;
+
+    const updateNavbarVisibility = () => {
+      frameId = null;
+      const nextShowNavbar = window.scrollY > window.innerHeight * 0.5;
+
+      if (nextShowNavbar !== currentShowNavbar) {
+        currentShowNavbar = nextShowNavbar;
+        setShowNavbar(nextShowNavbar);
+      }
+    };
+
+    const handleScroll = () => {
+      if (frameId === null) {
+        frameId = window.requestAnimationFrame(updateNavbarVisibility);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // run once on mount
+    updateNavbarVisibility();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      className={`fixed top-12 left-12 z-50 transition-all duration-500 origin-center ${
+        showNavbar ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
+      }`}
+    >
+      <EnvelopeMenu />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <main className="relative overflow-x-hidden bg-[#fff9e9]">
+      <GlobalNavbar />
+
+      <section id="home" className="fullscreen-lottie">
+        <LottieAnimation
+          animationPath={loaderAnimationPath}
+          className="fullscreen-animation"
+        />
+      </section>
+
       <section
+        style={{
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <About />
+      </section>
+
+      <section
+        id="blogs"
         style={{
           position: "relative",
           zIndex: 20,
@@ -17,6 +95,7 @@ export default function App() {
       </section>
 
       <section
+        id="women-in-stem"
         style={{
           position: "relative",
           zIndex: 10,
@@ -27,6 +106,7 @@ export default function App() {
       </section>
 
       <section
+        id="team"
         style={{
           position: "relative",
           zIndex: 5,
@@ -36,6 +116,7 @@ export default function App() {
       </section>
 
       <section
+        id="contributors"
         style={{
           position: "relative",
           zIndex: 1,
