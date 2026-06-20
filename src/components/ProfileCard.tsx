@@ -1,5 +1,3 @@
-import githubIcon from "../assets/teams/github.png";
-import linkedinIcon from "../assets/teams/linkedin.png";
 import cardBg from "../assets/teams/team-postcard.png";
 
 
