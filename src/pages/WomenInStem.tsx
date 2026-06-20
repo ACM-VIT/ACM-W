@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Constants ─── */
 
-const GLOBE_SIZE = 900;
+const GLOBE_SIZE = 760;
 
 const DEG = Math.PI / 180;
 const HALF_PI = Math.PI / 2;
@@ -143,6 +143,18 @@ export default function WomenInStem() {
       const group = globe.group;
       const camera = globe.camera;
       const globeEl = globeContainerRef.current!;
+
+      ScrollTrigger.create({
+        trigger: "#women-in-stem",
+        start: "top top",
+        end: "max",
+        onToggle: ({ isActive }) => {
+          globeEl.style.visibility = isActive ? "visible" : "hidden";
+        },
+        onRefresh: ({ isActive }) => {
+          globeEl.style.visibility = isActive ? "visible" : "hidden";
+        },
+      });
 
       /* ─── Hero exit: lock rotation & drag ─── */
       ScrollTrigger.create({
@@ -321,7 +333,6 @@ export default function WomenInStem() {
         className="relative z-10 h-screen w-full flex flex-col items-center"
         style={{ paddingTop: "56px" }}
       >
-        <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14]" />
         <h1
           className="text-[50px] tracking-[0.015em] font-bold leading-normal"
           style={{
@@ -339,8 +350,6 @@ export default function WomenInStem() {
           key={sci.name}
           className="scientist-section relative z-10 h-screen w-full overflow-hidden"
         >
-          {/* Top-left icon */}
-          <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14] z-50" />
 
           {/* Country silhouette */}
           <img

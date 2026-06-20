@@ -1,43 +1,17 @@
-import About from './pages/About';
+import { useEffect, useState } from "react";
+import EnvelopeMenu from "./EnvelopeMenu";
+import loaderAnimationPath from "./assets/loader.json?url";
+import { LottieAnimation } from "./components/LottieAnimation";
+import About from "./pages/About";
 import BlogStamps from "./pages/BlogStamps";
+import ContributorsSection from "./pages/Contributors";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
-import ContributorsSection from "./pages/Contributors";
-import { useState, useEffect } from 'react';
-import EnvelopeMenu from './EnvelopeMenu';
-import './App.css';
+import "./App.css";
 
-// A section placeholder for teammates to replace with their own components later
-function Section({ id, title }: { id: string, title: string }) {
-  return (
-    <main className="overflow-x-hidden">
-      <section
-      style={{
-          position: "relative",
-          zIndex: 20,
-        }}>
-      <About />
-      </section>
-
-      <section
-        style={{
-          position: "relative",
-          zIndex: 20,
-        }}
-      >
-        <BlogStamps />
-      </section>
-
-      <section
-        id="women-in-stem-section"
-        style={{
-          position: "relative",
-          zIndex: 10,
-          background: "#fff9e9",
-        }}
-      >
-        <WomenInStem />
-      </section>
+// Automatically manages showing the navbar when you scroll PAST the landing section
+function GlobalNavbar() {
+  const [showNavbar, setShowNavbar] = useState(false);
 
   useEffect(() => {
     let frameId: number | null = null;
@@ -85,36 +59,65 @@ function Section({ id, title }: { id: string, title: string }) {
 
 export default function App() {
   return (
-    <div
-      className="bg-[#e6ddd0] font-sans relative overflow-x-hidden"
-      style={{
-        backgroundImage:
-          `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' fill='%23e6ddd0'/%3E%3Cg fill='%234a1010' fill-opacity='0.05'%3E%3Ccircle cx='18' cy='24' r='1'/%3E%3Ccircle cx='62' cy='41' r='1'/%3E%3Ccircle cx='121' cy='29' r='1'/%3E%3Ccircle cx='33' cy='86' r='1'/%3E%3Ccircle cx='95' cy='74' r='1'/%3E%3Ccircle cx='142' cy='98' r='1'/%3E%3Ccircle cx='49' cy='131' r='1'/%3E%3Ccircle cx='109' cy='143' r='1'/%3E%3Ccircle cx='149' cy='151' r='1'/%3E%3C/g%3E%3C/svg%3E")`,
-      }}
-    >
-      {/* Global Nav that watches scroll */}
+    <main className="relative overflow-x-hidden bg-[#fff9e9]">
       <GlobalNavbar />
 
-      {/* The Landing Page (Takes up exactly one full screen height) */}
-      <section id="home" className="h-screen flex flex-col items-center justify-center text-[#4a1010] border-b border-[#4a1010]/20">
-        <h1 className="text-6xl font-serif font-bold mb-4 tracking-wider text-center">Welcome to ACM-W</h1>
-        <p className="text-xl italic">Scroll down to see the envelope appear...</p>
+      <section id="home" className="fullscreen-lottie">
+        <LottieAnimation
+          animationPath={loaderAnimationPath}
+          className="fullscreen-animation"
+        />
       </section>
 
-      {/* 
-        The Scrollable Sections your teammates will build!
-        Right now, they're placeholders, but they correspond to the Envelope links.
-      */}
-      <Section id="about-acmw" title="About ACM-W" />
-      <Section id="about-acm" title="About ACM" />
-      <Section id="contributors" title="Contributors" />
-      <Section id="team" title="The Team" />
-      <Section id="blogs" title="Blogs" />
-      <Section id="women-in-stem" title="Women in Stem" />
-      
-      <footer className="h-40 flex items-center justify-center text-[#4a1010]/60">
-        End of page
-      </footer>
-    </div>
+      <section
+        style={{
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <About />
+      </section>
+
+      <section
+        id="blogs"
+        style={{
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <BlogStamps />
+      </section>
+
+      <section
+        id="women-in-stem"
+        style={{
+          position: "relative",
+          zIndex: 10,
+          background: "#fff9e9",
+        }}
+      >
+        <WomenInStem />
+      </section>
+
+      <section
+        id="team"
+        style={{
+          position: "relative",
+          zIndex: 5,
+        }}
+      >
+        <TeamPage />
+      </section>
+
+      <section
+        id="contributors"
+        style={{
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <ContributorsSection />
+      </section>
+    </main>
   );
 }

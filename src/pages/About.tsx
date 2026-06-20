@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import envelopeImg from '../assets/about/envelope.png'
 import aboutAcmWImg from '../assets/about/about-acm-w.svg'
 import aboutAcmVitImg from '../assets/about/about-acm-vit.svg'
 import './About.css'
@@ -9,7 +8,7 @@ import './About.css'
 gsap.registerPlugin(ScrollTrigger)
 
 const BODY_COPY =
-  'Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields. Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields. Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields. Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive.'
+  'Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning.\n\nEncouraging inclusive participation and empowering diverse voices—especially women in tech—to lead innovation in STEM fields.\n\nBuilding a community where technical growth, mentorship, collaboration, and leadership thrive.'
 
 const REVEAL_DURATION = 2.4
 const HOLD_DURATION = 1.1
@@ -206,7 +205,6 @@ export default function About() {
   return (
     <main className="about" ref={rootRef}>
       <button className="about_mail" type="button" aria-label="Mail">
-        <img src={envelopeImg} alt="" className="about_mailIcon" />
       </button>
 
       <div className="about_scroll-track">
