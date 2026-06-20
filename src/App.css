@@ -182,12 +182,3 @@
     border-right-color: var(--border);
   }
 }
-.globe-fixed-container {
-  visibility: hidden;
-  pointer-events: none;
-}
-
-#women-in-stem-section .globe-fixed-container {
-  visibility: visible;
-  pointer-events: auto;
-}
