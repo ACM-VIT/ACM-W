@@ -204,9 +204,6 @@ export default function About() {
 
   return (
     <main className="about" ref={rootRef}>
-      <button className="about_mail" type="button" aria-label="Mail">
-      </button>
-
       <div className="about_scroll-track">
         <div className="about_stage">
           <div className="about_stack">
