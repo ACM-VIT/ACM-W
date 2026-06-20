@@ -4,18 +4,11 @@ import footerBlack2 from "../assets/footer/footer_black2.png";
 import footerPink2 from "../assets/footer/footer_pink2.png";
 
 const footerCards = [footerBlack1, footerPink1, footerBlack2, footerPink2];
-const cards = footerCards;
+const cards = [...footerCards, ...footerCards, ...footerCards];
 
 export default function Footer() {
   return (
-    <footer
-      className="w-full overflow-hidden bg-[#B49880] py-16 sm:py-20"
-      style={{
-        position: "sticky",
-        bottom: 0,
-        zIndex: 2,
-      }}
-    >
+    <footer className="relative w-full overflow-hidden bg-[#B49880] py-16 sm:py-20">
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-25 mix-blend-multiply"
         style={{
@@ -35,28 +28,20 @@ export default function Footer() {
             width: "100%",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 55,
-              width: "max-content",
-              padding: "4px 4px 8px",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: 55, width: "max-content", padding: "4px 4px 8px" }}>
             {cards.map((card, index) => (
-              <img
-                key={`${card}-${index}`}
-                src={card}
-                alt=""
-                style={{
-                  display: "block",
-                  width: "auto",
-                  height: 240,
-                  objectFit: "contain",
-                  flexShrink: 0,
-                }}
-              />
+              <div key={`${card}-${index}`} style={{ width: 240, height: 240, flexShrink: 0 }}>
+                <img
+                  src={card}
+                  alt=""
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
             ))}
           </div>
         </div>
