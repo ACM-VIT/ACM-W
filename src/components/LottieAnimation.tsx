@@ -9,6 +9,8 @@ type LottieAnimationProps = {
 
 type LoadAnimationConfig = Parameters<typeof lottie.loadAnimation>[0]
 
+const IMAGE_LOAD_TIMEOUT_MS = 6000
+
 function LottieFallback() {
   return (
     <div className="lottie-fallback" role="presentation" aria-hidden="true">
@@ -24,6 +26,40 @@ function LottieFallback() {
 function prefersReducedMotion() {
   if (typeof window === 'undefined' || !window.matchMedia) return false
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+/**
+ * Lottie's `DOMLoaded` event only means the SVG element tree has been built —
+ * it fires before the browser has actually finished downloading/decoding the
+ * <image> assets referenced inside it (background art, raster textures, etc).
+ * At larger viewport sizes those images take longer to decode, so revealing
+ * the stage on DOMLoaded shows layers popping in one at a time instead of the
+ * finished frame. This waits for every <image> in the SVG to actually be
+ * loaded before we consider the animation ready to show.
+ */
+function waitForImages(svg: SVGSVGElement): Promise<void> {
+  const images = Array.from(svg.querySelectorAll('image'))
+  if (images.length === 0) return Promise.resolve()
+
+  const loaders = images.map((imageEl) => {
+    const href =
+      imageEl.getAttribute('href') ?? imageEl.getAttribute('xlink:href')
+    if (!href) return Promise.resolve()
+
+    return new Promise<void>((resolve) => {
+      const probe = new Image()
+      probe.onload = () => resolve()
+      probe.onerror = () => resolve() // don't let one broken asset hang the whole reveal
+      probe.src = href
+      if (probe.complete) resolve()
+    })
+  })
+
+  const timeout = new Promise<void>((resolve) =>
+    setTimeout(resolve, IMAGE_LOAD_TIMEOUT_MS),
+  )
+
+  return Promise.race([Promise.all(loaders).then(() => undefined), timeout])
 }
 
 export function LottieAnimation({
@@ -51,7 +87,7 @@ export function LottieAnimation({
       path: animationPath,
       renderer: 'svg',
       loop: !reduceMotion,
-      autoplay: !reduceMotion,
+      autoplay: false, // hold playback until assets are actually painted
       rendererSettings: {
         preserveAspectRatio: 'xMidYMid meet',
         progressiveLoad: false,
@@ -64,16 +100,28 @@ export function LottieAnimation({
     animationRef.current = animation
     animation.setSubframe(true)
 
-    const handleReady = () => {
+    const reveal = () => {
       if (!isMounted) return
       setIsReady(true)
 
       if (reduceMotion) {
-        // Land on the final frame instead of animating, respecting the user's
-        // OS-level motion preference while still showing the finished artwork.
+        // Land on the final frame instead of animating, respecting the
+        // user's OS-level motion preference, while still showing the artwork.
         const lastFrame = Math.max(animation.totalFrames - 1, 0)
         animation.goToAndStop(lastFrame, true)
+      } else {
+        animation.play()
       }
+    }
+
+    const handleDomLoaded = () => {
+      if (!isMounted) return
+      const svg = container.querySelector('svg')
+      if (!svg) {
+        reveal()
+        return
+      }
+      waitForImages(svg).then(reveal)
     }
 
     const handleError = (error: unknown) => {
@@ -85,7 +133,7 @@ export function LottieAnimation({
       setHasError(true)
     }
 
-    animation.addEventListener('DOMLoaded', handleReady)
+    animation.addEventListener('DOMLoaded', handleDomLoaded)
     animation.addEventListener('data_failed', handleError)
     animation.addEventListener('error', handleError)
 
@@ -110,7 +158,7 @@ export function LottieAnimation({
     return () => {
       isMounted = false
       observer?.disconnect()
-      animation.removeEventListener('DOMLoaded', handleReady)
+      animation.removeEventListener('DOMLoaded', handleDomLoaded)
       animation.removeEventListener('data_failed', handleError)
       animation.removeEventListener('error', handleError)
       animation.destroy()
