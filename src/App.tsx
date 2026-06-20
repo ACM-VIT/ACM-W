@@ -1,3 +1,8 @@
+import About from './pages/About';
+import BlogStamps from "./pages/BlogStamps";
+import TeamPage from "./pages/TeamPage";
+import WomenInStem from "./pages/WomenInStem";
+import ContributorsSection from "./pages/Contributors";
 import { useState, useEffect } from 'react';
 import EnvelopeMenu from './EnvelopeMenu';
 import './App.css';
@@ -5,16 +10,34 @@ import './App.css';
 // A section placeholder for teammates to replace with their own components later
 function Section({ id, title }: { id: string, title: string }) {
   return (
-    <section id={id} className="min-h-screen flex flex-col items-center justify-center px-8 border-b border-[#4a1010]/20 text-[#4a1010]">
-      <h2 className="text-4xl font-serif font-bold mb-4">{title}</h2>
-      <p>This is the placeholder section for {title}. Your teammates will build here.</p>
-    </section>
-  );
-}
+    <main className="overflow-x-hidden">
+      <section
+      style={{
+          position: "relative",
+          zIndex: 20,
+        }}>
+      <About />
+      </section>
 
-// Automatically manages showing the navbar when you scroll PAST the landing section
-function GlobalNavbar() {
-  const [showNavbar, setShowNavbar] = useState(false);
+      <section
+        style={{
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <BlogStamps />
+      </section>
+
+      <section
+        id="women-in-stem-section"
+        style={{
+          position: "relative",
+          zIndex: 10,
+          background: "#fff9e9",
+        }}
+      >
+        <WomenInStem />
+      </section>
 
   useEffect(() => {
     let frameId: number | null = null;
