@@ -4,12 +4,12 @@ import footerBlack2 from "../assets/footer/footer_black2.png";
 import footerPink2 from "../assets/footer/footer_pink2.png";
 
 const footerCards = [footerBlack1, footerPink1, footerBlack2, footerPink2];
-const cards = [...footerCards, ...footerCards, ...footerCards];
+const cards = footerCards;
 
 export default function Footer() {
   return (
     <footer
-      className="relative w-full overflow-hidden bg-[#B49880] py-16 sm:py-20"
+      className="w-full overflow-hidden bg-[#B49880] py-16 sm:py-20"
       style={{
         position: "sticky",
         bottom: 0,

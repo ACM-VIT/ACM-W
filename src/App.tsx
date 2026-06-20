@@ -6,7 +6,7 @@ import Footer from "./components/Footer";
 
 export default function App() {
   return (
-    <main className="overflow-x-hidden">
+    <main>
       <section
         style={{
           position: "relative",
