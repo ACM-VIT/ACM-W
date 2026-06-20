@@ -383,8 +383,6 @@ export default function WomenInStem() {
           key={sci.name}
           className="scientist-section relative z-10 h-screen w-full overflow-hidden"
         >
-          {/* Top-left icon */}
-          <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14] z-50" />
 
           {/* Country silhouette */}
           <img
