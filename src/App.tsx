@@ -7,6 +7,8 @@ import BlogStamps from "./pages/BlogStamps";
 import ContributorsSection from "./pages/Contributors";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
+import Footer from "./components/Footer";
+
 import "./App.css";
 
 // Automatically manages showing the navbar when you scroll PAST the landing section
@@ -118,6 +120,8 @@ export default function App() {
       >
         <ContributorsSection />
       </section>
+
+      <Footer />
     </main>
   );
 }
