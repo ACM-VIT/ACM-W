@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import EnvelopeMenu from "./EnvelopeMenu";
 import loaderAnimationPath from "./assets/loader.json?url";
 import { LottieAnimation } from "./components/LottieAnimation";
+import About from "./pages/About";
 import BlogStamps from "./pages/BlogStamps";
 import ContributorsSection from "./pages/Contributors";
 import TeamPage from "./pages/TeamPage";
@@ -68,7 +69,14 @@ export default function App() {
         />
       </section>
 
-      <AboutSections />
+      <section
+        style={{
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <About />
+      </section>
 
       <section
         id="blogs"
@@ -111,48 +119,5 @@ export default function App() {
         <ContributorsSection />
       </section>
     </main>
-  );
-}
-
-function AboutSections() {
-  return (
-    <section className="relative z-20 bg-[#fff9e9] px-6 py-20 text-[#580A0A] sm:py-24">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-2">
-        <article id="about-acmw" className="scroll-mt-24">
-          <p className="mb-3 text-sm uppercase tracking-[0.24em] text-[#7a4444]">
-            Chapter
-          </p>
-          <h2
-            className="mb-6 text-[32px] font-bold tracking-[0.08em] sm:text-[40px]"
-            style={{ fontFamily: "Kovanov, Georgia, serif" }}
-          >
-            ABOUT ACM-W
-          </h2>
-          <p className="text-lg leading-8 text-[#5e4d4d]">
-            ACM-W celebrates, supports, and advocates for women in computing.
-            The chapter builds a space for technical growth, mentorship,
-            collaboration, and leadership through community initiatives and
-            events.
-          </p>
-        </article>
-
-        <article id="about-acm" className="scroll-mt-24">
-          <p className="mb-3 text-sm uppercase tracking-[0.24em] text-[#7a4444]">
-            Community
-          </p>
-          <h2
-            className="mb-6 text-[32px] font-bold tracking-[0.08em] sm:text-[40px]"
-            style={{ fontFamily: "Kovanov, Georgia, serif" }}
-          >
-            ABOUT ACM
-          </h2>
-          <p className="text-lg leading-8 text-[#5e4d4d]">
-            ACM connects students and computing professionals through projects,
-            research, workshops, and peer learning. The student chapter brings
-            that culture of curiosity and engineering practice to campus.
-          </p>
-        </article>
-      </div>
-    </section>
   );
 }
