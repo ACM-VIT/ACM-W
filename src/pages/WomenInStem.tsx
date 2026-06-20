@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Constants ─── */
 
-const GLOBE_SIZE = 900;
+const GLOBE_SIZE = 760;
 
 const DEG = Math.PI / 180;
 const HALF_PI = Math.PI / 2;
@@ -131,6 +131,7 @@ const CAM_ZOOM_Z = 1.3;
 /* ─── Component ─── */
 
 export default function WomenInStem() {
+  const sectionRef = useRef<HTMLDivElement>(null);
   const globeRef = useRef<Globe3DHandle>(null);
   const globeContainerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
@@ -143,6 +144,46 @@ export default function WomenInStem() {
       const group = globe.group;
       const camera = globe.camera;
       const globeEl = globeContainerRef.current!;
+      const sectionEl = sectionRef.current;
+
+      gsap.set(globeEl, { autoAlpha: 0, pointerEvents: "none" });
+
+      ScrollTrigger.create({
+        trigger: sectionEl,
+        start: "top top",
+        end: "bottom top",
+        onEnter: () => {
+          gsap.to(globeEl, {
+            autoAlpha: 1,
+            duration: 0.25,
+            overwrite: "auto",
+          });
+          globeEl.style.pointerEvents = "auto";
+        },
+        onEnterBack: () => {
+          gsap.to(globeEl, {
+            autoAlpha: 1,
+            duration: 0.25,
+            overwrite: "auto",
+          });
+        },
+        onLeave: () => {
+          gsap.to(globeEl, {
+            autoAlpha: 0,
+            duration: 0.2,
+            overwrite: "auto",
+          });
+          globeEl.style.pointerEvents = "none";
+        },
+        onLeaveBack: () => {
+          gsap.to(globeEl, {
+            autoAlpha: 0,
+            duration: 0.2,
+            overwrite: "auto",
+          });
+          globeEl.style.pointerEvents = "none";
+        },
+      });
 
       /* ─── Hero exit: lock rotation & drag ─── */
       ScrollTrigger.create({
@@ -300,7 +341,10 @@ export default function WomenInStem() {
   /* ─── Render ─── */
 
   return (
-    <div className="bg-[#fff9e9] text-[#580A0A] overflow-x-hidden">
+    <div
+      ref={sectionRef}
+      className="bg-[#fff9e9] text-[#580A0A] overflow-x-hidden"
+    >
       {/* ── Fixed globe ── */}
       <div ref={globeContainerRef} className="globe-fixed-container">
         <Globe3D
