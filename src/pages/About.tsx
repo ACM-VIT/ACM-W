@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import aboutAcmWImg from '../assets/about/about-acm-w.svg'
 import aboutAcmVitImg from '../assets/about/about-acm-vit.svg'
+import mailIcon from '../assets/open.svg'
 import './About.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -204,6 +205,9 @@ export default function About() {
 
   return (
     <main className="about" ref={rootRef}>
+      <button className="about_mail" aria-label="Menu">
+        <img src={mailIcon} alt="Menu icon" className="about_mailIcon" />
+      </button>
       <div className="about_scroll-track">
         <div className="about_stage">
           <div className="about_stack">
