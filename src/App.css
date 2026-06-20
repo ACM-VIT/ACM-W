@@ -100,3 +100,12 @@
   transform: translateX(54%) rotate(16deg);
   background: #580a0a;
 }
+.globe-fixed-container {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#women-in-stem-section .globe-fixed-container {
+  visibility: visible;
+  pointer-events: auto;
+}
