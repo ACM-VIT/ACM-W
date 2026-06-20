@@ -321,7 +321,6 @@ export default function WomenInStem() {
         className="relative z-10 h-screen w-full flex flex-col items-center"
         style={{ paddingTop: "56px" }}
       >
-        <div className="absolute top-8 left-8 w-8 h-8 bg-[#5d0f14]" />
         <h1
           className="text-[50px] tracking-[0.015em] font-bold leading-normal"
           style={{

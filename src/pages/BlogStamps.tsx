@@ -311,40 +311,6 @@ export default function BlogStamps() {
         userSelect: "none",
       }}
     >
-      <div style={{ position: "absolute", top: 18, left: 18 }}>
-        <svg
-          width="36"
-          height="28"
-          viewBox="0 0 36 28"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect width="36" height="28" rx="3" fill="#6b1616" />
-          <polyline
-            points="0,0 18,16 36,0"
-            fill="#8b2a2a"
-            stroke="#8b2a2a"
-            strokeWidth="1"
-          />
-          <line
-            x1="0"
-            y1="28"
-            x2="13"
-            y2="14"
-            stroke="#7a1c1c"
-            strokeWidth="1.2"
-          />
-          <line
-            x1="36"
-            y1="28"
-            x2="23"
-            y2="14"
-            stroke="#7a1c1c"
-            strokeWidth="1.2"
-          />
-        </svg>
-      </div>
-
       <h2
         style={{
           fontSize: 50,
