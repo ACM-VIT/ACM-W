@@ -144,6 +144,18 @@ export default function WomenInStem() {
       const camera = globe.camera;
       const globeEl = globeContainerRef.current!;
 
+      ScrollTrigger.create({
+        trigger: "#women-in-stem",
+        start: "top top",
+        end: "max",
+        onToggle: ({ isActive }) => {
+          globeEl.style.visibility = isActive ? "visible" : "hidden";
+        },
+        onRefresh: ({ isActive }) => {
+          globeEl.style.visibility = isActive ? "visible" : "hidden";
+        },
+      });
+
       /* ─── Hero exit: lock rotation & drag ─── */
       ScrollTrigger.create({
         trigger: heroRef.current,
