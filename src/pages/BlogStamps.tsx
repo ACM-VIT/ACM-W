@@ -4,9 +4,6 @@ import leftArr from "../assets/leftArr.png";
 import rightArr from "../assets/rightArr.png";
 import { blogs } from "../data/blogs";
 
-const NOISE =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")";
-
 function StampBorder({ children }: { children: ReactNode }) {
   const MAROON = "#6b1212";
   const CREAM = "#F2E8CF";
@@ -93,7 +90,6 @@ function StampBorder({ children }: { children: ReactNode }) {
           position: "absolute",
           inset: border,
           background: CREAM,
-          backgroundImage: NOISE,
           overflow: "hidden",
         }}
       >
@@ -301,7 +297,6 @@ export default function BlogStamps() {
         minHeight: "100vh",
         height: "100vh",
         background: "#FFF9E9",
-        backgroundImage: NOISE,
         fontFamily: "'Georgia', serif",
         position: "relative",
         display: "flex",
@@ -340,7 +335,8 @@ export default function BlogStamps() {
           background: "none",
           border: "none",
           cursor: "pointer",
-          zIndex: 20,
+          zIndex: 60,
+          pointerEvents: "auto",
         }}
         aria-label="Previous"
       >
@@ -359,7 +355,8 @@ export default function BlogStamps() {
           background: "none",
           border: "none",
           cursor: "pointer",
-          zIndex: 20,
+          zIndex: 60,
+          pointerEvents: "auto",
         }}
         aria-label="Next"
       >

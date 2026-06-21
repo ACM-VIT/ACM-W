@@ -159,16 +159,29 @@ export default function WomenInStem() {
       /* ─── Hero exit: lock rotation & drag ─── */
       ScrollTrigger.create({
         trigger: heroRef.current,
-        start: "70% top",
+        start: "top 75%",
+        onEnter: () => {
+          globeEl.style.visibility = "visible";
+          globeEl.style.pointerEvents = "auto";
+          globe.setAutoRotate(true);
+          globe.setDragEnabled(true);
+        },
         onLeave: () => {
           globe.setAutoRotate(false);
           globe.setDragEnabled(false);
           globeEl.style.pointerEvents = "none";
         },
         onEnterBack: () => {
+          globeEl.style.visibility = "visible";
+          globeEl.style.pointerEvents = "auto";
           globe.setAutoRotate(true);
           globe.setDragEnabled(true);
-          globeEl.style.pointerEvents = "auto";
+        },
+        onLeaveBack: () => {
+          globe.setAutoRotate(false);
+          globe.setDragEnabled(false);
+          globeEl.style.visibility = "hidden";
+          globeEl.style.pointerEvents = "none";
         },
       });
 

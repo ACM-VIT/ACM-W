@@ -5,6 +5,7 @@ import { LottieAnimation } from "./components/LottieAnimation";
 import About from "./pages/About";
 import BlogStamps from "./pages/BlogStamps";
 import ContributorsSection from "./pages/Contributors";
+import Events from "./pages/Events";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
 import Footer from "./components/Footer";
@@ -78,6 +79,16 @@ export default function App() {
         }}
       >
         <About />
+      </section>
+
+      <section
+        id="events"
+        style={{
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <Events />
       </section>
 
       <section
