@@ -4,9 +4,6 @@ import leftArr from "../assets/leftArr.png";
 import rightArr from "../assets/rightArr.png";
 import { blogs } from "../data/blogs";
 
-const NOISE =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")";
-
 function StampBorder({ children }: { children: ReactNode }) {
   const MAROON = "#6b1212";
   const CREAM = "#F2E8CF";
@@ -93,7 +90,6 @@ function StampBorder({ children }: { children: ReactNode }) {
           position: "absolute",
           inset: border,
           background: CREAM,
-          backgroundImage: NOISE,
           overflow: "hidden",
         }}
       >
@@ -301,7 +297,6 @@ export default function BlogStamps() {
         minHeight: "100vh",
         height: "100vh",
         background: "#FFF9E9",
-        backgroundImage: NOISE,
         fontFamily: "'Georgia', serif",
         position: "relative",
         display: "flex",
@@ -311,40 +306,6 @@ export default function BlogStamps() {
         userSelect: "none",
       }}
     >
-      <div style={{ position: "absolute", top: 18, left: 18 }}>
-        <svg
-          width="36"
-          height="28"
-          viewBox="0 0 36 28"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect width="36" height="28" rx="3" fill="#6b1616" />
-          <polyline
-            points="0,0 18,16 36,0"
-            fill="#8b2a2a"
-            stroke="#8b2a2a"
-            strokeWidth="1"
-          />
-          <line
-            x1="0"
-            y1="28"
-            x2="13"
-            y2="14"
-            stroke="#7a1c1c"
-            strokeWidth="1.2"
-          />
-          <line
-            x1="36"
-            y1="28"
-            x2="23"
-            y2="14"
-            stroke="#7a1c1c"
-            strokeWidth="1.2"
-          />
-        </svg>
-      </div>
-
       <h2
         style={{
           fontSize: 50,
@@ -374,7 +335,8 @@ export default function BlogStamps() {
           background: "none",
           border: "none",
           cursor: "pointer",
-          zIndex: 20,
+          zIndex: 60,
+          pointerEvents: "auto",
         }}
         aria-label="Previous"
       >
@@ -393,7 +355,8 @@ export default function BlogStamps() {
           background: "none",
           border: "none",
           cursor: "pointer",
-          zIndex: 20,
+          zIndex: 60,
+          pointerEvents: "auto",
         }}
         aria-label="Next"
       >

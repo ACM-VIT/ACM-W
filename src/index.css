@@ -60,8 +60,15 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
+  visibility: hidden;
   pointer-events: auto;
   will-change: opacity;
+}
+
+.globe-fixed-container > div,
+.globe-fixed-container canvas {
+  max-width: min(760px, 88vw);
+  max-height: min(760px, 88vw);
 }
 
 /* ─── Photo vintage frame ─── */

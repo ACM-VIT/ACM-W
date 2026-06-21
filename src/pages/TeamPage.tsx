@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import envelopeIcon from "../assets/teams/envelope.png";
 import cherukuri from "../assets/teams/cherukuri.png";
 import lavanya from "../assets/teams/lavanya.png";
 import mahendra from "../assets/teams/mahendra.png";
@@ -366,11 +365,6 @@ export default function TeamPage() {
           backgroundRepeat: "repeat",
         }}
       />
-      <img
-        src={envelopeIcon}
-        alt=""
-        className="absolute left-6 top-6 z-10 h-7 w-7"
-      />
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-6">
         <h2
@@ -393,6 +387,7 @@ export default function TeamPage() {
             return (
               <div
                 key={row}
+                id={row === 1 ? "faculty-coordinator" : undefined}
                 className="flex flex-col items-center gap-6 md:flex-row md:justify-center md:gap-8"
               >
                 {rowMembers.map((member) => (
