@@ -9,7 +9,6 @@ import ContributorsSection from "./pages/Contributors";
 import Events from "./pages/Events";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
-import Footer from "./components/Footer";
 
 import "./App.css";
 
@@ -134,7 +133,15 @@ export default function App() {
         <ContributorsSection />
       </section>
 
-      <Footer />
+      <section
+        id="envelope-footer"
+        style={{
+          position: "relative",
+          zIndex: 0,
+        }}
+      >
+        <EnvelopeFooter />
+      </section>
     </main>
   );
 }
