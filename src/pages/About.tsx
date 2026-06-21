@@ -1,10 +1,8 @@
 import { useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import envelopeImg from '../assets/about/envelope.png'
 import aboutAcmWImg from '../assets/about/about-acm-w.svg'
 import aboutAcmVitImg from '../assets/about/about-acm-vit.svg'
-import './About.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -150,7 +148,6 @@ export default function About() {
       )
       const stage = root.querySelector<HTMLElement>('.about_stage')
       const scrollTrack = root.querySelector<HTMLElement>('.about_scroll-track')
-      const mail = root.querySelector<HTMLElement>('.about_mail')
 
       if (
         !acmw ||
@@ -160,8 +157,7 @@ export default function About() {
         !acmvitImg ||
         !acmvitOverlay ||
         !stage ||
-        !scrollTrack ||
-        !mail
+        !scrollTrack
       ) {
         return
       }
@@ -174,7 +170,6 @@ export default function About() {
       })
       gsap.set([acmwImg, acmvitImg], { ...IMAGE_WASHED })
       gsap.set([acmwOverlay, acmvitOverlay], { opacity: 0 })
-      gsap.set(mail, { y: 0, opacity: 1 })
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -196,7 +191,6 @@ export default function About() {
       tl.to({}, { duration: HOLD_DURATION })
       tl.addLabel('handoff')
       crossfadeCards(tl, acmwParts, acmvitParts, 'handoff')
-      tl.to(mail, { y: -96, opacity: 0, duration: EXIT_DURATION, ease: 'none' }, 'handoff')
       tl.to({}, { duration: HOLD_DURATION })
     }, root)
 
@@ -205,10 +199,142 @@ export default function About() {
 
   return (
     <main className="about" ref={rootRef}>
-      <button className="about_mail" type="button" aria-label="Mail">
-        <img src={envelopeImg} alt="" className="about_mailIcon" />
-      </button>
+      <style>{`
+        .about {
+          position: relative;
+          overflow-x: hidden;
+          min-height: 100svh;
+          background-color: #fff9e9;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+        }
 
+        .about_scroll-track {
+          height: 450vh;
+        }
+
+        .about_stage {
+          position: relative;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          min-height: 100svh;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        .about_stack {
+          position: relative;
+          width: 118vw;
+          height: min(73vw, calc(100svh - 20px));
+          min-width: 0;
+        }
+
+        .about_polaroid {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          width: 3000px;
+          height: 100%;
+          margin: 0;
+          filter: drop-shadow(0 14px 32px rgba(60, 34, 24, 0.16));
+          will-change: transform, opacity;
+        }
+
+        .about_polaroid--acmw {
+          z-index: 2;
+        }
+
+        .about_polaroid--acmvit {
+          z-index: 3;
+        }
+
+        .about_polaroid-img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          will-change: filter, opacity, transform;
+        }
+
+        .about_overlay {
+          position: absolute;
+          inset: 21.5% 10.5% 20.5% 10.5%;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          margin: 0;
+          padding: 0;
+          color: #fff;
+          pointer-events: none;
+          transform-origin: center center;
+          overflow: hidden;
+          width: auto;
+        }
+
+        .about_cardTitle {
+          flex-shrink: 0;
+          margin: 0;
+          padding: 0;
+          font-family: 'Times New Roman', Times, 'Liberation Serif', serif;
+          font-size: clamp(26px, 3vw, 44px);
+          font-weight: 700;
+          line-height: 1.12;
+          letter-spacing: 0.06em;
+          text-align: center;
+          text-transform: uppercase;
+          transform-origin: center center;
+        }
+
+        .about_polaroid--acmw .about_overlay {
+          transform: rotate(-7.2deg);
+        }
+
+        .about_polaroid--acmvit .about_overlay {
+          transform: rotate(7.2deg);
+        }
+
+        .about_cardBody {
+          width: 100%;
+          margin: auto 0 0;
+          font-family: 'Times New Roman', Times, 'Liberation Serif', serif;
+          font-size: clamp(11px, 1.08vw, 16px);
+          font-weight: 400;
+          line-height: 1.3;
+          text-align: justify;
+          text-justify: inter-word;
+          hyphens: auto;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+        }
+
+        @media (max-width: 768px) {
+          .about_scroll-track {
+            height: 500vh;
+          }
+
+          .about_stage {
+            padding: 0;
+          }
+
+          .about_stack {
+            width: 118vw;
+            height: min(73vw, calc(100svh - 16px));
+          }
+
+          .about_overlay {
+            inset: 22.5% 10% 20% 10%;
+          }
+
+          .about_cardTitle {
+            font-size: clamp(22px, 5.5vw, 30px);
+          }
+
+          .about_cardBody {
+            font-size: 10px;
+            line-height: 1.26;
+          }
+        }
+      `}</style>
       <div className="about_scroll-track">
         <div className="about_stage">
           <div className="about_stack">

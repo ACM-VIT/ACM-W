@@ -1,43 +1,32 @@
 import About from './pages/About';
 import BlogStamps from "./pages/BlogStamps";
+import ContributorsSection from "./pages/Contributors";
+import Events from "./pages/Events";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
-import ContributorsSection from "./pages/Contributors";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import EnvelopeMenu from './EnvelopeMenu';
 import './App.css';
 
 // A section placeholder for teammates to replace with their own components later
-function Section({ id, title }: { id: string, title: string }) {
+function Section({
+  id,
+  title,
+  children,
+}: {
+  id: string;
+  title: string;
+  children: ReactNode;
+}) {
   return (
-    <main className="overflow-x-hidden">
-      <section
-      style={{
-          position: "relative",
-          zIndex: 20,
-        }}>
-      <About />
-      </section>
+    <main id={id} className="overflow-x-hidden" aria-label={title}>
+      <section style={{ position: "relative", zIndex: 20 }}>{children}</section>
+    </main>
+  );
+}
 
-      <section
-        style={{
-          position: "relative",
-          zIndex: 20,
-        }}
-      >
-        <BlogStamps />
-      </section>
-
-      <section
-        id="women-in-stem-section"
-        style={{
-          position: "relative",
-          zIndex: 10,
-          background: "#fff9e9",
-        }}
-      >
-        <WomenInStem />
-      </section>
+function GlobalNavbar() {
+  const [showNavbar, setShowNavbar] = useState(false);
 
   useEffect(() => {
     let frameId: number | null = null;
@@ -105,12 +94,25 @@ export default function App() {
         The Scrollable Sections your teammates will build!
         Right now, they're placeholders, but they correspond to the Envelope links.
       */}
-      <Section id="about-acmw" title="About ACM-W" />
-      <Section id="about-acm" title="About ACM" />
-      <Section id="contributors" title="Contributors" />
-      <Section id="team" title="The Team" />
-      <Section id="blogs" title="Blogs" />
-      <Section id="women-in-stem" title="Women in Stem" />
+      <Section id="about-acmw" title="About ACM-W">
+        <About />
+      </Section>
+      <Section id="events" title="Events">
+        <Events />
+      </Section>
+      <Section id="blogs" title="Blogs">
+        <BlogStamps />
+      </Section>
+      <Section id="women-in-stem" title="Women in Stem">
+        <WomenInStem />
+      </Section>
+      <Section id="team" title="The Team">
+        <TeamPage />
+      </Section>
+      <Section id="contributors" title="Contributors">
+        <ContributorsSection />
+      </Section>
+      
       
       <footer className="h-40 flex items-center justify-center text-[#4a1010]/60">
         End of page
