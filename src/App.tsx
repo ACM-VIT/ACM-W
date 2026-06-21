@@ -82,6 +82,16 @@ export default function App() {
       </section>
 
       <section
+        id="events"
+        style={{
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <Events />
+      </section>
+
+      <section
         id="blogs"
         style={{
           position: "relative",
