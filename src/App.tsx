@@ -74,6 +74,7 @@ export default function App() {
       </section>
 
       <section
+        id="about"
         style={{
           position: "relative",
           zIndex: 20,
