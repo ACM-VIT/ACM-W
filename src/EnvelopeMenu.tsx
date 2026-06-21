@@ -1,5 +1,8 @@
 import { useRef, useLayoutEffect, useState } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 // Import all SVG assets
 import closedEnv from './assets/closed.svg';
@@ -13,8 +16,8 @@ import teamImg from './assets/team.svg';
 
 const cards = [
   { id: 1, img: contributorsImg, alt: 'Contributors stamp', link: '#contributors', x: 0, y: -75 },
-  { id: 2, img: aboutAcmwImg, alt: 'About ACM-W stamp', link: '#about-acmw', x: 80, y: -35 },
-  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about-acm', x: 80, y: 45 },
+  { id: 2, img: aboutAcmwImg, alt: 'About ACM-W stamp', link: '#about', x: 80, y: -35 },
+  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about', x: 80, y: 45 },
   { id: 4, img: blogsImg, alt: 'Blogs stamp', link: '#blogs', x: 0, y: 85 },
   { id: 5, img: womenInStemImg, alt: 'Women in STEM stamp', link: '#women-in-stem', x: -80, y: 45 },
   { id: 6, img: teamImg, alt: 'Team stamp', link: '#team', x: -80, y: -35 },
@@ -114,7 +117,44 @@ export default function EnvelopeMenu() {
                   const target = document.querySelector(card.link);
                   if (target) {
                     e.preventDefault();
+
+                    // For women-in-stem: pre-show the globe BEFORE scrolling so
+                    // Three.js renders frames during the animation instead of
+                    // only appearing after landing (which caused the load delay).
+                    if (card.link === '#women-in-stem') {
+                      const globeEl = document.querySelector('.globe-fixed-container') as HTMLElement | null;
+                      if (globeEl) {
+                        globeEl.style.visibility = 'visible';
+                        globeEl.style.pointerEvents = 'none';
+                      }
+                    }
+
                     target.scrollIntoView({ behavior: 'smooth' });
+
+                    // After the smooth scroll settles, force ScrollTrigger to
+                    // re-evaluate all scroll-position callbacks (e.g. globe hide/show).
+                    const refreshAfterScroll = () => {
+                      ScrollTrigger.refresh();
+
+                      // ScrollTrigger's onRefresh uses end:"max" so it reports
+                      // isActive=true for any scroll position past women-in-stem,
+                      // which would wrongly show the globe on Team/Contributors.
+                      // Override it immediately after refresh (synchronous, so this
+                      // runs after all onRefresh callbacks have fired).
+                      const globeEl = document.querySelector('.globe-fixed-container') as HTMLElement | null;
+                      if (globeEl && card.link !== '#women-in-stem') {
+                        globeEl.style.visibility = 'hidden';
+                        globeEl.style.pointerEvents = 'none';
+                      }
+                    };
+
+                    if ('onscrollend' in window) {
+                      // Modern browsers: wait for scroll to fully stop
+                      window.addEventListener('scrollend', refreshAfterScroll, { once: true });
+                    } else {
+                      // Fallback: give the smooth scroll ~600ms to land
+                      setTimeout(refreshAfterScroll, 600);
+                    }
                   }
                 }}
                 className="nav-card absolute w-24 h-16 flex flex-col items-center justify-center z-0 origin-center transition-transform hover:!scale-110"

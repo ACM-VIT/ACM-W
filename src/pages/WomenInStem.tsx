@@ -144,6 +144,7 @@ export default function WomenInStem() {
       const camera = globe.camera;
       const globeEl = globeContainerRef.current!;
 
+      /* ─── Globe visibility: show while women-in-stem is active ─── */
       ScrollTrigger.create({
         trigger: "#women-in-stem",
         start: "top top",
