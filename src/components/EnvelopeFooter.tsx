@@ -56,6 +56,7 @@ export default function EnvelopeFooter() {
         scale: 1,
         rotateX: 0,
         rotateZ: 0,
+        x: 10,
       });
 
       // Envelope layers: hidden initially
@@ -63,7 +64,11 @@ export default function EnvelopeFooter() {
       gsap.set(envelopePocket, { opacity: 0 });
 
       // Flap: hidden, hinged open (rotated back 180°)
-      gsap.set(flapOnly, { opacity: 0, rotateX: -180 });
+gsap.set(".flapOnly", {
+  transformOrigin: "top center"
+});
+
+      gsap.set(flapOnly, { opacity: 0, rotation: 180});
 
       // Wrapper: no rotation yet
       gsap.set(envelopeWrapper, { rotateY: 0 });
@@ -100,10 +105,12 @@ export default function EnvelopeFooter() {
       tl.to(
         brownCard,
         {
-          rotateX: 15,
-          rotateZ: -2,
+          // rotateX: 15,
+          rotateZ: +5,
           duration: 1.5,
           ease: 'power2.inOut',
+          z: 1.1,
+          x: -1,
         },
         2
       );
@@ -118,6 +125,9 @@ export default function EnvelopeFooter() {
           opacity: 1,
           duration: 1.2,
           ease: 'power2.out',
+          scale: 0.80,
+          y: 40,
+          z: 1,
         },
         3.5
       );
@@ -128,6 +138,8 @@ export default function EnvelopeFooter() {
           opacity: 1,
           duration: 1.2,
           ease: 'power2.out',
+          scale: 1.6,
+          z: 1.2,
         },
         3.7
       );
@@ -138,6 +150,7 @@ export default function EnvelopeFooter() {
           opacity: 1,
           duration: 0.8,
           ease: 'power2.out',
+          // transformOrigin: "top center",
         },
         4.0
       );
@@ -146,17 +159,17 @@ export default function EnvelopeFooter() {
       // Step 5A: The Tilt — card tilts counter-clockwise as if
       // held diagonally before being dropped in (5 → 6)
       // ======================================================
-      tl.to(
-        brownCard,
-        {
-          rotation: -12,
-          rotateX: 15,
-          scale: 0.95,
-          duration: 1,
-          ease: 'power2.inOut',
-        },
-        5
-      );
+      // tl.to(
+      //   brownCard,
+      //   {
+      //     rotation: -12,
+      //     rotateX: 15,
+      //     scale: 0.95,
+      //     duration: 1,
+      //     ease: 'power2.inOut',
+      //   },
+      //   5
+      // );
 
       // ======================================================
       // Step 5B: Slide & Straighten — card drops into the pocket
@@ -166,12 +179,14 @@ export default function EnvelopeFooter() {
       tl.to(
         brownCard,
         {
-          y: '65%',
+          // y: '75%',
           rotation: 0,
           rotateX: 0,
-          scale: 0.75,
+          scale: 1,
           duration: 2,
           ease: 'power2.inOut',
+          x:-5,
+          y: '25%',
         },
         6
       );
@@ -181,12 +196,39 @@ export default function EnvelopeFooter() {
       // CSS translateZ(15px) keeps the flap above the pocket.
       // Do NOT animate z here — let CSS handle the depth.
       // ======================================================
+      gsap.set(".flapOnly", {
+  transformOrigin: "top center"
+});
       tl.to(
         flapOnly,
         {
-          rotateX: 0,
+
+          rotateX: 90,
           duration: 1.5,
           ease: 'power2.inOut',
+          scale: 0.80,
+          y: 75,
+          z: 2,
+          x: 1,
+
+        },
+        8.5
+      );
+      
+gsap.set(flapOnly, { opacity: 0});
+
+      tl.to(
+        flapOnly,
+        {
+
+          rotateX: 180,
+          duration: 1.5,
+          ease: 'power2.inOut',
+          scale: 0.80,
+          y: 75,
+          z: 2,
+          x: 1,
+
         },
         8.5
       );
