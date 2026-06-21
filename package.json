@@ -7,7 +7,11 @@
     "dev": "node --experimental-strip-types node_modules/vite/bin/vite.js --config vite.config.ts --configLoader native",
     "build": "tsc -b && node --experimental-strip-types node_modules/vite/bin/vite.js build --config vite.config.ts --configLoader native",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cf:worker:dev": "npm run build && wrangler --config=wrangler.jsonc dev",
+    "cf:worker:deploy": "npm run build && wrangler --config=wrangler.jsonc deploy",
+    "cf:pages:dev": "npm run build && wrangler --config=wrangler.pages.jsonc pages dev dist",
+    "cf:pages:deploy": "npm run build && wrangler --config=wrangler.pages.jsonc pages deploy dist --project-name acm-w"
   },
   "dependencies": {
     "@types/three": "^0.184.1",
@@ -35,6 +39,7 @@
     "tailwindcss": "^4.3.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "wrangler": "^4.103.0"
   }
 }
