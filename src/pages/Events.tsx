@@ -111,8 +111,10 @@ function StampBorder({ children }: { children: ReactNode }) {
 
 function EventStamp({
   logo,
+  imageRotation = 0,
 }: {
   logo: string;
+  imageRotation?: number;
 }) {
   return (
     <div
@@ -139,6 +141,7 @@ function EventStamp({
               width: "82%",
               height: "82%",
               objectFit: "contain",
+              transform: `rotate(${imageRotation}deg)`,
             }}
           />
         </div>
@@ -152,18 +155,19 @@ const events = [
     title: "C2C",
     logo: C2C,
     description:
-    "Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields. Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields. Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields. Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive."  },
+      "Code2Create is ACM-W’s flagship 48 hour overnight hackathon and one of the largest student run hackathons at VIT Vellore. With 2000+ participants every edition, it brings together developers, designers and problem solvers from across the country to build, innovate and create under one roof. The energy of 48 hours is unlike anything else, teams forming, ideas taking shape, prototypes being built from scratch and solutions emerging that nobody saw coming. From first timers finding their footing to experienced builders pushing their limits, Code2Create creates a space where every participant is challenged, every idea is taken seriously and every team walks out having built something they are genuinely proud of. It is not just a hackathon. It is where real builders are made."
+  },
   {
     title: "Insipher",
     logo: insipher,
     description:
-      "Insipher is ACM-W's flagship event fostering innovation, collaboration, and technical excellence through engaging challenges and inspiring experiences.",
+      "Inspiher is ACM-W’s recurring speaker series dedicated to celebrating women in STEM and the journeys that brought them there. Each edition features an intimate one on one conversation between ACM-W members and an accomplished woman in the field, diving deep into her story, the path she chose, the challenges she faced, the moments that defined her, and the heights she has reached. It is not a formal talk or a rehearsed panel. It is an honest, personal conversation that makes the journeys of women in tech feel real and reachable. Every edition of Inspiher leaves the room with something to think about, something to aspire to, and the reminder that there is space for everyone in this field."
   },
   {
     title: "Neural Hack",
     logo: neuralHack,
     description:
-      "The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields.",
+      "The Neural Hack is a 36 hour hackathon presented by ACM-W, built entirely around data centric machine learning. It goes beyond just writing models, participants are challenged to think critically about data quality, representation and the real world impact of the solutions they build. The Neural Hack actively encourages inclusive participation and champions diverse voices in tech, with a strong focus on empowering women in STEM to lead, innovate and take up space in one of the fastest growing fields in the world. Whether you are just getting started with ML or have been building models for years, The Neural Hack is a space where curiosity meets challenge and where the work you do in 36 hours can actually mean something."
   },
 ];
 
@@ -184,7 +188,8 @@ export default function EventsPage() {
           color: "#5B0F0F",
           fontSize: "3.5rem",
           margin: 0,
-          fontFamily: "Georgia, serif",
+          fontFamily: "Kovanov, Georgia, serif",
+          fontWeight: "bold",
         }}
       >
         EVENTS
@@ -200,7 +205,7 @@ export default function EventsPage() {
           transform: "rotate(-8deg)",
         }}
       >
-        <EventStamp logo={events[0].logo} />
+        <EventStamp logo={events[0].logo} imageRotation={6.5} />
       </div>
 
       <div
@@ -215,7 +220,9 @@ export default function EventsPage() {
           style={{
             color: "#321515",
             lineHeight: 1.9,
-            fontSize: "0.95rem",
+            fontSize: "1rem",
+            fontFamily: "Kovanov, Georgia, serif",
+            fontWeight: "bold",
           }}
         >
           {events[0].description}
@@ -232,14 +239,14 @@ export default function EventsPage() {
           transform: "rotate(8deg)",
         }}
       >
-        <EventStamp logo={events[1].logo} />
+        <EventStamp logo={events[1].logo} imageRotation={-6.5} />
       </div>
 
       <div
         style={{
           position: "absolute",
           left: "70px",
-          top: "1030px",
+          top: "990px",
           width: "500px",
         }}
       >
@@ -247,7 +254,9 @@ export default function EventsPage() {
           style={{
             color: "#321515",
             lineHeight: 1.9,
-            fontSize: "0.95rem",
+            fontSize: "1rem",
+            fontFamily: "Kovanov, Georgia, serif",
+            fontWeight: "bold",
           }}
         >
           {events[1].description}
@@ -264,14 +273,14 @@ export default function EventsPage() {
           transform: "rotate(-7deg)",
         }}
       >
-        <EventStamp logo={events[2].logo} />
+        <EventStamp logo={events[2].logo} imageRotation={7} />
       </div>
 
       <div
         style={{
           position: "absolute",
           right: "70px",
-          top: "1640px",
+          top: "1560px",
           width: "500px",
         }}
       >
@@ -279,7 +288,9 @@ export default function EventsPage() {
           style={{
             color: "#321515",
             lineHeight: 1.9,
-            fontSize: "0.95rem",
+            fontSize: "1rem",
+            fontFamily: "Kovanov, Georgia, serif",
+            fontWeight: "bold",
           }}
         >
           {events[2].description}
