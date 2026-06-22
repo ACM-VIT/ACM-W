@@ -6,6 +6,7 @@ import About from "./pages/About";
 import BlogStamps from "./pages/BlogStamps";
 import ContributorsSection from "./pages/Contributors";
 import Events from "./pages/Events";
+import BestChapter from "./pages/BestChapter";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
 import Footer from "./components/Footer";
@@ -90,6 +91,16 @@ export default function App() {
         }}
       >
         <Events />
+      </section>
+
+      <section
+        id="best-chapter"
+        style={{
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <BestChapter />
       </section>
 
       <section

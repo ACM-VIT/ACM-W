@@ -1,8 +1,62 @@
-import { useId, type ReactNode } from "react";
+import {
+  useId,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import neuralHack from "../assets/NeuralHack.png";
 import insipher from "../assets/Inspiher.svg";
 import C2C from "../assets/C2C.png";
+
+interface ParallaxState {
+  ref: React.RefObject<HTMLDivElement | null>;
+  offsetY: number;
+  opacity: number;
+  scale: number;
+}
+
+function useParallax(speed = 0.15): ParallaxState {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [state, setState] = useState({
+    offsetY: 0,
+    opacity: 1,
+    scale: 1,
+  });
+
+  useEffect(() => {
+    const update = () => {
+      if (!ref.current) return;
+
+      const rect = ref.current.getBoundingClientRect();
+      const viewportCenter = window.innerHeight / 2;
+      const elementCenter = rect.top + rect.height / 2;
+
+      const distance = elementCenter - viewportCenter;
+      const normalized = distance / viewportCenter;
+
+      setState({
+        offsetY: -normalized * 30 * speed,
+        opacity: Math.max(0.65, 1 - Math.abs(normalized) * 0.35),
+        scale: 1 + (1 - Math.abs(normalized)) * 0.04,
+      });
+    };
+
+    update();
+
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [speed]);
+
+  return { ref, ...state };
+}
 
 function StampBorder({ children }: { children: ReactNode }) {
   const MAROON = "#6b1212";
@@ -37,7 +91,6 @@ function StampBorder({ children }: { children: ReactNode }) {
           inset: 0,
           width: "100%",
           height: "100%",
-          overflow: "visible",
         }}
       >
         <defs>
@@ -112,12 +165,21 @@ function StampBorder({ children }: { children: ReactNode }) {
 function EventStamp({
   logo,
   imageRotation = 0,
+  parallax,
 }: {
   logo: string;
   imageRotation?: number;
+  parallax: ParallaxState;
 }) {
   return (
-    <div className="eventStampFrame">
+    <div
+      className="eventStampFrame"
+      style={{
+        transform: `translateY(${parallax.offsetY}px) scale(${parallax.scale})`,
+        opacity: parallax.opacity,
+        transition: "transform 0.25s ease, opacity 0.3s ease",
+      }}
+    >
       <StampBorder>
         <div
           style={{
@@ -151,42 +213,55 @@ const events = [
     logo: C2C,
     rotation: 6.5,
     description:
-      "Code2Create is ACM-W’s flagship 48 hour overnight hackathon and one of the largest student run hackathons at VIT Vellore. With 2000+ participants every edition, it brings together developers, designers and problem solvers from across the country to build, innovate and create under one roof. The energy of 48 hours is unlike anything else, teams forming, ideas taking shape, prototypes being built from scratch and solutions emerging that nobody saw coming. From first timers finding their footing to experienced builders pushing their limits, Code2Create creates a space where every participant is challenged, every idea is taken seriously and every team walks out having built something they are genuinely proud of. It is not just a hackathon. It is where real builders are made."
+      "Code2Create is ACM-W’s flagship 48 hour overnight hackathon and one of the largest student run hackathons at VIT Vellore. With 2000+ participants every edition, it brings together developers, designers and problem solvers from across the country to build, innovate and create under one roof.",
   },
   {
-    title: "Insipher",
+    title: "Inspiher",
     logo: insipher,
     rotation: -6.5,
     description:
-      "Inspiher is ACM-W’s recurring speaker series dedicated to celebrating women in STEM and the journeys that brought them there. Each edition features an intimate one on one conversation between ACM-W members and an accomplished woman in the field, diving deep into her story, the path she chose, the challenges she faced, the moments that defined her, and the heights she has reached. It is not a formal talk or a rehearsed panel. It is an honest, personal conversation that makes the journeys of women in tech feel real and reachable. Every edition of Inspiher leaves the room with something to think about, something to aspire to, and the reminder that there is space for everyone in this field."
+      "Inspiher is ACM-W’s recurring speaker series dedicated to celebrating women in STEM and the journeys that brought them there. Every edition features an intimate conversation with accomplished women in technology and research.",
   },
   {
     title: "Neural Hack",
     logo: neuralHack,
     rotation: 7,
     description:
-      "The Neural Hack is a 36 hour hackathon presented by ACM-W, built entirely around data centric machine learning. It goes beyond just writing models, participants are challenged to think critically about data quality, representation and the real world impact of the solutions they build. The Neural Hack actively encourages inclusive participation and champions diverse voices in tech, with a strong focus on empowering women in STEM to lead, innovate and take up space in one of the fastest growing fields in the world. Whether you are just getting started with ML or have been building models for years, The Neural Hack is a space where curiosity meets challenge and where the work you do in 36 hours can actually mean something."
+      "The Neural Hack is a 36 hour hackathon focused on data-centric machine learning. Participants tackle real-world challenges while learning about responsible AI, data quality and impactful innovation.",
   },
 ];
 
 export default function EventsPage() {
+  const stamp1 = useParallax(0.12);
+  const stamp2 = useParallax(0.18);
+  const stamp3 = useParallax(0.14);
+
+  const parallaxs = [stamp1, stamp2, stamp3];
+
   return (
     <>
       <style>{EVENTS_PAGE_STYLES}</style>
+
       <div className="eventsPage">
         <div className="eventsShell">
           <h1 className="eventsTitle">EVENTS</h1>
 
           <div className="eventsList">
             {events.map((event, index) => {
-              const reverse = index % 2 === 1
+              const reverse = index % 2 === 1;
+              const parallax = parallaxs[index];
 
               return (
                 <section
                   key={event.title}
-                  className={`eventRow ${reverse ? "eventRow--reverse" : ""}`}
+                  className={`eventRow ${
+                    reverse ? "eventRow--reverse" : ""
+                  }`}
                 >
-                  <div className="eventStampWrap">
+                  <div
+                    className="eventStampWrap"
+                    ref={parallax.ref}
+                  >
                     <div
                       className="eventStampWrapInner"
                       style={{
@@ -196,13 +271,19 @@ export default function EventsPage() {
                       <EventStamp
                         logo={event.logo}
                         imageRotation={event.rotation}
+                        parallax={parallax}
                       />
                     </div>
                   </div>
 
-                  <p className="eventCopy">{event.description}</p>
+                  <div className="eventContent">
+                    <h2>{event.title}</h2>
+                    <p className="eventCopy">
+                      {event.description}
+                    </p>
+                  </div>
                 </section>
-              )
+              );
             })}
           </div>
         </div>
@@ -210,155 +291,126 @@ export default function EventsPage() {
     </>
   );
 }
+
 const EVENTS_PAGE_STYLES = `
-.eventsPage {
-  min-height: 100vh;
-  background: #fff9e9;
-  position: relative;
-  overflow: hidden;
-  padding: clamp(3rem, 5vw, 5rem) clamp(1rem, 4vw, 3rem) clamp(4rem, 6vw, 6rem);
-  box-sizing: border-box;
+.eventsPage{
+  min-height:100vh;
+  background:#FFF9E9;
+  padding:4rem 1.5rem;
 }
 
-.eventsShell {
-  width: min(1400px, 100%);
-  margin: 0 auto;
+.eventsShell{
+  width:min(1400px,100%);
+  margin:0 auto;
 }
 
-.eventsTitle {
-  text-align: center;
-  color: #5b0f0f;
-  font-size: clamp(2.25rem, 5vw, 3.5rem);
-  line-height: 0.95;
-  margin: 0 0 clamp(6rem, 7vw, 6.5rem);
-  font-family: Kovanov, Georgia, serif;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+.eventsTitle{
+  text-align:center;
+  color:#5B0F0F;
+  font-size:clamp(2.5rem,5vw,4rem);
+  margin-bottom:4rem;
+  font-family:Kovanov,Georgia,serif;
 }
 
-.eventsList {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(3.5rem, 7vw, 5.75rem);
+.eventsList{
+  display:flex;
+  flex-direction:column;
+  gap:4rem;
 }
 
-.eventRow {
-  display: grid;
-  grid-template-columns: minmax(320px, 1.1fr) minmax(280px, 0.9fr);
-  align-items: center;
-  gap: clamp(2rem, 5vw, 4rem);
+.eventRow{
+  display:grid;
+  grid-template-columns:1.15fr 0.85fr;
+  align-items:center;
+  gap:2rem;
 }
 
-.eventRow--reverse {
-  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+.eventRow--reverse{
+  grid-template-columns:0.85fr 1.15fr;
 }
 
-.eventStampWrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
+.eventRow--reverse .eventStampWrap{
+  order:2;
 }
 
-.eventStampWrapInner {
-  width: min(100%, 820px);
+.eventRow--reverse .eventContent{
+  order:1;
 }
 
-.eventStampFrame {
-  width: 100%;
-  aspect-ratio: 820 / 600;
+.eventStampWrap{
+  display:flex;
+  justify-content:center;
 }
 
-.eventStampFrame img {
-  display: block;
+.eventStampWrapInner{
+  width:min(100%,720px);
 }
 
-.eventCopy {
-  color: #321515;
-  line-height: 1.8;
-  font-size: clamp(0.98rem, 1.2vw, 1.08rem);
-  font-family: Kovanov, Georgia, serif;
-  font-weight: 700;
-  margin: 0;
-  max-width: 56ch;
+.eventStampFrame{
+  width:100%;
+  aspect-ratio:820/600;
 }
 
-.eventRow--reverse .eventCopy {
-  justify-self: end;
+.eventContent h2{
+  color:#5B0F0F;
+  margin-bottom:1rem;
+  font-size:clamp(1.5rem,3vw,2rem);
 }
 
-.eventRow--reverse .eventStampWrap {
-  order: 2;
+.eventCopy{
+  color:#321515;
+  font-family:Kovanov,Georgia,serif;
+  font-weight:700;
+  line-height:1.8;
+  font-size:clamp(.95rem,1.1vw,1.08rem);
 }
 
-.eventRow--reverse .eventCopy {
-  order: 1;
-  justify-self: start;
-}
+@media (max-width:900px){
 
-@media (max-width: 900px) {
-  .eventsPage {
-    overflow: visible;
-  }
-
-  .eventsList {
-    gap: 4rem;
+  .eventsList{
+    gap:3rem;
   }
 
   .eventRow,
-  .eventRow--reverse {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-
-  .eventRow--reverse .eventCopy,
-  .eventCopy {
-    justify-self: stretch;
-    max-width: none;
+  .eventRow--reverse{
+    grid-template-columns:1fr;
   }
 
   .eventRow--reverse .eventStampWrap,
-  .eventRow--reverse .eventCopy {
-    order: initial;
+  .eventRow--reverse .eventContent{
+    order:initial;
   }
 
-  .eventCopy {
-    font-size: 1rem;
-    line-height: 1.7;
-    margin-top: 0.25rem;
+  .eventStampWrapInner{
+    width:100%;
+    max-width:620px;
   }
 
-  .eventStampWrapInner {
-    width: min(100%, 680px);
+  .eventContent{
+    text-align:center;
   }
 }
 
-@media (max-width: 640px) {
-  .eventsPage {
-    padding-inline: 0.9rem;
-    padding-top: 2.5rem;
+@media (max-width:640px){
+
+  .eventsPage{
+    padding:2.5rem 1rem;
   }
 
-  .eventsShell {
-    width: 100%;
+  .eventsTitle{
+    margin-bottom:2rem;
   }
 
-  .eventsTitle {
-    margin-bottom: 2.25rem;
-    letter-spacing: 0.06em;
+  .eventsList{
+    gap:2.25rem;
   }
 
-  .eventsList {
-    gap: 2.5rem;
+  .eventStampFrame{
+    aspect-ratio:1.25;
   }
 
-  .eventStampWrapInner {
-    width: min(100%, 560px);
+  .eventCopy{
+    line-height:1.65;
+    font-size:.95rem;
   }
-
-  .eventCopy {
-    font-size: 0.95rem;
-    line-height: 1.65;
-  }
-}
-`;
+}`;
