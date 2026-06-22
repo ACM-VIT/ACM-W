@@ -31,10 +31,13 @@ function useParallax(
   });
 
   useEffect(() => {
-    let rafId: number;
+    let rafId: number | null = null;
 
     const update = () => {
+      if (rafId !== null) return;
+      
       rafId = requestAnimationFrame(() => {
+        rafId = null;
         if (!ref.current) return;
         const rect = ref.current.getBoundingClientRect();
         const windowH = window.innerHeight;
@@ -69,7 +72,7 @@ function useParallax(
     update(); // initial
     return () => {
       window.removeEventListener("scroll", update);
-      cancelAnimationFrame(rafId);
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [speed, scaleRange, driftDeg]);
 
