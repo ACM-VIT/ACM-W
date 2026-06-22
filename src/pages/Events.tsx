@@ -1,8 +1,71 @@
-import { useId, type ReactNode } from "react";
+import {
+  useId,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import neuralHack from "../assets/NeuralHack.png";
 import insipher from "../assets/Inspiher.svg";
 import C2C from "../assets/C2C.png";
+
+interface ParallaxState {
+  ref: React.RefObject<HTMLDivElement | null>;
+  offsetY: number;
+  opacity: number;
+  scale: number;
+}
+
+function useParallax(speed = 0.15): ParallaxState {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [state, setState] = useState({
+    offsetY: 0,
+    opacity: 1,
+    scale: 1,
+  });
+
+  useEffect(() => {
+    let rafId: number | null = null;
+
+    const update = () => {
+      rafId = null;
+      if (!ref.current) return;
+
+      const rect = ref.current.getBoundingClientRect();
+      const viewportCenter = window.innerHeight / 2;
+      const elementCenter = rect.top + rect.height / 2;
+
+      const distance = elementCenter - viewportCenter;
+      const normalized = distance / viewportCenter;
+
+      setState({
+        offsetY: -normalized * 30 * speed,
+        opacity: Math.max(0.65, 1 - Math.abs(normalized) * 0.35),
+        scale: 1 + (1 - Math.abs(normalized)) * 0.04,
+      });
+    };
+
+    const scheduleUpdate = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(update);
+    };
+
+    update();
+
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
+  }, [speed]);
+
+  return { ref, ...state };
+}
 
 function StampBorder({ children }: { children: ReactNode }) {
   const MAROON = "#6b1212";
@@ -22,23 +85,11 @@ function StampBorder({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-      }}
-    >
+    <div className="relative h-full w-full">
       <svg
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          overflow: "visible",
-        }}
+        className="absolute inset-0 h-full w-full"
       >
         <defs>
           <mask id={maskId}>
@@ -96,13 +147,7 @@ function StampBorder({ children }: { children: ReactNode }) {
         />
       </svg>
 
-      <div
-        style={{
-          position: "absolute",
-          inset: border,
-          background: CREAM,
-        }}
-      >
+      <div className="absolute inset-[32px] bg-[#F2E8CF]">
         {children}
       </div>
     </div>
@@ -112,37 +157,28 @@ function StampBorder({ children }: { children: ReactNode }) {
 function EventStamp({
   logo,
   imageRotation = 0,
+  parallax,
 }: {
   logo: string;
   imageRotation?: number;
+  parallax: ParallaxState;
 }) {
   return (
     <div
+      className="aspect-[820/600] w-full transition-[transform,opacity] duration-300 ease-out max-sm:aspect-[1.25]"
       style={{
-        width: 820,
-        height: 600,
+        transform: `translateY(${parallax.offsetY}px) scale(${parallax.scale})`,
+        opacity: parallax.opacity,
       }}
     >
       <StampBorder>
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        <div className="flex h-full w-full items-center justify-center">
           <img
             src={logo}
             alt=""
             draggable={false}
-            style={{
-              width: "82%",
-              height: "82%",
-              objectFit: "contain",
-              transform: `rotate(${imageRotation}deg)`,
-            }}
+            className="h-[82%] w-[82%] object-contain"
+            style={{ transform: `rotate(${imageRotation}deg)` }}
           />
         </div>
       </StampBorder>
@@ -154,147 +190,90 @@ const events = [
   {
     title: "C2C",
     logo: C2C,
+    rotation: 6.5,
     description:
-      "Code2Create is ACM-W’s flagship 48 hour overnight hackathon and one of the largest student run hackathons at VIT Vellore. With 2000+ participants every edition, it brings together developers, designers and problem solvers from across the country to build, innovate and create under one roof. The energy of 48 hours is unlike anything else, teams forming, ideas taking shape, prototypes being built from scratch and solutions emerging that nobody saw coming. From first timers finding their footing to experienced builders pushing their limits, Code2Create creates a space where every participant is challenged, every idea is taken seriously and every team walks out having built something they are genuinely proud of. It is not just a hackathon. It is where real builders are made."
+      "Code2Create is ACM-W’s flagship 48 hour overnight hackathon and one of the largest student run hackathons at VIT Vellore. With 2000+ participants every edition, it brings together developers, designers and problem solvers from across the country to build, innovate and create under one roof.",
   },
   {
-    title: "Insipher",
+    title: "Inspiher",
     logo: insipher,
+    rotation: -6.5,
     description:
-      "Inspiher is ACM-W’s recurring speaker series dedicated to celebrating women in STEM and the journeys that brought them there. Each edition features an intimate one on one conversation between ACM-W members and an accomplished woman in the field, diving deep into her story, the path she chose, the challenges she faced, the moments that defined her, and the heights she has reached. It is not a formal talk or a rehearsed panel. It is an honest, personal conversation that makes the journeys of women in tech feel real and reachable. Every edition of Inspiher leaves the room with something to think about, something to aspire to, and the reminder that there is space for everyone in this field."
+      "Inspiher is ACM-W’s recurring speaker series dedicated to celebrating women in STEM and the journeys that brought them there. Every edition features an intimate conversation with accomplished women in technology and research.",
   },
   {
     title: "Neural Hack",
     logo: neuralHack,
+    rotation: 7,
     description:
-      "The Neural Hack is a 36 hour hackathon presented by ACM-W, built entirely around data centric machine learning. It goes beyond just writing models, participants are challenged to think critically about data quality, representation and the real world impact of the solutions they build. The Neural Hack actively encourages inclusive participation and champions diverse voices in tech, with a strong focus on empowering women in STEM to lead, innovate and take up space in one of the fastest growing fields in the world. Whether you are just getting started with ML or have been building models for years, The Neural Hack is a space where curiosity meets challenge and where the work you do in 36 hours can actually mean something."
+      "The Neural Hack is a 36 hour hackathon focused on data-centric machine learning. Participants tackle real-world challenges while learning about responsible AI, data quality and impactful innovation.",
   },
 ];
 
 export default function EventsPage() {
+  const stamp1 = useParallax(0.12);
+  const stamp2 = useParallax(0.18);
+  const stamp3 = useParallax(0.14);
+
+  const parallaxs = [stamp1, stamp2, stamp3];
+
   return (
-    <div
-      style={{
-        minHeight: "2400px",
-        background: "#FFF9E9",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <h1
-        style={{
-          textAlign: "center",
-          paddingTop: "60px",
-          color: "#5B0F0F",
-          fontSize: "3.5rem",
-          margin: 0,
-          fontFamily: "Kovanov, Georgia, serif",
-          fontWeight: "bold",
-        }}
-      >
-        EVENTS
-      </h1>
+    <div className="min-h-screen bg-[#fff9e9] px-6 py-16 max-sm:px-4 max-sm:py-10">
+      <div className="mx-auto w-full max-w-[1400px]">
+        <h1 className="mb-16 text-center font-[Kovanov,Georgia,serif] text-[clamp(3.5rem,5vw,4rem)] font-bold text-[#5B0F0F] max-sm:mb-8">
+          EVENTS
+        </h1>
 
-      {/* EVENT 1 */}
+        <div className="flex flex-col gap-16 max-[900px]:gap-12 max-sm:gap-9">
+          {events.map((event, index) => {
+            const reverse = index % 2 === 1;
+            const parallax = parallaxs[index];
 
-      <div
-        style={{
-          position: "absolute",
-          left: "-20px",
-          top: "250px",
-          transform: "rotate(-8deg)",
-        }}
-      >
-        <EventStamp logo={events[0].logo} imageRotation={6.5} />
-      </div>
+            return (
+              <section
+                key={event.title}
+                className={`grid items-center gap-8 max-[900px]:grid-cols-1 ${
+                  reverse
+                    ? "grid-cols-[0.85fr_1.15fr]"
+                    : "grid-cols-[1.15fr_0.85fr]"
+                }`}
+              >
+                <div
+                  ref={parallax.ref}
+                  className={`flex justify-center ${
+                    reverse ? "order-2 max-[900px]:order-none" : ""
+                  }`}
+                >
+                  <div
+                    className="w-full max-w-[720px] max-[900px]:max-w-[620px]"
+                    style={{
+                      transform: `rotate(${reverse ? 8 : -8}deg)`,
+                    }}
+                  >
+                    <EventStamp
+                      logo={event.logo}
+                      imageRotation={event.rotation}
+                      parallax={parallax}
+                    />
+                  </div>
+                </div>
 
-      <div
-        style={{
-          position: "absolute",
-          right: "70px",
-          top: "330px",
-          width: "500px",
-        }}
-      >
-        <p
-          style={{
-            color: "#321515",
-            lineHeight: 1.9,
-            fontSize: "1rem",
-            fontFamily: "Kovanov, Georgia, serif",
-            fontWeight: "bold",
-          }}
-        >
-          {events[0].description}
-        </p>
-      </div>
-
-      {/* EVENT 2 */}
-
-      <div
-        style={{
-          position: "absolute",
-          right: "-20px",
-          top: "850px",
-          transform: "rotate(8deg)",
-        }}
-      >
-        <EventStamp logo={events[1].logo} imageRotation={-6.5} />
-      </div>
-
-      <div
-        style={{
-          position: "absolute",
-          left: "70px",
-          top: "990px",
-          width: "500px",
-        }}
-      >
-        <p
-          style={{
-            color: "#321515",
-            lineHeight: 1.9,
-            fontSize: "1rem",
-            fontFamily: "Kovanov, Georgia, serif",
-            fontWeight: "bold",
-          }}
-        >
-          {events[1].description}
-        </p>
-      </div>
-
-      {/* EVENT 3 */}
-
-      <div
-        style={{
-          position: "absolute",
-          left: "-20px",
-          top: "1450px",
-          transform: "rotate(-7deg)",
-        }}
-      >
-        <EventStamp logo={events[2].logo} imageRotation={7} />
-      </div>
-
-      <div
-        style={{
-          position: "absolute",
-          right: "70px",
-          top: "1560px",
-          width: "500px",
-        }}
-      >
-        <p
-          style={{
-            color: "#321515",
-            lineHeight: 1.9,
-            fontSize: "1rem",
-            fontFamily: "Kovanov, Georgia, serif",
-            fontWeight: "bold",
-          }}
-        >
-          {events[2].description}
-        </p>
+                <div
+                  className={`max-[900px]:text-center ${
+                    reverse ? "order-1 max-[900px]:order-none" : ""
+                  }`}
+                >
+                  <h2 className="mb-4 text-[clamp(1.5rem,3vw,2rem)] text-[#5B0F0F]">
+                    {event.title}
+                  </h2>
+                  <p className="font-[Kovanov,Georgia,serif] text-[clamp(0.95rem,1.1vw,1.08rem)] font-bold leading-[1.8] text-[#321515] max-sm:text-[0.95rem] max-sm:leading-[1.65]">
+                    {event.description}
+                  </p>
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
