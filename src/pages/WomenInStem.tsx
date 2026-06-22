@@ -362,6 +362,9 @@ export default function WomenInStem() {
         />
       </div>
 
+<<<<<<< HEAD
+
+=======
       {/* ── Hero ── */}
       <section
         ref={heroRef}
@@ -378,6 +381,7 @@ export default function WomenInStem() {
           WOMEN IN STEM
         </h1>
       </section>
+>>>>>>> e18860a5ecde95d90a44f9240eea21fb2e173831
 
       {/* ── Scientists ── */}
       {scientists.map((sci) => (
@@ -396,9 +400,8 @@ export default function WomenInStem() {
 
           {/* Scientist photo */}
           <div
-            className={`photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0${
-              sci.hasFrame ? "" : " photo-frame--needs-border"
-            }`}
+            className={`photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0${sci.hasFrame ? "" : " photo-frame--needs-border"
+              }`}
           >
             <img src={sci.photo} alt={sci.name} />
           </div>
