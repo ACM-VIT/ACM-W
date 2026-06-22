@@ -362,26 +362,14 @@ export default function WomenInStem() {
         />
       </div>
 
-<<<<<<< HEAD
-
-=======
       {/* ── Hero ── */}
       <section
         ref={heroRef}
         className="relative z-10 h-screen w-full flex flex-col items-center"
         style={{ paddingTop: "56px" }}
       >
-        <h1
-          className="women-in-stem-hero-title text-[50px] tracking-[0.015em] font-bold leading-normal"
-          style={{
-            fontFamily: "Kovanov, Georgia, serif",
-            color: "#580a0a",
-          }}
-        >
-          WOMEN IN STEM
-        </h1>
+
       </section>
->>>>>>> e18860a5ecde95d90a44f9240eea21fb2e173831
 
       {/* ── Scientists ── */}
       {scientists.map((sci) => (
