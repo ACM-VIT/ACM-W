@@ -341,22 +341,7 @@ export default function WomenInStem() {
         />
       </div>
 
-      {/* ── Hero ── */}
-      <section
-        ref={heroRef}
-        className="relative z-10 h-screen w-full flex flex-col items-center"
-        style={{ paddingTop: "56px" }}
-      >
-        <h1
-          className="text-[50px] tracking-[0.015em] font-bold leading-normal"
-          style={{
-            fontFamily: "Kovanov, Georgia, serif",
-            color: "#580a0a",
-          }}
-        >
-          WOMEN IN STEM
-        </h1>
-      </section>
+
 
       {/* ── Scientists ── */}
       {scientists.map((sci) => (
@@ -375,9 +360,8 @@ export default function WomenInStem() {
 
           {/* Scientist photo */}
           <div
-            className={`photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0${
-              sci.hasFrame ? "" : " photo-frame--needs-border"
-            }`}
+            className={`photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0${sci.hasFrame ? "" : " photo-frame--needs-border"
+              }`}
           >
             <img src={sci.photo} alt={sci.name} />
           </div>

@@ -9,6 +9,7 @@ import Events from "./pages/Events";
 import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
 import Footer from "./components/Footer";
+import TitleCard from "./components/TitleCard";
 
 import "./App.css";
 
@@ -100,6 +101,17 @@ export default function App() {
         }}
       >
         <BlogStamps />
+      </section>
+
+      {/* ── Title card reveal — scroll-pinned between Blogs and WomenInStem ── */}
+      <section
+        id="title-card-section"
+        style={{
+          position: "relative",
+          zIndex: 15,
+        }}
+      >
+        <TitleCard />
       </section>
 
       <section
