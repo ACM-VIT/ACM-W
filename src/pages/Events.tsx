@@ -307,9 +307,10 @@ const EVENTS_PAGE_STYLES = `
 .eventsTitle{
   text-align:center;
   color:#5B0F0F;
-  font-size:clamp(2.5rem,5vw,4rem);
+  font-size:clamp(3.5rem,5vw,4rem);
   margin-bottom:4rem;
   font-family:Kovanov,Georgia,serif;
+  font-weight:bold;
 }
 
 .eventsList{

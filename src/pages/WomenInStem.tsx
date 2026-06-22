@@ -136,6 +136,8 @@ export default function WomenInStem() {
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    let matchMedia: gsap.MatchMedia | undefined;
+
     const timer = setTimeout(() => {
       const globe = globeRef.current;
       if (!globe?.group || !globe?.camera) return;
@@ -186,139 +188,158 @@ export default function WomenInStem() {
         },
       });
 
-      /* ─── Scientist scroll sections ─── */
+      /* ─── Scientist scroll sections (desktop vs mobile layouts) ─── */
       const sections = gsap.utils.toArray<HTMLElement>(".scientist-section");
 
-      sections.forEach((section, i) => {
-        const sci = scientists[i];
-        const isLast = i === sections.length - 1;
+      const setupScientistTimelines = (mobile: boolean) => {
+        sections.forEach((section, i) => {
+          const sci = scientists[i];
+          const isLast = i === sections.length - 1;
 
-        const {
-          rotX: targetRotX,
-          rotY: targetRotY,
-          y: targetY,
-        } = lngLatToFocus(
-          sci.focus.lng,
-          sci.focus.lat,
-        );
-
-        const countryImg = section.querySelector(
-          ".country-img",
-        ) as HTMLElement;
-        const photoFrame = section.querySelector(
-          ".photo-frame",
-        ) as HTMLElement;
-        const textEl = section.querySelector(
-          ".scientist-text",
-        ) as HTMLElement;
-
-        // Initial state — everything invisible & centered
-        gsap.set(countryImg, {
-          xPercent: -50,
-          yPercent: -50,
-          opacity: 0,
-          scale: 0.3,
-        });
-        gsap.set(photoFrame, {
-          xPercent: -50,
-          yPercent: -50,
-          opacity: 0,
-          y: 40,
-          rotation: sci.photoRotation,
-        });
-        gsap.set(textEl, {
-          yPercent: -50,
-          opacity: 0,
-          x: 60,
-        });
-
-        /* ─── Scroll-driven timeline ─── */
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: isLast ? "+=280%" : "+=340%",
-            scrub: 1,
-            pin: true,
-            anticipatePin: 1,
-          },
-        });
-
-        /*
-         * Phase 1a — Rotate globe to face the country (camera stays put).
-         * Auto-rotation is already off (hero exit trigger).  GSAP drives
-         * group.rotation directly, keeping the country locked in place.
-         */
-        tl.to(
-          group.rotation,
-          {
-            y: targetRotY,
-            x: targetRotX,
-            duration: 2.0,
-            ease: "power2.inOut",
-          },
-          0,
-        );
-        tl.to(
-          group.position,
-          {
+          const {
+            rotX: targetRotX,
+            rotY: targetRotY,
             y: targetY,
-            duration: 2.0,
-            ease: "power2.inOut",
-          },
-          0,
-        );
-
-        /*
-         * Phase 1b — Camera zooms in (starts slightly after rotation
-         * begins so the country is roughly centred before zoom gets close).
-         */
-        tl.to(
-          camera.position,
-          { z: CAM_ZOOM_Z, duration: 2.8, ease: "power2.in" },
-          0.5,
-        );
-
-        // Phase 2 — Globe fades out, country silhouette fades in (centered)
-        tl.to(globeEl, { opacity: 0, duration: 1.8 }, 2.8);
-        tl.to(countryImg, { opacity: 0.3, scale: 1, duration: 1.8 }, 3.2);
-
-        // Phase 3 — Country slides left + full opacity, photo appears
-        tl.to(
-          countryImg,
-          { x: "-22vw", opacity: 0.85, duration: 2 },
-          5,
-        );
-        tl.to(
-          photoFrame,
-          { opacity: 1, x: "-18vw", y: 0, duration: 1.6 },
-          5.6,
-        );
-
-        // Phase 4 — Text fades in from the right
-        tl.to(textEl, { opacity: 1, x: 0, duration: 1.4 }, 7);
-
-        if (!isLast) {
-          // Phase 5 — Hold (gap 8.4 → 9.2)
-
-          // Phase 6 — Fade out content + reset globe for next scientist
-          tl.to(
-            [countryImg, photoFrame, textEl],
-            { opacity: 0, duration: 1.2 },
-            9.2,
+          } = lngLatToFocus(
+            sci.focus.lng,
+            sci.focus.lat,
           );
-          tl.to(globeEl, { opacity: 1, duration: 1 }, 10.2);
+
+          const countryImg = section.querySelector(
+            ".country-img",
+          ) as HTMLElement;
+          const photoFrame = section.querySelector(
+            ".photo-frame",
+          ) as HTMLElement;
+          const textEl = section.querySelector(
+            ".scientist-text",
+          ) as HTMLElement;
+
+          gsap.set(countryImg, {
+            xPercent: -50,
+            yPercent: -50,
+            opacity: 0,
+            scale: 0.3,
+            x: 0,
+            y: 0,
+          });
+          gsap.set(photoFrame, {
+            xPercent: -50,
+            yPercent: -50,
+            opacity: 0,
+            y: mobile ? 20 : 40,
+            x: 0,
+            rotation: sci.photoRotation,
+          });
+          gsap.set(textEl, {
+            yPercent: mobile ? 0 : -50,
+            xPercent: mobile ? -50 : 0,
+            opacity: 0,
+            x: mobile ? 0 : 60,
+            y: 0,
+          });
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              end: isLast ? "+=280%" : "+=340%",
+              scrub: 1,
+              pin: true,
+              anticipatePin: 1,
+            },
+          });
+
+          tl.to(
+            group.rotation,
+            {
+              y: targetRotY,
+              x: targetRotX,
+              duration: 2.0,
+              ease: "power2.inOut",
+            },
+            0,
+          );
+          tl.to(
+            group.position,
+            {
+              y: targetY,
+              duration: 2.0,
+              ease: "power2.inOut",
+            },
+            0,
+          );
           tl.to(
             camera.position,
-            { z: CAM_DEFAULT_Z, duration: 1.2 },
-            10.2,
+            { z: CAM_ZOOM_Z, duration: 2.8, ease: "power2.in" },
+            0.5,
           );
-        }
+
+          tl.to(globeEl, { opacity: 0, duration: 1.8 }, 2.8);
+          tl.to(
+            countryImg,
+            {
+              opacity: mobile ? 0.55 : 0.3,
+              scale: mobile ? 0.85 : 1,
+              duration: 1.8,
+            },
+            3.2,
+          );
+
+          if (mobile) {
+            tl.to(
+              countryImg,
+              { y: "-22vh", x: 0, opacity: 0.65, scale: 0.75, duration: 2 },
+              5,
+            );
+            tl.to(
+              photoFrame,
+              { opacity: 1, x: 0, y: "-4vh", duration: 1.6 },
+              5.6,
+            );
+            tl.to(textEl, { opacity: 1, duration: 1.4 }, 7);
+          } else {
+            tl.to(
+              countryImg,
+              { x: "-22vw", opacity: 0.85, duration: 2 },
+              5,
+            );
+            tl.to(
+              photoFrame,
+              { opacity: 1, x: "-18vw", y: 0, duration: 1.6 },
+              5.6,
+            );
+            tl.to(textEl, { opacity: 1, x: 0, duration: 1.4 }, 7);
+          }
+
+          if (!isLast) {
+            tl.to(
+              [countryImg, photoFrame, textEl],
+              { opacity: 0, duration: 1.2 },
+              9.2,
+            );
+            tl.to(globeEl, { opacity: 1, duration: 1 }, 10.2);
+            tl.to(
+              camera.position,
+              { z: CAM_DEFAULT_Z, duration: 1.2 },
+              10.2,
+            );
+          }
+        });
+      };
+
+      matchMedia = gsap.matchMedia();
+      matchMedia.add("(min-width: 769px)", () => {
+        setupScientistTimelines(false);
+      });
+      matchMedia.add("(max-width: 768px)", () => {
+        setupScientistTimelines(true);
       });
     }, 120);
 
     return () => {
       clearTimeout(timer);
+      matchMedia?.revert();
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
@@ -348,7 +369,7 @@ export default function WomenInStem() {
         style={{ paddingTop: "56px" }}
       >
         <h1
-          className="text-[50px] tracking-[0.015em] font-bold leading-normal"
+          className="women-in-stem-hero-title text-[50px] tracking-[0.015em] font-bold leading-normal"
           style={{
             fontFamily: "Kovanov, Georgia, serif",
             color: "#580a0a",
@@ -384,7 +405,7 @@ export default function WomenInStem() {
 
           {/* Text */}
           <div
-            className="scientist-text absolute top-1/2 opacity-0"
+            className="scientist-text absolute top-1/2 opacity-0 max-md:left-1/2 max-md:w-[88vw] max-md:max-w-none"
             style={{ left: "55%", width: "38%", maxWidth: 560 }}
           >
             <h2 className="scientist-name">{sci.name}</h2>
