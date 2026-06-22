@@ -27,7 +27,10 @@ function useParallax(speed = 0.15): ParallaxState {
   });
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     const update = () => {
+      rafId = null;
       if (!ref.current) return;
 
       const rect = ref.current.getBoundingClientRect();
@@ -44,14 +47,20 @@ function useParallax(speed = 0.15): ParallaxState {
       });
     };
 
+    const scheduleUpdate = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(update);
+    };
+
     update();
 
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
 
     return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
     };
   }, [speed]);
 
@@ -76,22 +85,11 @@ function StampBorder({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-      }}
-    >
+    <div className="relative h-full w-full">
       <svg
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-        }}
+        className="absolute inset-0 h-full w-full"
       >
         <defs>
           <mask id={maskId}>
@@ -149,13 +147,7 @@ function StampBorder({ children }: { children: ReactNode }) {
         />
       </svg>
 
-      <div
-        style={{
-          position: "absolute",
-          inset: border,
-          background: CREAM,
-        }}
-      >
+      <div className="absolute inset-[32px] bg-[#F2E8CF]">
         {children}
       </div>
     </div>
@@ -173,33 +165,20 @@ function EventStamp({
 }) {
   return (
     <div
-      className="eventStampFrame"
+      className="aspect-[820/600] w-full transition-[transform,opacity] duration-300 ease-out max-sm:aspect-[1.25]"
       style={{
         transform: `translateY(${parallax.offsetY}px) scale(${parallax.scale})`,
         opacity: parallax.opacity,
-        transition: "transform 0.25s ease, opacity 0.3s ease",
       }}
     >
       <StampBorder>
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        <div className="flex h-full w-full items-center justify-center">
           <img
             src={logo}
             alt=""
             draggable={false}
-            style={{
-              width: "82%",
-              height: "82%",
-              objectFit: "contain",
-              transform: `rotate(${imageRotation}deg)`,
-            }}
+            className="h-[82%] w-[82%] object-contain"
+            style={{ transform: `rotate(${imageRotation}deg)` }}
           />
         </div>
       </StampBorder>
@@ -239,179 +218,63 @@ export default function EventsPage() {
   const parallaxs = [stamp1, stamp2, stamp3];
 
   return (
-    <>
-      <style>{EVENTS_PAGE_STYLES}</style>
+    <div className="min-h-screen bg-[#fff9e9] px-6 py-16 max-sm:px-4 max-sm:py-10">
+      <div className="mx-auto w-full max-w-[1400px]">
+        <h1 className="mb-16 text-center font-[Kovanov,Georgia,serif] text-[clamp(3.5rem,5vw,4rem)] font-bold text-[#5B0F0F] max-sm:mb-8">
+          EVENTS
+        </h1>
 
-      <div className="eventsPage">
-        <div className="eventsShell">
-          <h1 className="eventsTitle">EVENTS</h1>
+        <div className="flex flex-col gap-16 max-[900px]:gap-12 max-sm:gap-9">
+          {events.map((event, index) => {
+            const reverse = index % 2 === 1;
+            const parallax = parallaxs[index];
 
-          <div className="eventsList">
-            {events.map((event, index) => {
-              const reverse = index % 2 === 1;
-              const parallax = parallaxs[index];
-
-              return (
-                <section
-                  key={event.title}
-                  className={`eventRow ${
-                    reverse ? "eventRow--reverse" : ""
+            return (
+              <section
+                key={event.title}
+                className={`grid items-center gap-8 max-[900px]:grid-cols-1 ${
+                  reverse
+                    ? "grid-cols-[0.85fr_1.15fr]"
+                    : "grid-cols-[1.15fr_0.85fr]"
+                }`}
+              >
+                <div
+                  ref={parallax.ref}
+                  className={`flex justify-center ${
+                    reverse ? "order-2 max-[900px]:order-none" : ""
                   }`}
                 >
                   <div
-                    className="eventStampWrap"
-                    ref={parallax.ref}
+                    className="w-full max-w-[720px] max-[900px]:max-w-[620px]"
+                    style={{
+                      transform: `rotate(${reverse ? 8 : -8}deg)`,
+                    }}
                   >
-                    <div
-                      className="eventStampWrapInner"
-                      style={{
-                        transform: `rotate(${reverse ? 8 : -8}deg)`,
-                      }}
-                    >
-                      <EventStamp
-                        logo={event.logo}
-                        imageRotation={event.rotation}
-                        parallax={parallax}
-                      />
-                    </div>
+                    <EventStamp
+                      logo={event.logo}
+                      imageRotation={event.rotation}
+                      parallax={parallax}
+                    />
                   </div>
+                </div>
 
-                  <div className="eventContent">
-                    <h2>{event.title}</h2>
-                    <p className="eventCopy">
-                      {event.description}
-                    </p>
-                  </div>
-                </section>
-              );
-            })}
-          </div>
+                <div
+                  className={`max-[900px]:text-center ${
+                    reverse ? "order-1 max-[900px]:order-none" : ""
+                  }`}
+                >
+                  <h2 className="mb-4 text-[clamp(1.5rem,3vw,2rem)] text-[#5B0F0F]">
+                    {event.title}
+                  </h2>
+                  <p className="font-[Kovanov,Georgia,serif] text-[clamp(0.95rem,1.1vw,1.08rem)] font-bold leading-[1.8] text-[#321515] max-sm:text-[0.95rem] max-sm:leading-[1.65]">
+                    {event.description}
+                  </p>
+                </div>
+              </section>
+            );
+          })}
         </div>
       </div>
-    </>
+    </div>
   );
 }
-
-const EVENTS_PAGE_STYLES = `
-.eventsPage{
-  min-height:100vh;
-  background:#FFF9E9;
-  padding:4rem 1.5rem;
-}
-
-.eventsShell{
-  width:min(1400px,100%);
-  margin:0 auto;
-}
-
-.eventsTitle{
-  text-align:center;
-  color:#5B0F0F;
-  font-size:clamp(3.5rem,5vw,4rem);
-  margin-bottom:4rem;
-  font-family:Kovanov,Georgia,serif;
-  font-weight:bold;
-}
-
-.eventsList{
-  display:flex;
-  flex-direction:column;
-  gap:4rem;
-}
-
-.eventRow{
-  display:grid;
-  grid-template-columns:1.15fr 0.85fr;
-  align-items:center;
-  gap:2rem;
-}
-
-.eventRow--reverse{
-  grid-template-columns:0.85fr 1.15fr;
-}
-
-.eventRow--reverse .eventStampWrap{
-  order:2;
-}
-
-.eventRow--reverse .eventContent{
-  order:1;
-}
-
-.eventStampWrap{
-  display:flex;
-  justify-content:center;
-}
-
-.eventStampWrapInner{
-  width:min(100%,720px);
-}
-
-.eventStampFrame{
-  width:100%;
-  aspect-ratio:820/600;
-}
-
-.eventContent h2{
-  color:#5B0F0F;
-  margin-bottom:1rem;
-  font-size:clamp(1.5rem,3vw,2rem);
-}
-
-.eventCopy{
-  color:#321515;
-  font-family:Kovanov,Georgia,serif;
-  font-weight:700;
-  line-height:1.8;
-  font-size:clamp(.95rem,1.1vw,1.08rem);
-}
-
-@media (max-width:900px){
-
-  .eventsList{
-    gap:3rem;
-  }
-
-  .eventRow,
-  .eventRow--reverse{
-    grid-template-columns:1fr;
-  }
-
-  .eventRow--reverse .eventStampWrap,
-  .eventRow--reverse .eventContent{
-    order:initial;
-  }
-
-  .eventStampWrapInner{
-    width:100%;
-    max-width:620px;
-  }
-
-  .eventContent{
-    text-align:center;
-  }
-}
-
-@media (max-width:640px){
-
-  .eventsPage{
-    padding:2.5rem 1rem;
-  }
-
-  .eventsTitle{
-    margin-bottom:2rem;
-  }
-
-  .eventsList{
-    gap:2.25rem;
-  }
-
-  .eventStampFrame{
-    aspect-ratio:1.25;
-  }
-
-  .eventCopy{
-    line-height:1.65;
-    font-size:.95rem;
-  }
-}`;

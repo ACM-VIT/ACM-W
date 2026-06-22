@@ -405,8 +405,7 @@ export default function WomenInStem() {
 
           {/* Text */}
           <div
-            className="scientist-text absolute top-1/2 opacity-0 max-md:left-1/2 max-md:w-[88vw] max-md:max-w-none"
-            style={{ left: "55%", width: "38%", maxWidth: 560 }}
+            className="scientist-text absolute top-1/2 opacity-0 left-[55%] w-[38%] max-w-[560px] max-md:left-1/2 max-md:top-auto max-md:bottom-[16vh] max-md:w-[88vw] max-md:max-w-none max-md:-translate-x-1/2 max-md:translate-y-0 max-md:text-center max-md:z-[3] max-md:px-2 max-[480px]:w-[92vw] max-[480px]:bottom-[14vh]"
           >
             <h2 className="scientist-name">{sci.name}</h2>
             <p className="scientist-subtitle">{sci.title}</p>

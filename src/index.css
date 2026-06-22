@@ -178,18 +178,6 @@ body {
     width: min(220px, 55vw);
   }
 
-  .scientist-text {
-    left: 50% !important;
-    top: auto !important;
-    bottom: 16vh !important;
-    width: 88vw !important;
-    max-width: none !important;
-    transform: translate(-50%, 0) !important;
-    text-align: center;
-    z-index: 3;
-    padding: 0 0.5rem;
-  }
-
   .scientist-name {
     font-size: 2rem;
     margin-bottom: 10px;
@@ -221,11 +209,6 @@ body {
   .women-in-stem-hero-title {
     font-size: clamp(1.5rem, 7.5vw, 2rem) !important;
     padding: 0 1rem;
-  }
-
-  .scientist-text {
-    width: 92vw !important;
-    bottom: 14vh !important;
   }
 
   .scientist-name {
