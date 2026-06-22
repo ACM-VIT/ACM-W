@@ -1,8 +1,83 @@
-import { useId, type ReactNode } from "react";
+import { useId, useEffect, useRef, useState, type ReactNode } from "react";
 
 import neuralHack from "../assets/NeuralHack.png";
 import insipher from "../assets/Inspiher.svg";
 import C2C from "../assets/C2C.png";
+
+// Parallax state returned by the hook
+interface ParallaxState {
+  ref: React.RefObject<HTMLDivElement | null>;
+  offsetY: number;       // vertical float offset in px
+  opacity: number;       // 0 → 1 fade-in
+  scale: number;         // subtle breathing scale
+  rotationDrift: number; // slight rotation shift in deg
+  shadowBlur: number;    // shadow depth in px
+  shadowOpacity: number; // shadow alpha
+}
+
+function useParallax(
+  speed = 0.35,
+  scaleRange = 0.08,
+  driftDeg = 2,
+): ParallaxState {
+  const ref = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<Omit<ParallaxState, "ref">>({
+    offsetY: 0,
+    opacity: 0,
+    scale: 0.92,
+    rotationDrift: 0,
+    shadowBlur: 8,
+    shadowOpacity: 0.08,
+  });
+
+  useEffect(() => {
+    let rafId: number | null = null;
+
+    const update = () => {
+      if (rafId !== null) return;
+      
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        if (!ref.current) return;
+        const rect = ref.current.getBoundingClientRect();
+        const windowH = window.innerHeight;
+
+        // How far the element centre is from the viewport centre, normalised to [-1, 1]
+        const centerOffset = rect.top + rect.height / 2 - windowH / 2;
+        const normalised = Math.max(-1, Math.min(1, centerOffset / (windowH * 0.8)));
+
+        // Parallax Y: stronger offset, opposing scroll direction
+        const offsetY = centerOffset * speed;
+
+        // Opacity: fully visible when within ~80% of viewport, fades at edges
+        const distFromCenter = Math.abs(normalised);
+        const opacity = Math.max(0, Math.min(1, 1.4 - distFromCenter * 1.5));
+
+        // Scale: grows toward 1.0+ at center, shrinks at edges
+        const scale = 1 + scaleRange * (1 - distFromCenter * 1.2);
+
+        // Rotation drift: subtle tilt shift based on scroll position
+        const rotationDrift = normalised * driftDeg;
+
+        // Shadow: deepens as card approaches center (feels like it lifts)
+        const proximity = 1 - distFromCenter;
+        const shadowBlur = 8 + proximity * 32;
+        const shadowOpacity = 0.06 + proximity * 0.18;
+
+        setState({ offsetY, opacity, scale, rotationDrift, shadowBlur, shadowOpacity });
+      });
+    };
+
+    window.addEventListener("scroll", update, { passive: true });
+    update(); // initial
+    return () => {
+      window.removeEventListener("scroll", update);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [speed, scaleRange, driftDeg]);
+
+  return { ref, ...state };
+}
 
 function StampBorder({ children }: { children: ReactNode }) {
   const MAROON = "#6b1212";
@@ -112,15 +187,24 @@ function StampBorder({ children }: { children: ReactNode }) {
 function EventStamp({
   logo,
   imageRotation = 0,
+  parallax,
 }: {
   logo: string;
   imageRotation?: number;
+  parallax: ParallaxState;
 }) {
+  const { offsetY, opacity, scale, rotationDrift, shadowBlur, shadowOpacity } = parallax;
+
   return (
     <div
       style={{
         width: 820,
         height: 600,
+        transform: `translateY(${offsetY}px) scale(${scale}) rotate(${rotationDrift}deg)`,
+        opacity,
+        filter: `drop-shadow(0px ${shadowBlur * 0.4}px ${shadowBlur}px rgba(90, 15, 15, ${shadowOpacity}))`,
+        transition: "transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.4s ease-out, filter 0.3s ease-out",
+        willChange: "transform, opacity, filter",
       }}
     >
       <StampBorder>
@@ -172,6 +256,11 @@ const events = [
 ];
 
 export default function EventsPage() {
+  // Each stamp has unique speed / scale / rotation-drift for organic layered feel
+  const stamp1 = useParallax(0.35, 0.07, 1.8);
+  const stamp2 = useParallax(0.42, 0.09, 2.4);
+  const stamp3 = useParallax(0.30, 0.06, 1.5);
+
   return (
     <div
       style={{
@@ -198,6 +287,7 @@ export default function EventsPage() {
       {/* EVENT 1 */}
 
       <div
+        ref={stamp1.ref}
         style={{
           position: "absolute",
           left: "-20px",
@@ -205,7 +295,7 @@ export default function EventsPage() {
           transform: "rotate(-8deg)",
         }}
       >
-        <EventStamp logo={events[0].logo} imageRotation={6.5} />
+        <EventStamp logo={events[0].logo} imageRotation={6.5} parallax={stamp1} />
       </div>
 
       <div
@@ -232,6 +322,7 @@ export default function EventsPage() {
       {/* EVENT 2 */}
 
       <div
+        ref={stamp2.ref}
         style={{
           position: "absolute",
           right: "-20px",
@@ -239,7 +330,7 @@ export default function EventsPage() {
           transform: "rotate(8deg)",
         }}
       >
-        <EventStamp logo={events[1].logo} imageRotation={-6.5} />
+        <EventStamp logo={events[1].logo} imageRotation={-6.5} parallax={stamp2} />
       </div>
 
       <div
@@ -266,6 +357,7 @@ export default function EventsPage() {
       {/* EVENT 3 */}
 
       <div
+        ref={stamp3.ref}
         style={{
           position: "absolute",
           left: "-20px",
@@ -273,7 +365,7 @@ export default function EventsPage() {
           transform: "rotate(-7deg)",
         }}
       >
-        <EventStamp logo={events[2].logo} imageRotation={7} />
+        <EventStamp logo={events[2].logo} imageRotation={7} parallax={stamp3} />
       </div>
 
       <div
