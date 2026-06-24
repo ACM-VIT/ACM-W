@@ -35,21 +35,6 @@ type Contributor = {
 
 const contributors: Contributor[] = [
   {
-    name: "Ananya Bisht",
-    imageSrc: "ananya",
-    bio: "Built the auth system & API layer.",
-    primaryLink: {
-      href: "https://github.com/ananyab1404",
-      iconSrc: githubIcon,
-      label: "GitHub",
-    },
-    secondaryLink: {
-      href: "https://www.linkedin.com/in/ananya-bisht-a27036367/",
-      iconSrc: linkedinIcon,
-      label: "LinkedIn",
-    },
-  },
-  {
     name: "Aribam Tamanna Sharma",
     imageSrc: "tamanna",
     bio: "Do your best in everything. No matter the outcome, you will always be proud that you gave it your all.",
@@ -60,51 +45,6 @@ const contributors: Contributor[] = [
     },
     secondaryLink: {
       href: "https://www.linkedin.com/in/aribam-tamanna-sharma?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-      iconSrc: linkedinIcon,
-      label: "LinkedIn",
-    },
-  },
-  {
-    name: "Chinmayee Badiger",
-    imageSrc: "chinmayee",
-    bio: "Built the auth system & API layer.",
-    primaryLink: {
-      href: "https://github.com/chinmayeebadiger",
-      iconSrc: githubIcon,
-      label: "GitHub",
-    },
-    secondaryLink: {
-      href: "https://www.linkedin.com/in/chinmayee-badiger-2111a1326/",
-      iconSrc: linkedinIcon,
-      label: "LinkedIn",
-    },
-  },
-  {
-    name: "Ishita Joshi",
-    imageSrc: "ishita",
-    bio: "Built the auth system & API layer.",
-    primaryLink: {
-      href: "https://github.com/Ishitajoshii",
-      iconSrc: githubIcon,
-      label: "GitHub",
-    },
-    secondaryLink: {
-      href: "https://www.linkedin.com/in/ishita-joshi7/",
-      iconSrc: linkedinIcon,
-      label: "LinkedIn",
-    },
-  },
-  {
-    name: "Jahnavi Singh",
-    imageSrc: "jahnavi",
-    bio: "Built the auth system & API layer.",
-    primaryLink: {
-      href: "https://github.com/POSTI-25",
-      iconSrc: githubIcon,
-      label: "GitHub",
-    },
-    secondaryLink: {
-      href: "https://www.linkedin.com/in/jahnavisingh512/",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
@@ -125,16 +65,16 @@ const contributors: Contributor[] = [
     },
   },
   {
-    name: "Nimesha Subramanian",
-    imageSrc: "nimesha",
+    name: "Ishita Joshi",
+    imageSrc: "ishita",
     bio: "Built the auth system & API layer.",
     primaryLink: {
-      href: "https://github.com/nimeshas",
+      href: "https://github.com/Ishitajoshii",
       iconSrc: githubIcon,
       label: "GitHub",
     },
     secondaryLink: {
-      href: "https://www.linkedin.com/in/nimeshas",
+      href: "https://www.linkedin.com/in/ishita-joshi7/",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
@@ -155,6 +95,21 @@ const contributors: Contributor[] = [
     },
   },
   {
+    name: "Jahnavi Singh",
+    imageSrc: "jahnavi",
+    bio: "Built the auth system & API layer.",
+    primaryLink: {
+      href: "https://github.com/POSTI-25",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/jahnavisingh512/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
     name: "Sudiksha Kathuria",
     imageSrc: "sudiksha",
     bio: "Built the auth system & API layer.",
@@ -165,6 +120,51 @@ const contributors: Contributor[] = [
     },
     secondaryLink: {
       href: "https://www.linkedin.com/in/sudiksha-kathuria/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Chinmayee Badiger",
+    imageSrc: "chinmayee",
+    bio: "Built the auth system & API layer.",
+    primaryLink: {
+      href: "https://github.com/chinmayeebadiger",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/chinmayee-badiger-2111a1326/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Ananya Bisht",
+    imageSrc: "ananya",
+    bio: "Built the auth system & API layer.",
+    primaryLink: {
+      href: "https://github.com/ananyab1404",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/ananya-bisht-a27036367/",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Nimesha Subramanian",
+    imageSrc: "nimesha",
+    bio: "Built the auth system & API layer.",
+    primaryLink: {
+      href: "https://github.com/nimeshas",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/nimeshas",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
