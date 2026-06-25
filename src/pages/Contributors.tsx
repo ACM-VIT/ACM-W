@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import cardBg from "../assets/contributors/ContributorsPostcard.png";
-
-import contributor1 from "../assets/contributors/contributor1.png";
 
 import githubIcon from "../assets/teams/github.png";
 import linkedinIcon from "../assets/teams/linkedin.png";
+import tamanna from "../assets/contributors/tamanna.png";
+import maitri from "../assets/contributors/maitri.png";
+import ishita from "../assets/contributors/ishita.png";
+import nitu from "../assets/contributors/nitu.png";
+import jahnavi from "../assets/contributors/jahnavi.png";
+import sudiksha from "../assets/contributors/sudiksha.png";
+import chinmayee from "../assets/contributors/chinmayee.png";
+import ananya from "../assets/contributors/ananya.png";
+import nimesha from "../assets/contributors/nimesha.png";
 
 const imageMap = {
-  contributor1,
+  ananya, chinmayee, jahnavi, nimesha, nitu, sudiksha, maitri, tamanna, ishita,
 };
 
 type ImageKey = keyof typeof imageMap;
@@ -29,7 +36,7 @@ type Contributor = {
 const contributors: Contributor[] = [
   {
     name: "Aribam Tamanna Sharma",
-    imageSrc: "contributor1",
+    imageSrc: "tamanna",
     bio: "Do your best in everything. No matter the outcome, you will always be proud that you gave it your all.",
     primaryLink: {
       href: "https://github.com/A-Taman",
@@ -43,121 +50,121 @@ const contributors: Contributor[] = [
     },
   },
   {
-    name: "Ishita Joshi",
-    imageSrc: "contributor1",
+    name: "Maitri Shah",
+    imageSrc: "maitri",
     bio: "Built the auth system & API layer.",
     primaryLink: {
-      href: "https://github.com/janedoe",
+      href: "https://github.com/Maitri-shah29",
       iconSrc: githubIcon,
       label: "GitHub",
     },
     secondaryLink: {
-      href: "https://linkedin.com/in/janedoe",
+      href: "https://www.linkedin.com/in/maitri-shah29",
+      iconSrc: linkedinIcon,
+      label: "LinkedIn",
+    },
+  },
+  {
+    name: "Ishita Joshi",
+    imageSrc: "ishita",
+    bio: "Built the auth system & API layer.",
+    primaryLink: {
+      href: "https://github.com/Ishitajoshii",
+      iconSrc: githubIcon,
+      label: "GitHub",
+    },
+    secondaryLink: {
+      href: "https://www.linkedin.com/in/ishita-joshi7/",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
   },
   {
     name: "Nitu S U",
-    imageSrc: "contributor1",
-    bio: "Built the auth system & API layer.",
+    imageSrc: "nitu",
+    bio: "You can't go back and change the beginning, but you can start where you are and change the ending",
     primaryLink: {
-      href: "https://github.com/janedoe",
+      href: "https://github.com/nitusuu",
       iconSrc: githubIcon,
       label: "GitHub",
     },
     secondaryLink: {
-      href: "https://linkedin.com/in/janedoe",
+      href: "https://www.linkedin.com/in/nitu-s-u-7643b5321/",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
   },
   {
-    name: "Maitri Shah",
-    imageSrc: "contributor1",
+    name: "Jahnavi Singh",
+    imageSrc: "jahnavi",
     bio: "Built the auth system & API layer.",
     primaryLink: {
-      href: "https://github.com/janedoe",
+      href: "https://github.com/POSTI-25",
       iconSrc: githubIcon,
       label: "GitHub",
     },
     secondaryLink: {
-      href: "https://linkedin.com/in/janedoe",
-      iconSrc: linkedinIcon,
-      label: "LinkedIn",
-    },
-  },
-  {
-    name: "Jahnavi",
-    imageSrc: "contributor1",
-    bio: "Built the auth system & API layer.",
-    primaryLink: {
-      href: "https://github.com/janedoe",
-      iconSrc: githubIcon,
-      label: "GitHub",
-    },
-    secondaryLink: {
-      href: "https://linkedin.com/in/janedoe",
+      href: "https://www.linkedin.com/in/jahnavisingh512/",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
   },
   {
     name: "Sudiksha Kathuria",
-    imageSrc: "contributor1",
+    imageSrc: "sudiksha",
     bio: "Built the auth system & API layer.",
     primaryLink: {
-      href: "https://github.com/janedoe",
+      href: "https://github.com/sudiksha-kathuria",
       iconSrc: githubIcon,
       label: "GitHub",
     },
     secondaryLink: {
-      href: "https://linkedin.com/in/janedoe",
+      href: "https://www.linkedin.com/in/sudiksha-kathuria/",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
   },
   {
     name: "Chinmayee Badiger",
-    imageSrc: "contributor1",
+    imageSrc: "chinmayee",
     bio: "Built the auth system & API layer.",
     primaryLink: {
-      href: "https://github.com/janedoe",
+      href: "https://github.com/chinmayeebadiger",
       iconSrc: githubIcon,
       label: "GitHub",
     },
     secondaryLink: {
-      href: "https://linkedin.com/in/janedoe",
+      href: "https://www.linkedin.com/in/chinmayee-badiger-2111a1326/",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
   },
   {
     name: "Ananya Bisht",
-    imageSrc: "contributor1",
+    imageSrc: "ananya",
     bio: "Built the auth system & API layer.",
     primaryLink: {
-      href: "https://github.com/janedoe",
+      href: "https://github.com/ananyab1404",
       iconSrc: githubIcon,
       label: "GitHub",
     },
     secondaryLink: {
-      href: "https://linkedin.com/in/janedoe",
+      href: "https://www.linkedin.com/in/ananya-bisht-a27036367/",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
   },
   {
     name: "Nimesha Subramanian",
-    imageSrc: "contributor1",
+    imageSrc: "nimesha",
     bio: "Built the auth system & API layer.",
     primaryLink: {
-      href: "https://github.com/janedoe",
+      href: "https://github.com/nimeshas",
       iconSrc: githubIcon,
       label: "GitHub",
     },
     secondaryLink: {
-      href: "https://linkedin.com/in/janedoe",
+      href: "https://www.linkedin.com/in/nimeshas",
       iconSrc: linkedinIcon,
       label: "LinkedIn",
     },
@@ -334,6 +341,29 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
 }
 
 export default function ContributorsSection() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (delta === 0) return;
+      const atStart = el.scrollLeft <= 0 && delta < 0;
+      const atEnd = el.scrollLeft >= maxScroll && delta > 0;
+      if (atStart || atEnd) return;
+
+      e.preventDefault();
+      el.scrollLeft += delta;
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
   return (
     <section className="relative w-full overflow-hidden bg-[#B49880] py-16 sm:py-20">
       <div
@@ -354,6 +384,7 @@ export default function ContributorsSection() {
         </h2>
 
         <div
+          ref={scrollRef}
           className="mt-12 w-full"
           style={{
             overflowX: "auto",

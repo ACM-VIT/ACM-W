@@ -68,6 +68,33 @@ Provide examples and code snippets showing how to use the project. Add screensho
 
 ---
 
+## Cloudflare Deployment
+
+This Vite app deploys to Cloudflare as prebuilt static assets from `dist`.
+
+```bash
+# Local Worker preview
+npm run cf:worker:dev
+
+# Deploy to the linked Cloudflare Worker
+npm run cf:worker:deploy
+
+# Local Pages preview
+npm run cf:pages:dev
+
+# Direct deploy to Cloudflare Pages
+npm run cf:pages:deploy
+```
+
+The default Worker config is `wrangler.jsonc`. The Pages config is kept in `wrangler.pages.jsonc` so the Git-linked Worker project can keep using the root Wrangler file. If the Cloudflare dashboard project name is different, update the `name` fields and the `--project-name` value in `package.json`.
+
+For Cloudflare Pages Git integration, use:
+
+- Build command: `npm run build`
+- Build output directory: `dist`
+
+---
+
 ## Contributing
 We welcome contributions of all kinds! Please read our [Contributing Guidelines](contributing.md) to get started quickly and make your PRs count.
 

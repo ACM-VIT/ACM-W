@@ -4,7 +4,7 @@ import aboutAcmVitImg from '../assets/about/about-acm-vit.svg'
 import './About.css'
 
 const BODY_COPY =
-  'Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields. Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields. Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive participation and empowering diverse voices-especially women in tech-to lead innovation in STEM fields. Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning, encouraging inclusive.'
+  'Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning.\n\nEncouraging inclusive participation and empowering diverse voices—especially women in tech—to lead innovation in STEM fields.\n\nBuilding a community where technical growth, mentorship, collaboration, and leadership thrive.'
 
 export default function About() {
   return (

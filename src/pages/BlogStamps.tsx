@@ -1,107 +1,10 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState} from "react";
 import { gsap } from "gsap";
 import leftArr from "../assets/leftArr.png";
 import rightArr from "../assets/rightArr.png";
 import { blogs } from "../data/blogs";
-
-const NOISE =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")";
-
-function StampBorder({ children }: { children: ReactNode }) {
-  const MAROON = "#6b1212";
-  const CREAM = "#F2E8CF";
-  const scallop = 3;
-  const border = 20;
-  const gap = 3;
-  const maskId = useId();
-  const positions: number[] = [];
-  const step = scallop * 2 + gap;
-  for (let p = 0; p <= 100; p += step) {
-    positions.push(p);
-  }
-
-  return (
-    <div
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-      }}
-    >
-      {/* TRUE SCALLOPED BORDER */}
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <defs>
-          <mask id={maskId} maskUnits="userSpaceOnUse">
-            <rect x="0" y="0" width="100" height="100" fill="white" />
-            {positions.map((p) => (
-              <circle key={`t-${p}`} cx={p} cy="0" r={scallop} fill="black" />
-            ))}
-            {positions.map((p) => (
-              <circle
-                key={`b-${p}`}
-                cx={p}
-                cy="100"
-                r={scallop}
-                fill="black"
-              />
-            ))}
-            {positions.map((p) => (
-              <circle key={`l-${p}`} cx="0" cy={p} r={scallop} fill="black" />
-            ))}
-            {positions.map((p) => (
-              <circle
-                key={`r-${p}`}
-                cx="100"
-                cy={p}
-                r={scallop}
-                fill="black"
-              />
-            ))}
-          </mask>
-        </defs>
-        <rect
-          x="0"
-          y="0"
-          width="100"
-          height="100"
-          fill={MAROON}
-          mask={`url(#${maskId})`}
-        />
-
-        {/* INNER PAPER */}
-        <rect
-          x={border}
-          y={border}
-          width={100 - border * 2}
-          height={100 - border * 2}
-          fill={CREAM}
-        />
-      </svg>
-
-      {/* CONTENT */}
-      <div
-        style={{
-          position: "absolute",
-          inset: border,
-          background: CREAM,
-          backgroundImage: NOISE,
-          overflow: "hidden",
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
+import BlogStampRoll from "./BlogStampRoll";
+import StampBorder from "../components/StampBorder";
 
 const CARD_W = 360;
 const CARD_H = 450;
@@ -110,7 +13,7 @@ const FAN_SPACING = 200;
 const FAN_DROP = 20;
 const FAN_BASE_OFFSET = 28;
 
-export default function BlogStamps() {
+function BlogStampsDesktop() {
   const [viewport, setViewport] = useState({ w: 1200, h: 800 });
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -301,7 +204,6 @@ export default function BlogStamps() {
         minHeight: "100vh",
         height: "100vh",
         background: "#FFF9E9",
-        backgroundImage: NOISE,
         fontFamily: "'Georgia', serif",
         position: "relative",
         display: "flex",
@@ -311,40 +213,6 @@ export default function BlogStamps() {
         userSelect: "none",
       }}
     >
-      <div style={{ position: "absolute", top: 18, left: 18 }}>
-        <svg
-          width="36"
-          height="28"
-          viewBox="0 0 36 28"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect width="36" height="28" rx="3" fill="#6b1616" />
-          <polyline
-            points="0,0 18,16 36,0"
-            fill="#8b2a2a"
-            stroke="#8b2a2a"
-            strokeWidth="1"
-          />
-          <line
-            x1="0"
-            y1="28"
-            x2="13"
-            y2="14"
-            stroke="#7a1c1c"
-            strokeWidth="1.2"
-          />
-          <line
-            x1="36"
-            y1="28"
-            x2="23"
-            y2="14"
-            stroke="#7a1c1c"
-            strokeWidth="1.2"
-          />
-        </svg>
-      </div>
-
       <h2
         style={{
           fontSize: 50,
@@ -374,7 +242,8 @@ export default function BlogStamps() {
           background: "none",
           border: "none",
           cursor: "pointer",
-          zIndex: 20,
+          zIndex: 60,
+          pointerEvents: "auto",
         }}
         aria-label="Previous"
       >
@@ -393,7 +262,8 @@ export default function BlogStamps() {
           background: "none",
           border: "none",
           cursor: "pointer",
-          zIndex: 20,
+          zIndex: 60,
+          pointerEvents: "auto",
         }}
         aria-label="Next"
       >
@@ -628,4 +498,19 @@ export default function BlogStamps() {
       </div>
     </div>
   );
+}
+
+export default function BlogStamps() {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < 768
+  );
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  if (isMobile) return <BlogStampRoll />;
+  return <BlogStampsDesktop />;
 }
