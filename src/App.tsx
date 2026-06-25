@@ -156,7 +156,9 @@ export default function App() {
       >
         <ContributorsSection />
       </section>
+
         <Footer />
+        
       <section
         id="envelope-footer"
         style={{

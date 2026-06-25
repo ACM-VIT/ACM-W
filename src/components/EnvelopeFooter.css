@@ -68,7 +68,7 @@
      2. envelopeInterior   (tan inside back wall)
      3. brownCard          (sliding contact card)
      4. envelopePocket     (front red pocket)
-     5. flapOnly           (top triangular flap)
+     5. flap-container     (two-part flap: insideFlap + outsideFlap)
    ----------------------------------------------- */
 
 /* Layer 1: Envelope backside (social links card).
@@ -155,23 +155,49 @@
   object-fit: contain;
 }
 
-/* Layer 5: Flap only (top triangular flap).
-   Cropped height asset — uses height: auto so it sizes
-   naturally from image width. Hinges from top center. */
-.flap-only {
+/* Layer 5: Two-part flap container.
+   Both insideFlap and outsideFlap are upright triangles (pointing UP).
+   They hinge from their BOTTOM edge (transform-origin: bottom center).
+   The container preserves 3D so both halves share the same 3D space.
+   IMPORTANT: inside-flap is position: relative so the container gets
+   real height from the image. Without this, height collapses to 0
+   and transform-origin: bottom center resolves to the TOP. */
+.flap-container {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
+  z-index: 2;
+  transform: translateZ(-5px);
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+/* inside-flap is RELATIVE so the container gets its height from
+   the flap image. This makes transform-origin: bottom center
+   correctly point to the base of the triangle. */
+.inside-flap {
+  position: relative;
+  width: 100%;
   height: auto;
-  z-index: 5;
-  transform-origin: top center;
-  transform: translateZ(15px);
+  transform-origin: bottom center;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-.flap-only img {
+/* outside-flap is ABSOLUTE, overlaying the inside-flap in the
+   exact same space. Same dimensions, same hinge point. */
+.outside-flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom center;
+}
+
+.inside-flap img,
+.outside-flap img {
   width: 100%;
   height: auto;
   display: block;
