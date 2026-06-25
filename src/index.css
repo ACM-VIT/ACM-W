@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&display=swap');
 @import "tailwindcss";
 
 @font-face {
@@ -67,8 +68,8 @@ body {
 
 .globe-fixed-container > div,
 .globe-fixed-container canvas {
-  max-width: min(760px, 88vw);
-  max-height: min(760px, 88vw);
+  width: min(760px, 88vw) !important;
+  height: min(760px, 88vw) !important;
 }
 
 /* ─── Photo vintage frame ─── */
@@ -78,23 +79,28 @@ body {
     0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Scientists whose PNG has no baked-in paper frame */
 .photo-frame--needs-border {
   padding: 14px 14px 36px 14px;
-  background: linear-gradient(155deg, #d4c5a0 0%, #c9b98a 40%, #bba474 100%);
+  background: linear-gradient(
+    155deg,
+    #d4c5a0 0%,
+    #c9b98a 40%,
+    #bba474 100%
+  );
 }
 
 .photo-frame img {
   display: block;
-  width: 380px;
+  width: min(380px, 30vw);
   height: auto;
   object-fit: cover;
 }
 
 /* ─── Scientist text styling ─── */
+
 .scientist-name {
-  font-family: "Kovanov", Georgia, "Times New Roman", serif;
-  font-size: 64px;
+  font-family: "Kovanov", Georgia, serif;
+  font-size: clamp(2.2rem, 4vw, 4rem);
   font-weight: 700;
   line-height: 1.1;
   color: #580a0a;
@@ -103,17 +109,129 @@ body {
 
 .scientist-subtitle {
   font-family: Georgia, serif;
-  font-size: 15px;
+  font-size: clamp(0.8rem, 1vw, 0.95rem);
   letter-spacing: 4px;
   text-transform: uppercase;
   color: #7a4444;
-  margin: 0 0 28px;
+  margin: 0 0 24px;
 }
 
 .scientist-desc {
   font-family: "Quicksand", Arial, sans-serif;
-  font-size: 18px;
-  line-height: 1.85;
+  font-size: clamp(0.95rem, 1.1vw, 1.15rem);
+  line-height: 1.8;
   color: #5e4d4d;
   margin: 0;
+}
+
+/* ───────────────────────────── */
+/* Tablet */
+/* ───────────────────────────── */
+
+@media (max-width: 1024px) {
+  .scientist-name {
+    font-size: 2.8rem;
+  }
+
+  .scientist-desc {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .photo-frame img {
+    width: 300px;
+  }
+
+  .country-img {
+    width: min(420px, 70vw) !important;
+  }
+}
+
+/* ───────────────────────────── */
+/* Mobile */
+/* ───────────────────────────── */
+
+@media (max-width: 768px) {
+  .women-in-stem-hero-title {
+    font-size: clamp(1.75rem, 8.5vw, 2.5rem) !important;
+    padding: 0 1.25rem;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .scientist-section {
+    overflow: hidden;
+  }
+
+  .country-img {
+    width: min(300px, 75vw) !important;
+  }
+
+  .photo-frame {
+    z-index: 2;
+  }
+
+  .photo-frame--needs-border {
+    padding: 10px 10px 28px;
+  }
+
+  .photo-frame img {
+    width: min(220px, 55vw);
+  }
+
+  .scientist-name {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  .scientist-subtitle {
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+
+  .scientist-desc {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .globe-fixed-container > div,
+  .globe-fixed-container canvas {
+    width: min(520px, 90vw) !important;
+    height: min(520px, 90vw) !important;
+  }
+}
+
+/* ───────────────────────────── */
+/* Small phones */
+/* ───────────────────────────── */
+
+@media (max-width: 480px) {
+  .women-in-stem-hero-title {
+    font-size: clamp(1.5rem, 7.5vw, 2rem) !important;
+    padding: 0 1rem;
+  }
+
+  .scientist-name {
+    font-size: 1.6rem;
+  }
+
+  .scientist-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .photo-frame img {
+    width: min(180px, 50vw);
+  }
+
+  .country-img {
+    width: min(240px, 70vw) !important;
+  }
+
+  .globe-fixed-container > div,
+  .globe-fixed-container canvas {
+    width: min(380px, 92vw) !important;
+    height: min(380px, 92vw) !important;
+  }
 }
