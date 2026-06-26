@@ -124,12 +124,110 @@
   -webkit-backface-visibility: hidden;
 }
 
-.brown-card img {
+/* Background texture — fills the card, sits behind the form */
+.brown-card__bg {
+  display: block;
   width: 100%;
   height: auto;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(74, 16, 16, 0.2);
+}
+
+/* Form overlay — positioned on top of the bg image */
+.brown-card__form {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8% 10%;
+  box-sizing: border-box;
+  gap: 0;
+}
+
+/* "CONTACT US" header — strict #580A0A */
+.brown-card__heading {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #580A0A;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin: 0 0 6% 0;
+}
+
+/* Each field row */
+.brown-card__field {
+  width: 100%;
+  margin-bottom: 3%;
+}
+
+.brown-card__label {
+  display: block;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #3a2a1a;
+  margin-bottom: 2px;
+}
+
+/* Inputs styled as underlines on the card */
+.brown-card__input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(74, 40, 20, 0.35);
+  outline: none;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 0.85rem;
+  color: #3a2a1a;
+  padding: 4px 0;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.brown-card__input:focus {
+  border-bottom-color: #580A0A;
+}
+
+.brown-card__input::placeholder {
+  color: rgba(58, 42, 26, 0.4);
+}
+
+/* Textarea — no resize, minimal height */
+.brown-card__textarea {
+  resize: none;
+  line-height: 1.4;
+}
+
+/* Submit button — strict #580A0A background */
+.brown-card__submit {
+  margin-top: 5%;
+  padding: 8px 36px;
+  background-color: #580A0A;
+  color: #f5ebe0;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.brown-card__submit:hover {
+  background-color: #6e1212;
+  transform: scale(1.03);
+}
+
+.brown-card__submit:active {
+  transform: scale(0.98);
 }
 
 /* Layer 4: Envelope pocket (front red pocket).

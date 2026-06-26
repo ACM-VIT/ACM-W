@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect } from 'react';
+import { useRef, useLayoutEffect, useState, type FormEvent } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './EnvelopeFooter.css';
@@ -28,6 +28,24 @@ gsap.registerPlugin(ScrollTrigger);
 export default function EnvelopeFooter() {
   const sectionRef = useRef<HTMLElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
+
+  // Contact form state
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+    // TODO: Integrate email service (e.g. EmailJS, Resend, or backend API)
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
   const envelopeWrapperRef = useRef<HTMLDivElement>(null);
 
   // Front-face layer refs
@@ -58,11 +76,11 @@ export default function EnvelopeFooter() {
     const ctx = gsap.context(() => {
       // ---- Initial state setup ----
 
-      // Brown card: centered horizontally (CSS handles translateX(-50%)),
-      // positioned at vertical center. GSAP will control y for sliding.
+      // Brown card: starts enlarged (scale 1.4) so the user can
+      // comfortably fill the form. Shrinks to 1 as the first scroll step.
       gsap.set(brownCard, {
         y: 0,
-        scale: 1,
+        scale: 1.4,
         rotateX: 0,
         rotateZ: 0,
         x: 10,
@@ -107,7 +125,22 @@ export default function EnvelopeFooter() {
       });
 
       // ======================================================
-      // Step 1 & 2: Zoom in on the brown card (0 → 2)
+      // Step 0: SHRINK — Card scales from 1.4 → 1 (0 → 1.5)
+      // Gives the user a large form to fill, then shrinks
+      // to envelope-size before the rest of the sequence.
+      // ======================================================
+      tl.to(
+        brownCard,
+        {
+          scale: 1,
+          duration: 1.5,
+          ease: 'power2.out',
+        },
+        0
+      );
+
+      // ======================================================
+      // Step 1 & 2: Zoom in on the brown card (1.5 → 3.5)
       // ======================================================
       tl.to(
         brownCard,
@@ -116,11 +149,11 @@ export default function EnvelopeFooter() {
           duration: 2,
           ease: 'power2.inOut',
         },
-        0
+        1.5
       );
 
       // ======================================================
-      // Step 3: First tilt — card tilts backward in 3D (2 → 3.5)
+      // Step 3: First tilt — card tilts backward in 3D (3.5 → 5)
       // ======================================================
       tl.to(
         brownCard,
@@ -132,11 +165,11 @@ export default function EnvelopeFooter() {
           z: 1.1,
           x: -1,
         },
-        2
+        3.5
       );
 
       // ======================================================
-      // Step 4: Envelope appears — fade in layers (3.5 → 5)
+      // Step 4: Envelope appears — fade in layers (5 → 6.5)
       // Interior fades in first, then pocket, then inside flap
       // ======================================================
       tl.to(
@@ -149,7 +182,7 @@ export default function EnvelopeFooter() {
           y: 40,
           z: 1,
         },
-        3.5
+        5
       );
 
       tl.to(
@@ -161,7 +194,7 @@ export default function EnvelopeFooter() {
           scale: 1.6,
           z: 1.2,
         },
-        3.7
+        5.2
       );
 
       // Inside flap fades in at the same time as envelope layers
@@ -176,7 +209,7 @@ export default function EnvelopeFooter() {
           z: 1,
 
         },
-        3.5
+        5
       );
 
       // ======================================================
@@ -196,11 +229,11 @@ export default function EnvelopeFooter() {
 
           z: 1.1,
         },
-        6
+        7.5
       );
 
       // ======================================================
-      // Step 6: Close the flap — TWO-PART RELAY (8.5 → 11.5)
+      // Step 6: Close the flap — TWO-PART RELAY (10 → 13)
       //
       // Both flaps are upright triangles with transform-origin
       // at bottom center. They rotate around their base edge.
@@ -211,9 +244,9 @@ export default function EnvelopeFooter() {
 
       // Promote flap container to the front before the close starts
       const flapContainer = insideFlap.parentElement!;
-      tl.set(flapContainer, { zIndex: 5, z: 15 }, 8.5);
+      tl.set(flapContainer, { zIndex: 5, z: 15 }, 10);
 
-      // Step A: Inside flap folds toward user from 0° → -90° (8.5 → 9.5)
+      // Step A: Inside flap folds toward user from 0° → -90° (10 → 11)
       tl.to(
         insideFlap,
         {
@@ -222,16 +255,16 @@ export default function EnvelopeFooter() {
           ease: 'power2.inOut',
           scale: 0.80,
         },
-        8.5
+        10
       );
 
       // Overlapping handoff — both flaps are near edge-on here,
       // so briefly showing both is invisible. This eliminates
       // the single-frame glitch of an instant swap.
-      tl.set(outsideFlap, { opacity: 1 }, 9.3);   // show outsideFlap early
-      tl.set(insideFlap, { opacity: 0 }, 9.6);     // hide insideFlap late
+      tl.set(outsideFlap, { opacity: 1 }, 10.8);   // show outsideFlap early
+      tl.set(insideFlap, { opacity: 0 }, 11.1);     // hide insideFlap late
 
-      // Step B: Outside flap continues from -90° → -180° (9.5 → 10.5)
+      // Step B: Outside flap continues from -90° → -180° (11 → 12)
       tl.to(
         outsideFlap,
         {
@@ -241,13 +274,13 @@ export default function EnvelopeFooter() {
           scale: 0.80,
           y: -190,
           z: 1.2,
-          
+
         },
-        9.5
+        11
       );
 
       // ======================================================
-      // Step 8: Flip the entire envelope 180° (12 → 15)
+      // Step 8: Flip the entire envelope 180° (13.5 → 16.5)
       // Reveals the backside with social links.
       // Before flipping, collapse all layers to z:0 so they
       // appear as one flat piece when viewed from the side.
@@ -256,11 +289,11 @@ export default function EnvelopeFooter() {
       // Collapse depth stack to sub-pixel increments before the flip.
       // Must preserve correct ordering (interior < card < pocket < flap)
       // but gaps are too small to see when viewed edge-on during rotateY.
-      tl.set(envelopeInterior, { z: -0.3 }, 11.8);
-      tl.set(brownCard, { z: 0 }, 11.8);
-      tl.set(envelopePocket, { z: 0.3 }, 11.8);
-      tl.set(flapContainer, { z: 0.5 }, 11.8);
-      tl.set(outsideFlap, { z: 0.6 }, 11.8);
+      tl.set(envelopeInterior, { z: -0.3 }, 13.3);
+      tl.set(brownCard, { z: 0 }, 13.3);
+      tl.set(envelopePocket, { z: 0.3 }, 13.3);
+      tl.set(flapContainer, { z: 0.5 }, 13.3);
+      tl.set(outsideFlap, { z: 0.6 }, 13.3);
 
       tl.to(
         envelopeWrapper,
@@ -269,7 +302,7 @@ export default function EnvelopeFooter() {
           duration: 3,
           ease: 'power2.inOut',
         },
-        12
+        13.5
       );
     }, section);
 
@@ -292,7 +325,59 @@ export default function EnvelopeFooter() {
 
               {/* Z-3: Brown contact card */}
               <div ref={brownCardRef} className="brown-card">
-                <img src={brownCardImg} alt="Contact card" draggable={false} />
+                <img src={brownCardImg} alt="Contact card" className="brown-card__bg" draggable={false} />
+                <form className="brown-card__form" onSubmit={handleSubmit}>
+                  <h2 className="brown-card__heading">CONTACT US</h2>
+
+                  <div className="brown-card__field">
+                    <label className="brown-card__label" htmlFor="contact-name">Name:</label>
+                    <input
+                      id="contact-name"
+                      className="brown-card__input"
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => handleChange('name', e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="brown-card__field">
+                    <label className="brown-card__label" htmlFor="contact-email">E-mail:</label>
+                    <input
+                      id="contact-email"
+                      className="brown-card__input"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleChange('email', e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="brown-card__field">
+                    <label className="brown-card__label" htmlFor="contact-phone">Phone:</label>
+                    <input
+                      id="contact-phone"
+                      className="brown-card__input"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => handleChange('phone', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="brown-card__field">
+                    <label className="brown-card__label" htmlFor="contact-message">Message:</label>
+                    <textarea
+                      id="contact-message"
+                      className="brown-card__input brown-card__textarea"
+                      value={formData.message}
+                      onChange={(e) => handleChange('message', e.target.value)}
+                      rows={2}
+                      required
+                    />
+                  </div>
+
+                  <button type="submit" className="brown-card__submit">Submit</button>
+                </form>
               </div>
 
               {/* Z-4: Front red pocket */}
