@@ -84,7 +84,7 @@ export default function EnvelopeFooter() {
       gsap.set(outsideFlap, {
         opacity: 0,
         rotateX: -90,
-        y: -190,
+        y: -185,
         scale: 0.80,
         z: 1,
       });
@@ -173,6 +173,7 @@ export default function EnvelopeFooter() {
           y: -185,
           scale: 0.80,
           z: 1,
+
         },
         3.5
       );
@@ -191,6 +192,7 @@ export default function EnvelopeFooter() {
           ease: 'power2.inOut',
           x: -5,
           y: '25%',
+
           z: 1.1,
         },
         6
@@ -217,6 +219,8 @@ export default function EnvelopeFooter() {
           rotateX: -90,
           duration: 1.5,
           ease: 'power2.inOut',
+          scale: 0.80,
+          
         },
         8.5
       );
@@ -234,6 +238,8 @@ export default function EnvelopeFooter() {
           rotateX: -180,
           duration: 1.5,
           ease: 'power2.inOut',
+          scale: 0.80,
+          y: -190,
         },
         10
       );
