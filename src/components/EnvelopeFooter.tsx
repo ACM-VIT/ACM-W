@@ -13,6 +13,15 @@ import envelopePocketImg from '../assets/footer/envelopePocket.png';
 import insideFlapImg from '../assets/footer/insideFlap.png';
 import outsideFlapImg from '../assets/footer/outsideFlap.png';
 
+// Social media icons & heart
+import heartImg from '../assets/footer/heart.png';
+import githubIcon from '../assets/footer/github.png';
+import facebookIcon from '../assets/footer/facebook.png';
+import instaIcon from '../assets/footer/insta.png';
+import twitterIcon from '../assets/footer/twitter.png';
+import linkedInIcon from '../assets/footer/linkedIn.png';
+import ytIcon from '../assets/footer/yt.png';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -232,6 +241,7 @@ export default function EnvelopeFooter() {
           scale: 0.80,
           y: -190,
           z: 1.2,
+          
         },
         9.5
       );
@@ -312,6 +322,44 @@ export default function EnvelopeFooter() {
                 className="back-face__img"
                 draggable={false}
               />
+
+              {/* Content overlay — sits on top of the backside image */}
+              <div className="back-face__content">
+                <div className="back-face__text-block">
+                  <div className="back-face__text-row">
+                    <span className="back-face__text">Made with</span>
+                    <img
+                      src={heartImg}
+                      alt="heart"
+                      className="back-face__heart"
+                      draggable={false}
+                    />
+                    <span className="back-face__text">by</span>
+                  </div>
+                  <span className="back-face__text back-face__text--org">ACM-W VIT</span>
+                </div>
+
+                <div className="back-face__social-row">
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    <img src={githubIcon} alt="GitHub" className="back-face__social-icon" draggable={false} />
+                  </a>
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    <img src={facebookIcon} alt="Facebook" className="back-face__social-icon" draggable={false} />
+                  </a>
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    <img src={instaIcon} alt="Instagram" className="back-face__social-icon" draggable={false} />
+                  </a>
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    <img src={twitterIcon} alt="Twitter / X" className="back-face__social-icon" draggable={false} />
+                  </a>
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    <img src={linkedInIcon} alt="LinkedIn" className="back-face__social-icon" draggable={false} />
+                  </a>
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    <img src={ytIcon} alt="YouTube" className="back-face__social-icon" draggable={false} />
+                  </a>
+                </div>
+              </div>
             </div>
 
           </div>

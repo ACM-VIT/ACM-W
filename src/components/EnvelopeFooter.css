@@ -215,6 +215,105 @@
 }
 
 /* -----------------------------------------------
+   BACK FACE CONTENT — Absolutely positioned overlay
+   inside .envelope-backside. Does NOT modify the
+   parent's width/height/transform/backface-visibility.
+   ----------------------------------------------- */
+.back-face__content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 12% 24px;
+  box-sizing: border-box;
+  pointer-events: auto;
+  /* Scale to match the backside image's scale(0.85) */
+  transform: scale(0.85);
+}
+
+/* Two-line text block — centered in the upper area */
+.back-face__text-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 4px;
+}
+
+/* "Made with ♥ by" inline row */
+.back-face__text-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.back-face__text {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: #f5ebe0;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Second line — "ACM-W VIT" bigger */
+.back-face__text--org {
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+}
+
+.back-face__heart {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  vertical-align: middle;
+  /* Subtle pulse animation for delight */
+  animation: heartbeat 1.4s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.15); }
+}
+
+/* Social icons row — anchored to the bottom */
+.back-face__social-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.back-face__social-row a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.back-face__social-row a:hover {
+  transform: scale(1.15);
+  opacity: 0.85;
+}
+
+.back-face__social-icon {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: brightness(0) invert(0.92) sepia(0.08) saturate(0.5);
+}
+
+/* -----------------------------------------------
    Responsive
    ----------------------------------------------- */
 @media (max-width: 600px) {
@@ -227,11 +326,28 @@
   }
 
   .back-face__content {
-    width: 80%;
-    padding: 20px;
+    padding: 0 16px 10% 16px;
   }
 
   .back-face__text {
-    font-size: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .back-face__text--org {
+    font-size: 1.25rem;
+  }
+
+  .back-face__heart {
+    width: 18px;
+    height: 18px;
+  }
+
+  .back-face__social-row {
+    gap: 16px;
+  }
+
+  .back-face__social-icon {
+    width: 24px;
+    height: 24px;
   }
 }
