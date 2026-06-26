@@ -204,66 +204,14 @@
 }
 
 /* -----------------------------------------------
-   BACK FACE CONTENT — Revealed after the 180° flip.
-   This is the content INSIDE the .envelope-backside div.
+   BACK FACE — Just the envelope backside image,
+   centered and scaled to 0.85.
    ----------------------------------------------- */
-.back-face__content {
-  width: 70%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 32px;
-  background: #4a1010;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(74, 16, 16, 0.3);
-}
-
-.back-face__text {
-  color: #e6ddd0;
-  font-size: 1.25rem;
-  text-align: center;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  line-height: 1.6;
-}
-
-.back-face__heart {
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.back-face__socials {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.back-face__socials a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  opacity: 0.85;
-}
-
-.back-face__socials a:hover {
-  transform: scale(1.2);
-  opacity: 1;
-}
-
-.back-face__socials img {
+.back-face__img {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: brightness(0) invert(0.9);
+  height: auto;
+  display: block;
+  transform: scale(0.85);
 }
 
 /* -----------------------------------------------

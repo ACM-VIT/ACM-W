@@ -13,14 +13,6 @@ import envelopePocketImg from '../assets/footer/envelopePocket.png';
 import insideFlapImg from '../assets/footer/insideFlap.png';
 import outsideFlapImg from '../assets/footer/outsideFlap.png';
 
-// Social icons
-import heartIcon from '../assets/footer/heart.png';
-import githubIcon from '../assets/footer/github.png';
-import facebookIcon from '../assets/footer/facebook.png';
-import instaIcon from '../assets/footer/insta.png';
-import twitterIcon from '../assets/footer/twitter.png';
-import linkedInIcon from '../assets/footer/linkedIn.png';
-import ytIcon from '../assets/footer/yt.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -314,39 +306,12 @@ export default function EnvelopeFooter() {
 
             {/* ========== BACK FACE ========== */}
             <div className="envelope-backside">
-              <div className="back-face__content">
-                <p className="back-face__text">
-                  Made with{' '}
-                  <img
-                    src={heartIcon}
-                    alt="love"
-                    className="back-face__heart"
-                  />{' '}
-                  by
-                  <br />
-                  ACM-W VIT
-                </p>
-                <div className="back-face__socials">
-                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                    <img src={githubIcon} alt="GitHub" />
-                  </a>
-                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                    <img src={facebookIcon} alt="Facebook" />
-                  </a>
-                  <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                    <img src={instaIcon} alt="Instagram" />
-                  </a>
-                  <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                    <img src={twitterIcon} alt="Twitter" />
-                  </a>
-                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                    <img src={linkedInIcon} alt="LinkedIn" />
-                  </a>
-                  <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-                    <img src={ytIcon} alt="YouTube" />
-                  </a>
-                </div>
-              </div>
+              <img
+                src={envelopeBacksideImg}
+                alt="Envelope backside"
+                className="back-face__img"
+                draggable={false}
+              />
             </div>
 
           </div>
