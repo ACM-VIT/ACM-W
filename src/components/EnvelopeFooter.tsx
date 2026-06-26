@@ -86,7 +86,7 @@ export default function EnvelopeFooter() {
         rotateX: -90,
         y: -185,
         scale: 0.80,
-        z: 1,
+        z: 1.2,
       });
 
       // Wrapper: no rotation yet
@@ -212,43 +212,54 @@ export default function EnvelopeFooter() {
       const flapContainer = insideFlap.parentElement!;
       tl.set(flapContainer, { zIndex: 5, z: 15 }, 8.5);
 
-      // Step A: Inside flap folds toward user from 0° → -90° (8.5 → 10)
+      // Step A: Inside flap folds toward user from 0° → -90° (8.5 → 9.5)
       tl.to(
         insideFlap,
         {
           rotateX: -90,
-          duration: 1.5,
+          duration: 1.0,
           ease: 'power2.inOut',
           scale: 0.80,
-          
         },
         8.5
       );
 
-      // At the exact moment insideFlap hits -90°, show the outsideFlap
-      // and hide the insideFlap for a clean handoff
-      tl.set(outsideFlap, { opacity: 1 }, 10);
-      tl.set(insideFlap, { opacity: 0 }, 10);
+      // Overlapping handoff — both flaps are near edge-on here,
+      // so briefly showing both is invisible. This eliminates
+      // the single-frame glitch of an instant swap.
+      tl.set(outsideFlap, { opacity: 1 }, 9.3);   // show outsideFlap early
+      tl.set(insideFlap, { opacity: 0 }, 9.6);     // hide insideFlap late
 
-      // Step B: Outside flap continues from -90° → -180° (10 → 11.5)
-      // ONLY rotateX changes — y, scale, z are already matched from init
+      // Step B: Outside flap continues from -90° → -180° (9.5 → 10.5)
       tl.to(
         outsideFlap,
         {
           rotateX: -180,
-          duration: 1.5,
+          duration: 1.0,
           ease: 'power2.inOut',
           scale: 0.80,
           y: -190,
+          z: 1.2,
         },
-        10
+        9.5
       );
 
       // ======================================================
       // Step 8: Flip the entire envelope 180° (12 → 15)
       // Reveals the backside with social links.
-      // (Pushed slightly later to accommodate the longer flap close)
+      // Before flipping, collapse all layers to z:0 so they
+      // appear as one flat piece when viewed from the side.
       // ======================================================
+
+      // Collapse depth stack to sub-pixel increments before the flip.
+      // Must preserve correct ordering (interior < card < pocket < flap)
+      // but gaps are too small to see when viewed edge-on during rotateY.
+      tl.set(envelopeInterior, { z: -0.3 }, 11.8);
+      tl.set(brownCard, { z: 0 }, 11.8);
+      tl.set(envelopePocket, { z: 0.3 }, 11.8);
+      tl.set(flapContainer, { z: 0.5 }, 11.8);
+      tl.set(outsideFlap, { z: 0.6 }, 11.8);
+
       tl.to(
         envelopeWrapper,
         {
