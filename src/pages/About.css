@@ -21,26 +21,6 @@ body,
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
 }
 
-.about_mail {
-  position: fixed;
-  top: 24px;
-  left: clamp(28px, 4vw, 56px);
-  z-index: 15;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.about_mailIcon {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
 .about_cards {
   display: flex;
   flex-direction: column;
@@ -110,6 +90,7 @@ body,
   margin: 0;
   padding: 0;
   color: #fff;
+  font-style: normal;
   pointer-events: none;
   transform-origin: center center;
   overflow: hidden;
@@ -152,6 +133,16 @@ body,
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 9;
+  line-clamp: 9;
+}
+
+.about_cardBody p {
+  margin: 0;
+}
+
+.about_cardBody p + p {
+  margin-top: 0.65em;
 }
 
 @media (max-width: 768px) {

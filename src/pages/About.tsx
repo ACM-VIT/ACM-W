@@ -1,18 +1,26 @@
-import envelopeImg from '../assets/about/envelope.png'
 import aboutAcmWImg from '../assets/about/about-acm-w.svg'
 import aboutAcmVitImg from '../assets/about/about-acm-vit.svg'
 import './About.css'
 
-const BODY_COPY =
-  'Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning.\n\nEncouraging inclusive participation and empowering diverse voices—especially women in tech—to lead innovation in STEM fields.\n\nBuilding a community where technical growth, mentorship, collaboration, and leadership thrive.'
+const BODY_PARAGRAPHS = [
+  'Presented by ACM-VIT and ACM W-VIT, The Neural Hack is a 36-hour hackathon focused on data-centric machine learning.',
+  'Encouraging inclusive participation and empowering diverse voices—especially women in tech—to lead innovation in STEM fields.',
+  'Building a community where technical growth, mentorship, collaboration, and leadership thrive.',
+] as const
+
+function AboutCardBody() {
+  return (
+    <div className="about_cardBody">
+      {BODY_PARAGRAPHS.map((paragraph) => (
+        <p key={paragraph}>{paragraph}</p>
+      ))}
+    </div>
+  )
+}
 
 export default function About() {
   return (
     <main className="about">
-      <button className="about_mail" type="button" aria-label="Mail">
-        <img src={envelopeImg} alt="" className="about_mailIcon" />
-      </button>
-
       <div className="about_cards">
         {/* Section 1 — overlay lives outside the figure so its z-index escapes the filter stacking context */}
         <section className="about_section">
@@ -20,10 +28,10 @@ export default function About() {
             <figure className="about_polaroid about_polaroid--acmw">
               <img src={aboutAcmWImg} alt="ACM-W members group photo" className="about_polaroid-img" />
             </figure>
-            <div className="about_overlay about_overlay--acmw">
+            <figcaption className="about_overlay about_overlay--acmw">
               <h2 className="about_cardTitle">ABOUT ACM - W</h2>
-              <p className="about_cardBody">{BODY_COPY}</p>
-            </div>
+              <AboutCardBody />
+            </figcaption>
           </div>
         </section>
 
@@ -33,10 +41,10 @@ export default function About() {
             <figure className="about_polaroid about_polaroid--acmvit">
               <img src={aboutAcmVitImg} alt="ACM-VIT members group photo" className="about_polaroid-img" />
             </figure>
-            <div className="about_overlay about_overlay--acmvit">
+            <figcaption className="about_overlay about_overlay--acmvit">
               <h2 className="about_cardTitle">ABOUT ACM - VIT</h2>
-              <p className="about_cardBody">{BODY_COPY}</p>
-            </div>
+              <AboutCardBody />
+            </figcaption>
           </div>
         </section>
       </div>
