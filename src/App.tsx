@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import EnvelopeMenu from "./EnvelopeMenu";
 import EnvelopeFooter from './components/EnvelopeFooter';
-import loaderAnimationPath from "./assets/loader.json?url";
-import { LottieAnimation } from "./components/LottieAnimation";
+import loaderAnimationPath from "./assets/Loader.svg";
+
+const cacheBuster = Date.now();
 import About from "./pages/About";
 import BlogStamps from "./pages/BlogStamps";
 import ContributorsSection from "./pages/Contributors";
@@ -15,7 +16,6 @@ import TitleCard from "./components/TitleCard";
 
 import "./App.css";
 
-// Automatically manages showing the navbar when you scroll PAST the landing section
 function GlobalNavbar() {
   const [showNavbar, setShowNavbar] = useState(false);
 
@@ -26,7 +26,6 @@ function GlobalNavbar() {
     const updateNavbarVisibility = () => {
       frameId = null;
       const nextShowNavbar = window.scrollY > window.innerHeight * 0.5;
-
       if (nextShowNavbar !== currentShowNavbar) {
         currentShowNavbar = nextShowNavbar;
         setShowNavbar(nextShowNavbar);
@@ -40,15 +39,11 @@ function GlobalNavbar() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // run once on mount
     updateNavbarVisibility();
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
-
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
     };
   }, []);
 
@@ -69,81 +64,49 @@ export default function App() {
       <GlobalNavbar />
 
       <section id="home" className="fullscreen-lottie">
+        <img
+          src={`${loaderAnimationPath}?t=${cacheBuster}`}
+          alt="Loading animation"
+          className="fullscreen-animation"
+        />
+      </section>
+
+      <section id="about" style={{ position: "relative", zIndex: 20 }}>
+        <About />
+      </section>
+
+      <section className="fullscreen-lottie">
         <LottieAnimation
           animationPath={loaderAnimationPath}
           className="fullscreen-animation"
         />
       </section>
 
-      <section
-        id="about"
-        style={{
-          position: "relative",
-          zIndex: 20,
-        }}
-      >
-        <About />
-      </section>
-
-      <section
-        id="events"
-        style={{
-          position: "relative",
-          zIndex: 20,
-        }}
-      >
+      <section id="events" style={{ position: "relative", zIndex: 20 }}>
         <Events />
       </section>
 
-      <section
-        id="best-chapter"
-        style={{
-          position: "relative",
-          zIndex: 20,
-        }}
-      >
+      <section id="best-chapter" style={{ position: "relative", zIndex: 20 }}>
         <BestChapter />
       </section>
 
-      <section
-        id="blogs"
-        style={{
-          position: "relative",
-          zIndex: 20,
-        }}
-      >
+      <section id="blogs" style={{ position: "relative", zIndex: 20 }}>
         <BlogStamps />
       </section>
 
-      {/* ── Title card reveal — scroll-pinned between Blogs and WomenInStem ── */}
-      <section
-        id="title-card-section"
-        style={{
-          position: "relative",
-          zIndex: 15,
-        }}
-      >
+      <section id="title-card-section" style={{ position: "relative", zIndex: 15 }}>
         <TitleCard />
       </section>
 
       <section
         id="women-in-stem"
-        style={{
-          position: "relative",
-          zIndex: 10,
-          background: "#fff9e9",
-        }}
+        style={{ position: "relative", zIndex: 10, background: "#fff9e9" }}
       >
         <WomenInStem />
       </section>
 
-      <section
-        id="team"
-        style={{
-          position: "relative",
-          zIndex: 5,
-        }}
-      >
+      {/* Higher z-index than women-in-stem so TeamPage always renders on top */}
+      <section id="team" style={{ position: "relative", zIndex: 20 }}>
         <TeamPage />
       </section>
 
