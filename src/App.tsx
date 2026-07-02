@@ -74,13 +74,6 @@ export default function App() {
         <About />
       </section>
 
-      <section className="fullscreen-lottie">
-        <LottieAnimation
-          animationPath={loaderAnimationPath}
-          className="fullscreen-animation"
-        />
-      </section>
-
       <section id="events" style={{ position: "relative", zIndex: 20 }}>
         <Events />
       </section>
