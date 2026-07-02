@@ -72,6 +72,45 @@ body {
   height: min(760px, 88vw) !important;
 }
 
+.globe-soft-edge {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.globe-soft-edge.is-globe-zooming {
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 50%,
+    #000 0%,
+    #000 46%,
+    rgba(0, 0, 0, 0.82) 62%,
+    rgba(0, 0, 0, 0.48) 78%,
+    rgba(0, 0, 0, 0.16) 91%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle at 50% 50%,
+    #000 0%,
+    #000 46%,
+    rgba(0, 0, 0, 0.82) 62%,
+    rgba(0, 0, 0, 0.48) 78%,
+    rgba(0, 0, 0, 0.16) 91%,
+    transparent 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+.globe-soft-edge.is-globe-zooming canvas {
+  -webkit-mask-image: inherit;
+  mask-image: inherit;
+  -webkit-mask-repeat: inherit;
+  mask-repeat: inherit;
+  -webkit-mask-size: inherit;
+  mask-size: inherit;
+}
+
 /* ─── Photo vintage frame ─── */
 .photo-frame {
   box-shadow:
