@@ -13,7 +13,7 @@ export type Globe3DHandle = {
 };
 
 type Globe3DProps = {
-  size?: number;
+  size?: number | string;
   lineColor?: string;
   sphereColor?: string;
   rotationSpeed?: number;
@@ -57,6 +57,7 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
   },
   ref,
 ) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internals = useRef<GlobeInternals>({});
   const autoRotateRef = useRef(true);
@@ -83,12 +84,11 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
   }));
 
   useEffect(() => {
+    const container = containerRef.current;
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!container || !canvas) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -96,7 +96,6 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       alpha: true,
     });
     renderer.setPixelRatio(dpr);
-    renderer.setSize(size, size);
     renderer.setClearColor(0x000000, 0);
 
     const scene = new THREE.Scene();
@@ -109,6 +108,21 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
      */
     const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
     camera.position.z = 3.0;
+
+    const resizeRenderer = () => {
+      const rect = container.getBoundingClientRect();
+      const fallbackSize = typeof size === "number" ? size : 900;
+      const width = Math.max(1, Math.round(rect.width || fallbackSize));
+      const height = Math.max(1, Math.round(rect.height || fallbackSize));
+
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    };
+
+    resizeRenderer();
+    const resizeObserver = new ResizeObserver(resizeRenderer);
+    resizeObserver.observe(container);
 
     const radius = 1;
     const group = new THREE.Group();
@@ -280,6 +294,7 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
 
     return () => {
       cancelAnimationFrame(animationId);
+      resizeObserver.disconnect();
       canvas.removeEventListener("pointerdown", onPointerDown);
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerup", onPointerUp);
@@ -293,6 +308,7 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
 
   return (
     <div
+      ref={containerRef}
       className={className}
       style={{
         width: size,
@@ -309,8 +325,8 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
         ref={canvasRef}
         style={{
           display: "block",
-          width: size,
-          height: size,
+          width: "100%",
+          height: "100%",
           border: "none",
           outline: "none",
         }}

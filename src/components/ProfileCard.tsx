@@ -27,7 +27,7 @@ export default function ProfileCard({
   const isValidLink = (href?: string) => Boolean(href && href !== "#");
   return (
     <article
-      className="team-card relative flex h-[200px] w-[340px] flex-col justify-center border border-[#5d0f14]/60 bg-cover bg-center p-4 shadow-md transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/20 hover:z-10 sm:h-[230px] sm:w-[420px]"
+      className="team-card relative flex aspect-[21/11.5] w-[min(92vw,26.25rem)] flex-col justify-center border border-[#5d0f14]/60 bg-cover bg-center p-[clamp(0.75rem,2.5vw,1rem)] shadow-md transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/20 hover:z-10 sm:w-[min(42vw,26.25rem)]"
       style={{ backgroundImage: `url(${cardBg})` }}
     >
       <div className="relative flex h-full w-full items-stretch">
@@ -46,13 +46,13 @@ export default function ProfileCard({
         <div className="flex w-1/2 flex-col justify-between pl-3 py-2">
           <div>
             <h3
-              className="text-[16px] font-bold leading-tight text-[#2f1b1b] sm:text-[18px]"
+              className="text-[clamp(0.95rem,2.4vw,1.125rem)] font-bold leading-tight text-[#2f1b1b]"
               style={{ fontFamily: "Kovanov, Georgia, serif" }}
             >
               {name}
             </h3>
             <p
-              className="mt-1 text-[13px] text-[#5b4a4a] sm:text-[14px]"
+              className="mt-1 text-[clamp(0.78rem,2vw,0.875rem)] text-[#5b4a4a]"
               style={{ fontFamily: "Quicksand, Arial, sans-serif" }}
             >
               {role}
@@ -70,7 +70,7 @@ export default function ProfileCard({
                 <img
                   src={primaryLink.iconSrc}
                   alt=""
-                  className="h-6 w-6"
+                  className="h-[clamp(1.25rem,4.5vw,1.5rem)] w-[clamp(1.25rem,4.5vw,1.5rem)]"
                 />
               </a>
             )}
@@ -84,7 +84,7 @@ export default function ProfileCard({
                 <img
                   src={secondaryLink.iconSrc}
                   alt=""
-                  className="h-6 w-6"
+                  className="h-[clamp(1.25rem,4.5vw,1.5rem)] w-[clamp(1.25rem,4.5vw,1.5rem)]"
                 />
               </a>
             )}

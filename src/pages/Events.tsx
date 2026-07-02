@@ -41,7 +41,7 @@ function useParallax(speed = 0.15): ParallaxState {
       const normalized = distance / viewportCenter;
 
       setState({
-        offsetY: -normalized * 30 * speed,
+        offsetY: -normalized * 3 * speed,
         opacity: Math.max(0.65, 1 - Math.abs(normalized) * 0.35),
         scale: 1 + (1 - Math.abs(normalized)) * 0.04,
       });
@@ -147,7 +147,7 @@ function StampBorder({ children }: { children: ReactNode }) {
         />
       </svg>
 
-      <div className="absolute inset-[32px] bg-[#F2E8CF]">
+      <div className="absolute inset-[5.333%] bg-[#F2E8CF]">
         {children}
       </div>
     </div>
@@ -167,7 +167,7 @@ function EventStamp({
     <div
       className="aspect-[820/600] w-full transition-[transform,opacity] duration-300 ease-out max-sm:aspect-[1.25]"
       style={{
-        transform: `translateY(${parallax.offsetY}px) scale(${parallax.scale})`,
+        transform: `translateY(${parallax.offsetY}vh) scale(${parallax.scale})`,
         opacity: parallax.opacity,
       }}
     >
@@ -219,12 +219,12 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen bg-[#fff9e9] px-6 py-16 max-sm:px-4 max-sm:py-10">
-      <div className="mx-auto w-full max-w-[1400px]">
+      <div className="mx-auto w-full max-w-[min(92vw,87.5rem)]">
         <h1 className="mb-16 text-center font-[Kovanov,Georgia,serif] text-[clamp(3.5rem,5vw,4rem)] font-bold text-[#5B0F0F] max-sm:mb-8">
           EVENTS
         </h1>
 
-        <div className="flex flex-col gap-16 max-[900px]:gap-12 max-sm:gap-9">
+        <div className="flex flex-col gap-16 max-[56.25rem]:gap-12 max-sm:gap-9">
           {events.map((event, index) => {
             const reverse = index % 2 === 1;
             const parallax = parallaxs[index];
@@ -232,7 +232,7 @@ export default function EventsPage() {
             return (
               <section
                 key={event.title}
-                className={`grid items-center gap-8 max-[900px]:grid-cols-1 ${
+                className={`grid items-center gap-8 max-[56.25rem]:grid-cols-1 ${
                   reverse
                     ? "grid-cols-[0.85fr_1.15fr]"
                     : "grid-cols-[1.15fr_0.85fr]"
@@ -241,11 +241,11 @@ export default function EventsPage() {
                 <div
                   ref={parallax.ref}
                   className={`flex justify-center ${
-                    reverse ? "order-2 max-[900px]:order-none" : ""
+                    reverse ? "order-2 max-[56.25rem]:order-none" : ""
                   }`}
                 >
                   <div
-                    className="w-full max-w-[720px] max-[900px]:max-w-[620px]"
+                    className="w-full max-w-[min(50vw,45rem)] max-[56.25rem]:max-w-[min(86vw,38.75rem)]"
                     style={{
                       transform: `rotate(${reverse ? 8 : -8}deg)`,
                     }}
@@ -259,8 +259,8 @@ export default function EventsPage() {
                 </div>
 
                 <div
-                  className={`max-[900px]:text-center ${
-                    reverse ? "order-1 max-[900px]:order-none" : ""
+                  className={`max-[56.25rem]:text-center ${
+                    reverse ? "order-1 max-[56.25rem]:order-none" : ""
                   }`}
                 >
                   <h2 className="mb-4 text-[clamp(1.5rem,3vw,2rem)] text-[#5B0F0F]">

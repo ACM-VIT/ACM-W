@@ -6,12 +6,7 @@ import { blogs } from "../data/blogs";
 import BlogStampRoll from "./BlogStampRoll";
 import StampBorder from "../components/StampBorder";
 
-const CARD_W = 360;
-const CARD_H = 450;
 const SPREAD = 90;
-const FAN_SPACING = 200;
-const FAN_DROP = 20;
-const FAN_BASE_OFFSET = 28;
 
 function BlogStampsDesktop() {
   const [viewport, setViewport] = useState({ w: 1200, h: 800 });
@@ -34,19 +29,24 @@ function BlogStampsDesktop() {
     const step = SPREAD / (n - 1);
     const angle = -SPREAD / 2 + slot * step;
     const offset = slot - centerSlot;
-    const tx = offset * FAN_SPACING;
-    const ty = Math.abs(offset) * FAN_DROP;
+    const tx = offset * fanSpacing;
+    const ty = Math.abs(offset) * fanDrop;
     const zIndex = 10 - Math.abs(offset);
     return { angle, zIndex, tx, ty };
   };
 
-  const baseSpan = CARD_W + FAN_SPACING * (n - 1);
-  const scale = Math.max(0.6, Math.min(1.2, (viewport.w - 40) / baseSpan));
-  const fanHeight = Math.max(260, Math.min(480, CARD_H * 1.9 * scale));
-  const fanTop = viewport.h - fanHeight - FAN_BASE_OFFSET;
-  const headingTop = Math.max(20, fanTop / 2);
+  const cardW = Math.min(viewport.w * 0.28, viewport.h * 0.42);
+  const cardH = cardW * 1.25;
+  const fanSpacing = viewport.w * 0.145;
+  const fanDrop = viewport.h * 0.025;
+  const fanBaseOffset = viewport.h * 0.035;
+  const baseSpan = cardW + fanSpacing * (n - 1);
+  const scale = Math.max(0.6, Math.min(1.2, (viewport.w * 0.97) / baseSpan));
+  const fanHeight = Math.max(viewport.h * 0.32, Math.min(viewport.h * 0.6, cardH * 1.9 * scale));
+  const fanTop = viewport.h - fanHeight - fanBaseOffset;
+  const headingTop = Math.max(viewport.h * 0.03, fanTop / 2);
   const contentScale = Math.max(0.75, Math.min(1, scale));
-  const imageHeight = Math.round(CARD_H * 0.5 * contentScale);
+  const imageHeight = Math.round(cardH * 0.5 * contentScale);
   const titleSize = 14 * contentScale;
   const authorSize = 10 * contentScale;
   const metaSize = 8 * contentScale;
@@ -60,7 +60,7 @@ function BlogStampsDesktop() {
       const { angle, zIndex, tx, ty } = getFanProps(slot);
       gsap.fromTo(
         el,
-        { y: 300, opacity: 0, rotation: 0, x: 0 },
+        { y: viewport.h * 0.375, opacity: 0, rotation: 0, x: 0 },
         {
           y: ty,
           x: tx,
@@ -102,17 +102,17 @@ function BlogStampsDesktop() {
       if (j === i || !c) return;
       const dir = j < i ? -1 : 1;
       gsap.to(c, {
-        x: dir * 50,
+        x: dir * viewport.w * 0.04,
         opacity: 0.28,
         duration: 0.4,
         ease: "power2.out",
       });
     });
-    const maxScaleW = (viewport.w * 0.72) / (CARD_W * scale);
-    const maxScaleH = (viewport.h * 0.72) / (CARD_H * scale);
+    const maxScaleW = (viewport.w * 0.72) / (cardW * scale);
+    const maxScaleH = (viewport.h * 0.72) / (cardH * scale);
     const targetScale = Math.max(1, Math.min(1.4, maxScaleW, maxScaleH));
     const targetY =
-      (CARD_H * targetScale - viewport.h / scale) / 2;
+      (cardH * targetScale - viewport.h / scale) / 2;
     gsap.to(el, {
       x: 0,
       y: targetY,
@@ -215,7 +215,7 @@ function BlogStampsDesktop() {
     >
       <h2
         style={{
-          fontSize: 50,
+          fontSize: "clamp(2.5rem, 4vw, 3.125rem)",
           fontFamily: "Kovanov, Georgia, serif",
           color: "#580a0a",
           letterSpacing: "0.015em",
@@ -237,8 +237,8 @@ function BlogStampsDesktop() {
         onClick={() => navigate(-1)}
         style={{
           position: "absolute",
-          left: 14,
-          top: `calc(100% - ${fanHeight}px - 24px)`,
+          left: "1.2vw",
+          top: fanTop + viewport.h * 0.005,
           background: "none",
           border: "none",
           cursor: "pointer",
@@ -250,15 +250,15 @@ function BlogStampsDesktop() {
         <img
           src={leftArr}
           alt=""
-          style={{ width: 26, height: 26, display: "block" }}
+          style={{ width: "clamp(1.35rem, 2.2vw, 1.625rem)", aspectRatio: "1 / 1", display: "block" }}
         />
       </button>
       <button
         onClick={() => navigate(1)}
         style={{
           position: "absolute",
-          right: 14,
-          top: `calc(100% - ${fanHeight}px - 24px)`,
+          right: "1.2vw",
+          top: fanTop + viewport.h * 0.005,
           background: "none",
           border: "none",
           cursor: "pointer",
@@ -270,7 +270,7 @@ function BlogStampsDesktop() {
         <img
           src={rightArr}
           alt=""
-          style={{ width: 26, height: 26, display: "block" }}
+          style={{ width: "clamp(1.35rem, 2.2vw, 1.625rem)", aspectRatio: "1 / 1", display: "block" }}
         />
       </button>
 
@@ -289,7 +289,7 @@ function BlogStampsDesktop() {
       <div
         style={{
           position: "absolute",
-          bottom: -FAN_BASE_OFFSET,
+          bottom: -fanBaseOffset,
           left: 0,
           right: 0,
           height: fanHeight,
@@ -322,10 +322,10 @@ function BlogStampsDesktop() {
               }}
               style={{
                 position: "absolute",
-                width: CARD_W,
-                height: CARD_H,
+                width: cardW,
+                height: cardH,
                 bottom: 0,
-                left: -CARD_W / 2,
+                left: -cardW / 2,
                 opacity: 0,
                 transformOrigin: "bottom center",
                 cursor: "pointer",
@@ -339,7 +339,7 @@ function BlogStampsDesktop() {
                   width: "100%",
                   height: "100%",
                   transformStyle: "preserve-3d",
-                  perspective: 900,
+                  perspective: "56rem",
                 }}
               >
                 <div
@@ -374,7 +374,7 @@ function BlogStampsDesktop() {
                           display: "flex",
                           flexDirection: "column",
                           flex: 1,
-                          padding: "8px 8px 6px",
+                          padding: "2.2% 2.2% 1.7%",
                           textAlign: "center",
                         }}
                       >
@@ -386,7 +386,7 @@ function BlogStampsDesktop() {
                             justifyContent: "center",
                             textAlign: "center",
                             flex: 1,
-                            gap: 6,
+                            gap: "2%",
                           }}
                         >
                           <p
@@ -418,7 +418,7 @@ function BlogStampsDesktop() {
                             display: "flex",
                             justifyContent: "space-between",
                             width: "100%",
-                            paddingTop: 4,
+                            paddingTop: "1.2%",
                             fontSize: metaSize,
                             color: "#8b4040",
                             borderTop: "0.5px solid #c8a090",
@@ -446,7 +446,7 @@ function BlogStampsDesktop() {
                         flexDirection: "column",
                         width: "100%",
                         height: "100%",
-                        padding: "10px 8px 8px",
+                        padding: "2.8% 2.2% 2.2%",
                         boxSizing: "border-box",
                       }}
                     >
@@ -456,7 +456,7 @@ function BlogStampsDesktop() {
                           fontWeight: "bold",
                           fontSize: titleSize,
                           color: "#3a1212",
-                          margin: "0 0 6px",
+                          margin: "0 0 1.7%",
                         }}
                       >
                         {blog.title}
@@ -479,7 +479,7 @@ function BlogStampsDesktop() {
                         style={{
                           textAlign: "center",
                           textDecoration: "underline",
-                          marginTop: 8,
+                          marginTop: "2.2%",
                           display: "block",
                           fontSize: linkSize,
                           color: "#6b1a1a",

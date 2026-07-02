@@ -28,9 +28,24 @@ export default function Footer() {
             width: "100%",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 55, width: "max-content", padding: "4px 4px 8px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "clamp(1rem, 4vw, 3.5rem)",
+              width: "max-content",
+              padding: "0.25rem 0.25rem 0.5rem",
+            }}
+          >
             {cards.map((card, index) => (
-              <div key={`${card}-${index}`} style={{ width: 240, height: 240, flexShrink: 0 }}>
+              <div
+                key={`${card}-${index}`}
+                style={{
+                  width: "clamp(8rem, 18vw, 15rem)",
+                  aspectRatio: "1 / 1",
+                  flexShrink: 0,
+                }}
+              >
                 <img
                   src={card}
                   alt=""

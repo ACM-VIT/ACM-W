@@ -7,7 +7,7 @@ export default function BestChapter() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: "100px 24px",
+        padding: "clamp(4rem, 12vh, 6.25rem) clamp(1rem, 4vw, 1.5rem)",
         position: "relative",
         overflow: "hidden",
         width: "100%",
@@ -39,7 +39,7 @@ export default function BestChapter() {
           fontSize: "clamp(1.1rem, 2vw, 1.6rem)",
           color: "#580A0A",
           margin: 0,
-          marginTop: "24px",
+          marginTop: "clamp(1rem, 3vh, 1.5rem)",
           textAlign: "center",
         }}
       >
