@@ -144,7 +144,47 @@ export default function WomenInStem() {
 
       const group = globe.group;
       const camera = globe.camera;
-      const globeEl = globeContainerRef.current!;
+      const globeEl = globeContainerRef.current;
+      const globeSoftEdgeEl = globeEl?.querySelector(
+        ".globe-soft-edge",
+      ) as HTMLElement | null;
+      if (!globeEl || !globeSoftEdgeEl) return;
+      const clearGlobeSoftEdge = () => {
+        globeSoftEdgeEl.classList.remove("is-globe-zooming");
+        globeSoftEdgeEl.style.removeProperty("--globe-edge-alpha-62");
+        globeSoftEdgeEl.style.removeProperty("--globe-edge-alpha-78");
+        globeSoftEdgeEl.style.removeProperty("--globe-edge-alpha-91");
+        globeSoftEdgeEl.style.removeProperty("--globe-edge-alpha-100");
+      };
+      const setGlobeSoftEdge = (progress: number) => {
+        const fadeIn = gsap.utils.clamp(0, 1, (progress - 0.04) / 0.08);
+        const fadeOut = gsap.utils.clamp(0, 1, (0.28 - progress) / 0.08);
+        const rawStrength = Math.min(fadeIn, fadeOut);
+        const strength = rawStrength * rawStrength * (3 - 2 * rawStrength);
+
+        if (strength <= 0.001) {
+          clearGlobeSoftEdge();
+          return;
+        }
+
+        globeSoftEdgeEl.classList.add("is-globe-zooming");
+        globeSoftEdgeEl.style.setProperty(
+          "--globe-edge-alpha-62",
+          (1 - strength * 0.18).toFixed(3),
+        );
+        globeSoftEdgeEl.style.setProperty(
+          "--globe-edge-alpha-78",
+          (1 - strength * 0.52).toFixed(3),
+        );
+        globeSoftEdgeEl.style.setProperty(
+          "--globe-edge-alpha-91",
+          (1 - strength * 0.84).toFixed(3),
+        );
+        globeSoftEdgeEl.style.setProperty(
+          "--globe-edge-alpha-100",
+          (1 - strength).toFixed(3),
+        );
+      };
 
       /* ─── Globe visibility: show while women-in-stem is active ─── */
       ScrollTrigger.create({
@@ -248,16 +288,13 @@ export default function WomenInStem() {
               pin: true,
               anticipatePin: 1,
               onUpdate: (self) => {
-                globeEl.classList.toggle(
-                  "is-globe-zooming",
-                  self.progress > 0.04 && self.progress < 0.28,
-                );
+                setGlobeSoftEdge(self.progress);
               },
               onLeave: () => {
-                globeEl.classList.remove("is-globe-zooming");
+                clearGlobeSoftEdge();
               },
               onLeaveBack: () => {
-                globeEl.classList.remove("is-globe-zooming");
+                clearGlobeSoftEdge();
               },
             },
           });

@@ -75,6 +75,10 @@ body {
 .globe-soft-edge {
   -webkit-mask-image: none;
   mask-image: none;
+  --globe-edge-alpha-62: 0.82;
+  --globe-edge-alpha-78: 0.48;
+  --globe-edge-alpha-91: 0.16;
+  --globe-edge-alpha-100: 0;
 }
 
 .globe-soft-edge.is-globe-zooming {
@@ -82,33 +86,24 @@ body {
     circle at 50% 50%,
     #000 0%,
     #000 46%,
-    rgba(0, 0, 0, 0.82) 62%,
-    rgba(0, 0, 0, 0.48) 78%,
-    rgba(0, 0, 0, 0.16) 91%,
-    transparent 100%
+    rgba(0, 0, 0, var(--globe-edge-alpha-62)) 62%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-78)) 78%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-91)) 91%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-100)) 100%
   );
   mask-image: radial-gradient(
     circle at 50% 50%,
     #000 0%,
     #000 46%,
-    rgba(0, 0, 0, 0.82) 62%,
-    rgba(0, 0, 0, 0.48) 78%,
-    rgba(0, 0, 0, 0.16) 91%,
-    transparent 100%
+    rgba(0, 0, 0, var(--globe-edge-alpha-62)) 62%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-78)) 78%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-91)) 91%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-100)) 100%
   );
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
-}
-
-.globe-soft-edge.is-globe-zooming canvas {
-  -webkit-mask-image: inherit;
-  mask-image: inherit;
-  -webkit-mask-repeat: inherit;
-  mask-repeat: inherit;
-  -webkit-mask-size: inherit;
-  mask-size: inherit;
 }
 
 /* ─── Photo vintage frame ─── */
