@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Constants ─── */
 
-const GLOBE_SIZE = "min(88vw, 88svh, 47.5rem)";
+const GLOBE_SIZE = "min(100vw, 100svh, 58rem)";
 
 const DEG = Math.PI / 180;
 const HALF_PI = Math.PI / 2;

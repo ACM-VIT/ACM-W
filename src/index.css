@@ -68,8 +68,8 @@ body {
 
 .globe-fixed-container > div,
 .globe-fixed-container canvas {
-  width: min(47.5rem, 88vw, 88svh) !important;
-  height: min(47.5rem, 88vw, 88svh) !important;
+  width: min(58rem, 100vw, 100svh) !important;
+  height: min(58rem, 100vw, 100svh) !important;
 }
 
 .globe-soft-edge {
@@ -231,8 +231,8 @@ body {
 
   .globe-fixed-container > div,
   .globe-fixed-container canvas {
-    width: min(32.5rem, 90vw, 90svh) !important;
-    height: min(32.5rem, 90vw, 90svh) !important;
+    width: min(40rem, 98vw, 98svh) !important;
+    height: min(40rem, 98vw, 98svh) !important;
   }
 }
 
@@ -265,7 +265,7 @@ body {
 
   .globe-fixed-container > div,
   .globe-fixed-container canvas {
-    width: min(23.75rem, 92vw, 92svh) !important;
-    height: min(23.75rem, 92vw, 92svh) !important;
+    width: min(29rem, 96vw, 96svh) !important;
+    height: min(29rem, 96vw, 96svh) !important;
   }
 }
