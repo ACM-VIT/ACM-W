@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Constants ─── */
 
-const GLOBE_SIZE = 760;
+const GLOBE_SIZE = "min(88vw, 88svh, 47.5rem)";
 
 const DEG = Math.PI / 180;
 const HALF_PI = Math.PI / 2;
@@ -57,7 +57,7 @@ type ScientistData = {
   focus: { lng: number; lat: number };
   title: string;
   text: string;
-  countryWidth: number;
+  countryWidth: string;
   photoRotation: number;
   /** true when the photo PNG already includes a vintage paper frame */
   hasFrame: boolean;
@@ -71,7 +71,7 @@ const scientists: ScientistData[] = [
     focus: { lng: 79, lat: 22 },
     title: "Astronaut — India",
     text: `Kalpana Chawla was the first woman of Indian origin in space. She served as a mission specialist and primary robotic arm operator on Space Shuttle Columbia. Her journey inspired millions of women to pursue science, aerospace and engineering.`,
-    countryWidth: 520,
+    countryWidth: "min(32.5rem, 36vw)",
     photoRotation: -5,
     hasFrame: false,
   },
@@ -82,7 +82,7 @@ const scientists: ScientistData[] = [
     focus: { lng: 20, lat: 52 },
     title: "Physicist — Poland",
     text: `Marie Curie pioneered research on radioactivity and became the first woman to win a Nobel Prize. She remains the only person to win Nobel Prizes in two scientific fields — Physics and Chemistry.`,
-    countryWidth: 460,
+    countryWidth: "min(28.75rem, 32vw)",
     photoRotation: -3,
     hasFrame: false,
   },
@@ -93,7 +93,7 @@ const scientists: ScientistData[] = [
     focus: { lng: -2, lat: 54 },
     title: "Mathematician — United Kingdom",
     text: `Ada Lovelace is widely regarded as the world's first computer programmer. Her notes on Charles Babbage's Analytical Engine introduced the idea that machines could go beyond calculations and manipulate symbols.`,
-    countryWidth: 400,
+    countryWidth: "min(25rem, 28vw)",
     photoRotation: -6,
     hasFrame: false,
   },
@@ -104,7 +104,7 @@ const scientists: ScientistData[] = [
     focus: { lng: 14, lat: 47.5 },
     title: "Inventor — Austria",
     text: `Hedy Lamarr co-invented a frequency-hopping spread spectrum communication system during World War II that laid the groundwork for modern Wi-Fi, Bluetooth, and GPS technologies. Her dual legacy as a Hollywood icon and brilliant inventor defied every expectation placed upon her.`,
-    countryWidth: 480,
+    countryWidth: "min(30rem, 33.5vw)",
     photoRotation: -4,
     hasFrame: true,
   },
@@ -115,7 +115,7 @@ const scientists: ScientistData[] = [
     focus: { lng: -98, lat: 39 },
     title: "Computer Scientist — United States",
     text: `Margaret Hamilton led the team that developed the on-board flight software for NASA's Apollo missions. Her rigorous approach to software engineering — a term she coined — was critical to the success of the Moon landing and has influenced the discipline ever since.`,
-    countryWidth: 560,
+    countryWidth: "min(35rem, 39vw)",
     photoRotation: -4,
     hasFrame: true,
   },
@@ -267,7 +267,7 @@ export default function WomenInStem() {
             xPercent: -50,
             yPercent: -50,
             opacity: 0,
-            y: mobile ? 20 : 40,
+            y: mobile ? "2vh" : "4vh",
             x: 0,
             rotation: sci.photoRotation,
           });
@@ -275,7 +275,7 @@ export default function WomenInStem() {
             yPercent: mobile ? 0 : -50,
             xPercent: mobile ? -50 : 0,
             opacity: 0,
-            x: mobile ? 0 : 60,
+            x: mobile ? 0 : "4vw",
             y: 0,
           });
 
@@ -378,10 +378,10 @@ export default function WomenInStem() {
       };
 
       matchMedia = gsap.matchMedia();
-      matchMedia.add("(min-width: 769px)", () => {
+      matchMedia.add("(min-width: 48.0625rem)", () => {
         setupScientistTimelines(false);
       });
-      matchMedia.add("(max-width: 768px)", () => {
+      matchMedia.add("(max-width: 48rem)", () => {
         setupScientistTimelines(true);
       });
     }, 120);
@@ -416,7 +416,7 @@ export default function WomenInStem() {
       <section
         ref={heroRef}
         className="relative z-10 h-screen w-full flex flex-col items-center"
-        style={{ paddingTop: "56px" }}
+        style={{ paddingTop: "clamp(3rem, 7vh, 3.5rem)" }}
       >
 
       </section>
@@ -446,7 +446,7 @@ export default function WomenInStem() {
 
           {/* Text */}
           <div
-            className="scientist-text absolute top-1/2 opacity-0 left-[55%] w-[38%] max-w-[560px] max-md:left-1/2 max-md:top-auto max-md:bottom-[16vh] max-md:w-[88vw] max-md:max-w-none max-md:-translate-x-1/2 max-md:translate-y-0 max-md:text-center max-md:z-[3] max-md:px-2 max-[480px]:w-[92vw] max-[480px]:bottom-[14vh]"
+            className="scientist-text absolute top-1/2 opacity-0 left-[55%] w-[38%] max-w-[35rem] max-md:left-1/2 max-md:top-auto max-md:bottom-[16vh] max-md:w-[88vw] max-md:max-w-none max-md:-translate-x-1/2 max-md:translate-y-0 max-md:text-center max-md:z-[3] max-md:px-2 max-[30rem]:w-[92vw] max-[30rem]:bottom-[14vh]"
           >
             <h2 className="scientist-name">{sci.name}</h2>
             <p className="scientist-subtitle">{sci.title}</p>

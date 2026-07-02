@@ -68,8 +68,8 @@ body {
 
 .globe-fixed-container > div,
 .globe-fixed-container canvas {
-  width: min(760px, 88vw) !important;
-  height: min(760px, 88vw) !important;
+  width: min(47.5rem, 88vw, 88svh) !important;
+  height: min(47.5rem, 88vw, 88svh) !important;
 }
 
 .globe-soft-edge {
@@ -114,7 +114,7 @@ body {
 }
 
 .photo-frame--needs-border {
-  padding: 14px 14px 36px 14px;
+  padding: clamp(0.625rem, 1.4vw, 0.875rem) clamp(0.625rem, 1.4vw, 0.875rem) clamp(1.75rem, 3vw, 2.25rem);
   background: linear-gradient(
     155deg,
     #d4c5a0 0%,
@@ -125,7 +125,7 @@ body {
 
 .photo-frame img {
   display: block;
-  width: min(380px, 30vw);
+  width: min(23.75rem, 30vw);
   height: auto;
   object-fit: cover;
 }
@@ -138,16 +138,16 @@ body {
   font-weight: 700;
   line-height: 1.1;
   color: #580a0a;
-  margin: 0 0 16px;
+  margin: 0 0 clamp(0.75rem, 2vh, 1rem);
 }
 
 .scientist-subtitle {
   font-family: Georgia, serif;
   font-size: clamp(0.8rem, 1vw, 0.95rem);
-  letter-spacing: 4px;
+  letter-spacing: 0.25rem;
   text-transform: uppercase;
   color: #7a4444;
-  margin: 0 0 24px;
+  margin: 0 0 clamp(1rem, 2.5vh, 1.5rem);
 }
 
 .scientist-desc {
@@ -162,7 +162,7 @@ body {
 /* Tablet */
 /* ───────────────────────────── */
 
-@media (max-width: 1024px) {
+@media (max-width: 64rem) {
   .scientist-name {
     font-size: 2.8rem;
   }
@@ -173,11 +173,11 @@ body {
   }
 
   .photo-frame img {
-    width: 300px;
+    width: min(18.75rem, 48vw);
   }
 
   .country-img {
-    width: min(420px, 70vw) !important;
+    width: min(26.25rem, 70vw) !important;
   }
 }
 
@@ -185,7 +185,7 @@ body {
 /* Mobile */
 /* ───────────────────────────── */
 
-@media (max-width: 768px) {
+@media (max-width: 48rem) {
   .women-in-stem-hero-title {
     font-size: clamp(1.75rem, 8.5vw, 2.5rem) !important;
     padding: 0 1.25rem;
@@ -198,7 +198,7 @@ body {
   }
 
   .country-img {
-    width: min(300px, 75vw) !important;
+    width: min(18.75rem, 75vw) !important;
   }
 
   .photo-frame {
@@ -206,22 +206,22 @@ body {
   }
 
   .photo-frame--needs-border {
-    padding: 10px 10px 28px;
+    padding: clamp(0.5rem, 2.7vw, 0.625rem) clamp(0.5rem, 2.7vw, 0.625rem) clamp(1.4rem, 7vw, 1.75rem);
   }
 
   .photo-frame img {
-    width: min(220px, 55vw);
+    width: min(13.75rem, 55vw);
   }
 
   .scientist-name {
     font-size: 2rem;
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
   }
 
   .scientist-subtitle {
     font-size: 0.8rem;
-    letter-spacing: 2px;
-    margin-bottom: 14px;
+    letter-spacing: 0.125rem;
+    margin-bottom: 0.875rem;
   }
 
   .scientist-desc {
@@ -231,8 +231,8 @@ body {
 
   .globe-fixed-container > div,
   .globe-fixed-container canvas {
-    width: min(520px, 90vw) !important;
-    height: min(520px, 90vw) !important;
+    width: min(32.5rem, 90vw, 90svh) !important;
+    height: min(32.5rem, 90vw, 90svh) !important;
   }
 }
 
@@ -240,7 +240,7 @@ body {
 /* Small phones */
 /* ───────────────────────────── */
 
-@media (max-width: 480px) {
+@media (max-width: 30rem) {
   .women-in-stem-hero-title {
     font-size: clamp(1.5rem, 7.5vw, 2rem) !important;
     padding: 0 1rem;
@@ -256,16 +256,16 @@ body {
   }
 
   .photo-frame img {
-    width: min(180px, 50vw);
+    width: min(11.25rem, 50vw);
   }
 
   .country-img {
-    width: min(240px, 70vw) !important;
+    width: min(15rem, 70vw) !important;
   }
 
   .globe-fixed-container > div,
   .globe-fixed-container canvas {
-    width: min(380px, 92vw) !important;
-    height: min(380px, 92vw) !important;
+    width: min(23.75rem, 92vw, 92svh) !important;
+    height: min(23.75rem, 92vw, 92svh) !important;
   }
 }

@@ -15,12 +15,12 @@ import womenInStemImg from './assets/womeninstem.svg';
 import teamImg from './assets/team.svg';
 
 const cards = [
-  { id: 1, img: contributorsImg, alt: 'Contributors stamp', link: '#contributors', x: 0, y: -75 },
-  { id: 2, img: aboutAcmwImg, alt: 'About ACM-W stamp', link: '#about', x: 80, y: -35 },
-  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about', x: 80, y: 45 },
-  { id: 4, img: blogsImg, alt: 'Blogs stamp', link: '#blogs', x: 0, y: 85 },
-  { id: 5, img: womenInStemImg, alt: 'Women in STEM stamp', link: '#women-in-stem', x: -80, y: 45 },
-  { id: 6, img: teamImg, alt: 'Team stamp', link: '#team', x: -80, y: -35 },
+  { id: 1, img: contributorsImg, alt: 'Contributors stamp', link: '#contributors', x: "0%", y: "-117%" },
+  { id: 2, img: aboutAcmwImg, alt: 'About ACM-W stamp', link: '#about', x: "84%", y: "-55%" },
+  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about', x: "84%", y: "70%" },
+  { id: 4, img: blogsImg, alt: 'Blogs stamp', link: '#blogs', x: "0%", y: "133%" },
+  { id: 5, img: womenInStemImg, alt: 'Women in STEM stamp', link: '#women-in-stem', x: "-84%", y: "70%" },
+  { id: 6, img: teamImg, alt: 'Team stamp', link: '#team', x: "-84%", y: "-55%" },
 ];
 
 export default function EnvelopeMenu() {
@@ -33,14 +33,14 @@ export default function EnvelopeMenu() {
       // Create the GSAP timeline
       tl.current = gsap.timeline({ paused: true })
         // 1. Shift the entire envelope group DOWN when hovering so cards make way on top
-        .to('.menu-group', { y: 40, duration: 0.15, ease: 'power2.out' }, 0)
+        .to('.menu-group', { yPercent: 83, duration: 0.15, ease: 'power2.out' }, 0)
         // 2. Crossfade the envelope
         .to('.closed-env', { opacity: 0, duration: 0.05 }, 0)
         .to('.open-env', { opacity: 1, duration: 0.05 }, 0)
         // 3. Cards rise straight up out of pocket
         .fromTo('.nav-card', 
           { x: 0, y: 0, scale: 0.3, opacity: 0 },
-          { y: -30, opacity: 1, scale: 0.6, duration: 0.15, stagger: 0.015, ease: 'power3.out' },
+          { y: "-46%", opacity: 1, scale: 0.6, duration: 0.15, stagger: 0.015, ease: 'power3.out' },
           0.02
         )
         // 4. Smooth, lightning fast fan out into the final circle
@@ -70,7 +70,7 @@ export default function EnvelopeMenu() {
       {/* We give it a generous relative wrapper so the hover hit-box covers the cards too */}
       <div
         ref={containerRef}
-        className="relative w-48 h-48"
+        className="relative aspect-square w-[clamp(9rem,18vw,12rem)]"
         onPointerEnter={(e) => {
           if (e.pointerType !== 'touch') {
             setIsHovered(true);
@@ -89,7 +89,7 @@ export default function EnvelopeMenu() {
         }}
       >
         <div className="absolute top-0 left-0 w-full flex justify-center">
-          <div className="menu-group relative w-16 h-12 flex items-center justify-center z-50">
+          <div className="menu-group relative flex h-1/4 w-1/3 items-center justify-center z-50">
             <button
               type="button"
               aria-expanded={isHovered}
@@ -157,9 +157,9 @@ export default function EnvelopeMenu() {
                     }
                   }
                 }}
-                className="nav-card absolute w-24 h-16 flex flex-col items-center justify-center z-0 origin-center transition-transform hover:!scale-110"
+                className="nav-card absolute flex h-1/3 w-1/2 flex-col items-center justify-center z-0 origin-center transition-transform hover:!scale-110"
               >
-                <img src={card.img} alt={card.alt} className="w-[70px] h-[50px] object-contain mix-blend-multiply drop-shadow-sm" />
+                <img src={card.img} alt={card.alt} className="h-[78%] w-[73%] object-contain mix-blend-multiply drop-shadow-sm" />
               </a>
             ))}
 
