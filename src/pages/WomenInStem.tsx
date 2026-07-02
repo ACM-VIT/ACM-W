@@ -247,6 +247,18 @@ export default function WomenInStem() {
               scrub: 1,
               pin: true,
               anticipatePin: 1,
+              onUpdate: (self) => {
+                globeEl.classList.toggle(
+                  "is-globe-zooming",
+                  self.progress > 0.04 && self.progress < 0.28,
+                );
+              },
+              onLeave: () => {
+                globeEl.classList.remove("is-globe-zooming");
+              },
+              onLeaveBack: () => {
+                globeEl.classList.remove("is-globe-zooming");
+              },
             },
           });
 
@@ -275,7 +287,7 @@ export default function WomenInStem() {
             0.5,
           );
 
-          tl.to(globeEl, { opacity: 0, duration: 1.8 }, 2.8);
+          tl.to(globeEl, { opacity: 0, duration: 2.6, ease: "power1.inOut" }, 1.4);
           tl.to(
             countryImg,
             {
@@ -352,6 +364,7 @@ export default function WomenInStem() {
       <div ref={globeContainerRef} className="globe-fixed-container">
         <Globe3D
           ref={globeRef}
+          className="globe-soft-edge"
           size={GLOBE_SIZE}
           lineColor="#5d0f14"
           sphereColor="#fff9e9"
