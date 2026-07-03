@@ -57,13 +57,12 @@ export default function EnvelopeFooter() {
       from_email:   formData.email,
       phone:        formData.phone,
       message:      formData.message,
-      to_email:     'jahnavisingh512@gmail.com',
+      to_email:     'outreach.acmvit@gmail.com',
     };
 
     try {
       await emailjs.send(serviceId, templateId, templateParams, { publicKey });
       setStatus('success');
-      setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (err: unknown) {
       console.error('EmailJS error:', err);
       if (err instanceof Error) {
@@ -416,7 +415,7 @@ export default function EnvelopeFooter() {
                     disabled={status === 'loading'}
                   >
                     {status === 'loading' && 'Sending…'}
-                    {status === 'success' && 'Sent'}
+                    {status === 'success' && 'thank you'}
                     {status === 'error'   && 'Try again'}
                     {status === 'idle'    && 'Submit'}
                   </button>
