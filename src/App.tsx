@@ -13,7 +13,6 @@ import TeamPage from "./pages/TeamPage";
 import WomenInStem from "./pages/WomenInStem";
 import Footer from "./components/Footer";
 import TitleCard from "./components/TitleCard";
-import LottieAnimation from "./components/LottieAnimation";
 
 import "./App.css";
 
