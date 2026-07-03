@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import EnvelopeMenu from "./EnvelopeMenu";
+import EnvelopeFooter from './components/EnvelopeFooter';
 import loaderAnimationPath from "./assets/Loader.svg";
 
 const cacheBuster = Date.now();
@@ -102,11 +103,27 @@ export default function App() {
         <TeamPage />
       </section>
 
-      <section id="contributors" style={{ position: "relative", zIndex: 1 }}>
+      <section
+        id="contributors"
+        style={{
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         <ContributorsSection />
       </section>
 
-      <Footer />
+        <Footer />
+        
+      <section
+        id="envelope-footer"
+        style={{
+          position: "relative",
+          zIndex: 0,
+        }}
+      >
+        <EnvelopeFooter />
+      </section>
     </main>
   );
 }
