@@ -368,7 +368,7 @@ export default function TeamPage() {
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-6">
         <h2
-          className="text-center text-[32px] font-bold tracking-[0.08em] sm:text-[40px]"
+          className="text-center text-[clamp(2rem,5vw,2.5rem)] font-bold tracking-[0.08em]"
           style={{
             fontFamily: "Kovanov, Georgia, serif",
             fontWeight: 700,

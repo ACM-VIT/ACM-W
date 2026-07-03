@@ -36,7 +36,7 @@ export default function BlogStampRoll() {
       style={{
         minHeight: "100vh",
         background: "#FFF9E9",
-        padding: "20px 12px 30px",
+        padding: "clamp(1rem, 3vh, 1.25rem) clamp(0.75rem, 3vw, 1rem) clamp(1.5rem, 4vh, 1.875rem)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -52,8 +52,8 @@ export default function BlogStampRoll() {
           fontWeight: "bold",
           lineHeight: "normal",
           textTransform: "uppercase",
-          fontSize: 32,
-          marginBottom: 20,
+          fontSize: "clamp(2rem, 8vw, 2.4rem)",
+          marginBottom: "clamp(1rem, 3vh, 1.25rem)",
         }}
       >
         Blogs
@@ -87,8 +87,8 @@ export default function BlogStampRoll() {
               <div
                 style={{
                   width: "88vw",
-                  maxWidth: 340,
-                  height: 460,
+                  maxWidth: "21.25rem",
+                  height: "min(72svh, 135vw)",
                 }}
               >
                 <StampBorder>
@@ -106,7 +106,7 @@ export default function BlogStampRoll() {
                       draggable={false}
                       style={{
                         width: "100%",
-                        height: 220,
+                        height: "48%",
                         objectFit: "cover",
                       }}
                     />
@@ -116,7 +116,7 @@ export default function BlogStampRoll() {
                         flex: 1,
                         display: "flex",
                         flexDirection: "column",
-                        padding: 12,
+                        padding: "3.5%",
                       }}
                     >
                       <h3
@@ -124,7 +124,7 @@ export default function BlogStampRoll() {
                           margin: 0,
                           textAlign: "center",
                           color: "#3a1212",
-                          fontSize: 16,
+                          fontSize: "clamp(0.95rem, 4.2vw, 1rem)",
                           lineHeight: 1.3,
                         }}
                       >
@@ -133,12 +133,12 @@ export default function BlogStampRoll() {
 
                       <p
                         style={{
-                          marginTop: 8,
-                          marginBottom: 12,
+                          marginTop: "2.3%",
+                          marginBottom: "3.5%",
                           textAlign: "center",
                           fontStyle: "italic",
                           color: "#6b1a1a",
-                          fontSize: 12,
+                          fontSize: "clamp(0.72rem, 3.2vw, 0.75rem)",
                         }}
                       >
                         By: {blog.author}
@@ -148,9 +148,9 @@ export default function BlogStampRoll() {
                         style={{
                           display: "flex",
                           justifyContent: "space-between",
-                          fontSize: 11,
+                          fontSize: "clamp(0.66rem, 3vw, 0.7rem)",
                           color: "#8b4040",
-                          marginBottom: 10,
+                          marginBottom: "3%",
                         }}
                       >
                         <span>{blog.date}</span>
@@ -162,7 +162,7 @@ export default function BlogStampRoll() {
                           flex: 1,
                           margin: 0,
                           overflow: "hidden",
-                          fontSize: 12,
+                          fontSize: "clamp(0.72rem, 3.2vw, 0.75rem)",
                           lineHeight: 1.6,
                           color: "#3a1212",
                         }}
@@ -176,10 +176,10 @@ export default function BlogStampRoll() {
                         rel="noreferrer"
                         style={{
                           textAlign: "center",
-                          marginTop: 12,
+                          marginTop: "3.5%",
                           color: "#6b1a1a",
                           textDecoration: "underline",
-                          fontSize: 13,
+                          fontSize: "clamp(0.78rem, 3.4vw, 0.82rem)",
                         }}
                       >
                         Read more →
@@ -203,10 +203,10 @@ export default function BlogStampRoll() {
             border: "none",
             background: "transparent",
             cursor: "pointer",
-            padding: 4,
+            padding: "1%",
           }}
         >
-          <img src={leftArr} alt="" style={{ width: 22, height: 22 }} />
+          <img src={leftArr} alt="" style={{ width: "clamp(1.25rem, 5vw, 1.375rem)", aspectRatio: "1 / 1" }} />
         </button>
 
         <button
@@ -220,18 +220,18 @@ export default function BlogStampRoll() {
             border: "none",
             background: "transparent",
             cursor: "pointer",
-            padding: 4,
+            padding: "1%",
           }}
         >
-          <img src={rightArr} alt="" style={{ width: 22, height: 22 }} />
+          <img src={rightArr} alt="" style={{ width: "clamp(1.25rem, 5vw, 1.375rem)", aspectRatio: "1 / 1" }} />
         </button>
       </div>
 
       <div
         style={{
           display: "flex",
-          gap: 8,
-          marginTop: 18,
+          gap: "0.5rem",
+          marginTop: "clamp(1rem, 3vh, 1.125rem)",
         }}
       >
         {blogs.map((_, idx) => (
@@ -239,8 +239,8 @@ export default function BlogStampRoll() {
             key={idx}
             onClick={() => setCurrent(idx)}
             style={{
-              width: 8,
-              height: 8,
+              width: "0.5rem",
+              aspectRatio: "1 / 1",
               borderRadius: "50%",
               border: "none",
               padding: 0,
@@ -253,10 +253,10 @@ export default function BlogStampRoll() {
 
       <div
         style={{
-          marginTop: 8,
+          marginTop: "0.5rem",
           color: "#6b1212",
           fontWeight: 600,
-          fontSize: 13,
+          fontSize: "0.8125rem",
         }}
       >
         {current + 1} / {blogs.length}

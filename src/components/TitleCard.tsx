@@ -6,9 +6,55 @@ import type { Globe3DHandle } from "../assets/globe_3d";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const GLOBE_SIZE = 660;
+const GLOBE_SIZE = "min(74vw, 74svh, 41.25rem)";
 const FONT = "'Playfair Display', Georgia, serif";
 const COLOR = "#5a0a10";
+
+function TextBlock({ flip = false }: { flip?: boolean }) {
+  const smallSz = "clamp(5.5rem, 9vw, 7.6rem)";
+  const largeSz = "clamp(13rem, 21vw, 18.4rem)";
+
+  const smallStyle: React.CSSProperties = {
+    fontFamily: FONT,
+    fontWeight: 900,
+    fontSize: smallSz,
+    letterSpacing: "-0.03em",
+    color: COLOR,
+    lineHeight: 0.95,
+    whiteSpace: "nowrap",
+    display: "block",
+  };
+
+  const largeStyle: React.CSSProperties = {
+    fontFamily: FONT,
+    fontWeight: 900,
+    fontSize: largeSz,
+    letterSpacing: "-0.04em",
+    color: COLOR,
+    lineHeight: 0.88,
+    whiteSpace: "nowrap",
+    display: "flex",
+    alignItems: "center",
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: flip ? "row-reverse" : "row",
+        alignItems: "center",
+        gap: "clamp(0.375rem, 1.2vw, 1.125rem)",
+      }}
+    >
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={smallStyle}>WOMEN</span>
+        <span style={smallStyle}>STEM</span>
+      </div>
+
+      <span style={largeStyle}>IN</span>
+    </div>
+  );
+}
 
 /**
  * TitleCard — Scroll-pinned full-screen reveal between Blogs and WomenInStem.
@@ -85,59 +131,6 @@ export default function TitleCard() {
     };
   }, []);
 
-  /**
-   * The two-column text block:
-   *   Left col: WOMEN (top) + STEM (bottom)  — smaller size
-   *   Right col: IN                           — large size, spans both rows
-   */
-  function TextBlock({ flip = false }: { flip?: boolean }) {
-    const smallSz = "calc(clamp(38px, 5.5vw, 72px) + 50px)";
-    const largeSz = "calc(clamp(80px, 12vw, 155px) + 140px)";
-
-    const smallStyle: React.CSSProperties = {
-      fontFamily: FONT,
-      fontWeight: 900,
-      fontSize: smallSz,
-      letterSpacing: "-0.03em",
-      color: COLOR,
-      lineHeight: 0.95,
-      whiteSpace: "nowrap",
-      display: "block",
-    };
-
-    const largeStyle: React.CSSProperties = {
-      fontFamily: FONT,
-      fontWeight: 900,
-      fontSize: largeSz,
-      letterSpacing: "-0.04em",
-      color: COLOR,
-      lineHeight: 0.88,
-      whiteSpace: "nowrap",
-      display: "flex",
-      alignItems: "center",
-    };
-
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: flip ? "row-reverse" : "row",
-          alignItems: "center",
-          gap: "clamp(6px, 1.2vw, 18px)",
-        }}
-      >
-        {/* Left (or right when flipped) column: WOMEN + STEM stacked */}
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span style={smallStyle}>WOMEN</span>
-          <span style={smallStyle}>STEM</span>
-        </div>
-
-        {/* Right (or left when flipped) column: IN tall */}
-        <span style={largeStyle}>IN</span>
-      </div>
-    );
-  }
-
   return (
     <div
       ref={sectionRef}
@@ -158,7 +151,7 @@ export default function TitleCard() {
           inset: 0,
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.12'/%3E%3C/svg%3E")`,
           backgroundRepeat: "repeat",
-          backgroundSize: "300px 300px",
+          backgroundSize: "18.75rem 18.75rem",
           mixBlendMode: "multiply",
           pointerEvents: "none",
           zIndex: 0,
@@ -183,7 +176,7 @@ export default function TitleCard() {
         ref={topBlockRef}
         style={{
           position: "absolute",
-          top: "clamp(12px, 4vh, 48px)",
+          top: "clamp(0.75rem, 4vh, 3rem)",
           left: 0,
           zIndex: 2,
           userSelect: "none",
@@ -200,7 +193,7 @@ export default function TitleCard() {
         ref={botBlockRef}
         style={{
           position: "absolute",
-          bottom: "clamp(12px, 4vh, 48px)",
+          bottom: "clamp(0.75rem, 4vh, 3rem)",
           right: 0,
           zIndex: 2,
           userSelect: "none",
