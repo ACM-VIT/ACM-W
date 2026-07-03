@@ -173,37 +173,42 @@
   min-height: 0;
 }
 
-/* Each field row */
+/* Each field row — label + input share one baseline */
 .brown-card__field {
   width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  border-bottom: 1px solid rgba(74, 40, 20, 0.35);
 }
 
 .brown-card__label {
-  display: block;
+  display: inline;
+  flex-shrink: 0;
   font-family: 'Playfair Display', 'Georgia', serif;
   font-size: clamp(0.55rem, 1.8vw, 0.75rem);
   font-weight: 600;
   color: #3a2a1a;
-  margin-bottom: 1px;
   line-height: 1.2;
+  padding-bottom: 2px;
 }
 
-/* Inputs styled as underlines on the card */
+/* Inputs fill remaining row width; border is on the parent .brown-card__field */
 .brown-card__input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(74, 40, 20, 0.35);
   outline: none;
   font-family: 'Playfair Display', 'Georgia', serif;
   font-size: clamp(0.55rem, 1.6vw, 0.7rem);
   color: #3a2a1a;
-  padding: 2px 0;
+  padding: 2px 4px;
   box-sizing: border-box;
   transition: border-color 0.2s ease;
 }
 
-.brown-card__input:focus {
+.brown-card__field:focus-within {
   border-bottom-color: #580A0A;
 }
 

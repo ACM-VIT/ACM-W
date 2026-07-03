@@ -121,6 +121,7 @@ export default function EnvelopeFooter() {
           pin: pinContainer,
           pinSpacing: false,
           anticipatePin: 1,
+          
         },
       });
 
