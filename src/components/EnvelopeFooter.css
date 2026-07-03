@@ -60,6 +60,7 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform-style: preserve-3d;
+  pointer-events: none; /* Prevent invisible 3D layers from swallowing clicks */
 }
 
 /* -----------------------------------------------
@@ -101,6 +102,7 @@
   transform: translateZ(-10px);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  pointer-events: none;
 }
 
 .envelope-interior img {
@@ -223,6 +225,20 @@
 
 .brown-card__input::placeholder {
   color: rgba(58, 42, 26, 0.4);
+}
+
+/* Kill Chrome's autofill white/blue background.
+   Chrome forces its own background via internal !important styles —
+   the only override is a massive inset box-shadow that covers it. */
+.brown-card__input:-webkit-autofill,
+.brown-card__input:-webkit-autofill:hover,
+.brown-card__input:-webkit-autofill:focus,
+.brown-card__input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: #3a2a1a !important;
+  background-color: transparent !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Textarea — no resize, minimal height */

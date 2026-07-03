@@ -45,25 +45,30 @@ export default function EnvelopeFooter() {
     e.preventDefault();
     setStatus('loading');
 
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+    // Debug: verify Vite loaded the env vars (check browser console)
+    console.log('EmailJS config:', { serviceId, templateId, publicKey: publicKey ? '✓ set' : '✗ MISSING' });
+
     const templateParams = {
       from_name:    formData.name,
       from_email:   formData.email,
       phone:        formData.phone,
       message:      formData.message,
-      to_email:     'outreach.acmvit@gmail.com',
+      to_email:     'jahnavisingh512@gmail.com',
     };
 
     try {
-      await emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-        templateParams,
-        { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
-      );
+      await emailjs.send(serviceId, templateId, templateParams, { publicKey });
       setStatus('success');
       setFormData({ name: '', email: '', phone: '', message: '' });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('EmailJS error:', err);
+      if (err instanceof Error) {
+        console.error('Error message:', err.message);
+      }
       setStatus('error');
     }
   };
@@ -131,6 +136,7 @@ export default function EnvelopeFooter() {
         y: -185,
         scale: 0.80,
         z: 1.2,
+        
       });
 
       // Wrapper: no rotation yet
@@ -147,8 +153,6 @@ export default function EnvelopeFooter() {
           pin: pinContainer,
           pinSpacing: false,
           anticipatePin: 1,
-
-
         },
       });
 
@@ -412,7 +416,7 @@ export default function EnvelopeFooter() {
                     disabled={status === 'loading'}
                   >
                     {status === 'loading' && 'Sending…'}
-                    {status === 'success' && 'Sent ✓'}
+                    {status === 'success' && 'Sent'}
                     {status === 'error'   && 'Try again'}
                     {status === 'idle'    && 'Submit'}
                   </button>

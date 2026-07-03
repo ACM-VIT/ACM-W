@@ -120,7 +120,7 @@ export default function App() {
         id="envelope-footer"
         style={{
           position: "relative",
-          zIndex: 20,
+          zIndex: 0,
         }}
       >
         <EnvelopeFooter />
