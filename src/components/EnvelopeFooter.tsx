@@ -135,7 +135,7 @@ export default function EnvelopeFooter() {
         y: -185,
         scale: 0.80,
         z: 1.2,
-        
+
       });
 
       // Wrapper: no rotation yet
@@ -467,19 +467,19 @@ export default function EnvelopeFooter() {
                 </div>
 
                 <div className="back-face__social-row">
-                  <a href="#" target="_blank" rel="noopener noreferrer">
+                  <a href="https://github.com/ACM-VIT" target="_blank" rel="noopener noreferrer">
                     <img src={githubIcon} alt="GitHub" className="back-face__social-icon" draggable={false} />
                   </a>
-                  <a href="#" target="_blank" rel="noopener noreferrer">
+                  <a href="https://www.facebook.com/acmvitvellore/" target="_blank" rel="noopener noreferrer">
                     <img src={facebookIcon} alt="Facebook" className="back-face__social-icon" draggable={false} />
                   </a>
-                  <a href="#" target="_blank" rel="noopener noreferrer">
+                  <a href="https://www.instagram.com/acmwvit/" target="_blank" rel="noopener noreferrer">
                     <img src={instaIcon} alt="Instagram" className="back-face__social-icon" draggable={false} />
                   </a>
                   <a href="#" target="_blank" rel="noopener noreferrer">
                     <img src={twitterIcon} alt="Twitter / X" className="back-face__social-icon" draggable={false} />
                   </a>
-                  <a href="#" target="_blank" rel="noopener noreferrer">
+                  <a href="https://www.linkedin.com/company/acmw-vit/?originalSubdomain=in" target="_blank" rel="noopener noreferrer">
                     <img src={linkedInIcon} alt="LinkedIn" className="back-face__social-icon" draggable={false} />
                   </a>
                   <a href="#" target="_blank" rel="noopener noreferrer">
