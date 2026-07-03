@@ -1,4 +1,5 @@
 import { useRef, useLayoutEffect, useState, type FormEvent } from 'react';
+import emailjs from '@emailjs/browser';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './EnvelopeFooter.css';
@@ -37,10 +38,34 @@ export default function EnvelopeFooter() {
     message: '',
   });
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  type FormStatus = 'idle' | 'loading' | 'success' | 'error';
+  const [status, setStatus] = useState<FormStatus>('idle');
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // TODO: Integrate email service (e.g. EmailJS, Resend, or backend API)
+    setStatus('loading');
+
+    const templateParams = {
+      from_name:    formData.name,
+      from_email:   formData.email,
+      phone:        formData.phone,
+      message:      formData.message,
+      to_email:     'outreach.acmvit@gmail.com',
+    };
+
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        templateParams,
+        { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
+      );
+      setStatus('success');
+      setFormData({ name: '', email: '', phone: '', message: '' });
+    } catch (err) {
+      console.error('EmailJS error:', err);
+      setStatus('error');
+    }
   };
 
   const handleChange = (field: string, value: string) => {
@@ -113,6 +138,7 @@ export default function EnvelopeFooter() {
 
       // ---- Master ScrollTrigger timeline ----
       const tl = gsap.timeline({
+
         scrollTrigger: {
           trigger: section,
           start: 'top top',
@@ -121,7 +147,8 @@ export default function EnvelopeFooter() {
           pin: pinContainer,
           pinSpacing: false,
           anticipatePin: 1,
-          
+
+
         },
       });
 
@@ -149,6 +176,7 @@ export default function EnvelopeFooter() {
           scale: 1.1,
           duration: 2,
           ease: 'power2.inOut',
+          
         },
         1.5
       );
@@ -378,7 +406,16 @@ export default function EnvelopeFooter() {
                     />
                   </div>
 
-                  <button type="submit" className="brown-card__submit">Submit</button>
+                  <button
+                    type="submit"
+                    className={`brown-card__submit brown-card__submit--${status}`}
+                    disabled={status === 'loading'}
+                  >
+                    {status === 'loading' && 'Sending…'}
+                    {status === 'success' && 'Sent ✓'}
+                    {status === 'error'   && 'Try again'}
+                    {status === 'idle'    && 'Submit'}
+                  </button>
                 </form>
               </div>
 

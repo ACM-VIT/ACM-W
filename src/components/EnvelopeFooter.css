@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible; /* Must NOT be hidden — clips pointer events on the scaled card */
   background-color: #e6ddd0;
   /* Match the site's dot texture background */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' fill='%23e6ddd0'/%3E%3Cg fill='%234a1010' fill-opacity='0.05'%3E%3Ccircle cx='18' cy='24' r='1'/%3E%3Ccircle cx='62' cy='41' r='1'/%3E%3Ccircle cx='121' cy='29' r='1'/%3E%3Ccircle cx='33' cy='86' r='1'/%3E%3Ccircle cx='95' cy='74' r='1'/%3E%3Ccircle cx='142' cy='98' r='1'/%3E%3Ccircle cx='49' cy='131' r='1'/%3E%3Ccircle cx='109' cy='143' r='1'/%3E%3Ccircle cx='149' cy='151' r='1'/%3E%3C/g%3E%3C/svg%3E");
@@ -122,9 +122,13 @@
   z-index: 3;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  pointer-events: auto;
 }
 
-/* Background texture — fills the card, sits behind the form */
+/* Background texture — fills the card, sits behind the form.
+   pointer-events: none is critical: in a preserve-3d stacking context
+   this image would otherwise absorb clicks before they reach the
+   absolutely-positioned form overlay above it. */
 .brown-card__bg {
   display: block;
   width: 100%;
@@ -132,6 +136,7 @@
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(74, 16, 16, 0.2);
+  pointer-events: none;
 }
 
 /* Form overlay — MUST stay within bg image bounds.
@@ -149,6 +154,7 @@
   padding: 6% 8%;
   box-sizing: border-box;
   overflow: hidden;
+  pointer-events: auto;
 }
 
 /* "CONTACT US" header — strict #580A0A */
@@ -191,6 +197,7 @@
   color: #3a2a1a;
   line-height: 1.2;
   padding-bottom: 2px;
+  
 }
 
 /* Inputs fill remaining row width; border is on the parent .brown-card__field */
@@ -206,6 +213,8 @@
   padding: 2px 4px;
   box-sizing: border-box;
   transition: border-color 0.2s ease;
+  pointer-events: auto;
+  cursor: text;
 }
 
 .brown-card__field:focus-within {
@@ -246,6 +255,19 @@
 
 .brown-card__submit:active {
   transform: scale(0.98);
+}
+
+.brown-card__submit--loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.brown-card__submit--success {
+  background-color: #2d6a2d;
+}
+
+.brown-card__submit--error {
+  background-color: #8b1a1a;
 }
 
 /* Layer 4: Envelope pocket (front red pocket).
