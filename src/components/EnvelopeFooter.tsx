@@ -49,8 +49,15 @@ export default function EnvelopeFooter() {
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-    // Debug: verify Vite loaded the env vars (check browser console)
-    console.log('EmailJS config:', { serviceId, templateId, publicKey: publicKey ? '✓ set' : '✗ MISSING' });
+    if (!serviceId || !templateId || !publicKey) {
+      console.error('Missing EmailJS config: set VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, and VITE_EMAILJS_PUBLIC_KEY.');
+      setStatus('error');
+      return;
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('EmailJS config loaded', { serviceId, templateId, publicKey: 'set' });
+    }
 
     const templateParams = {
       from_name:    formData.name,
