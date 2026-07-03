@@ -254,6 +254,7 @@ export default function EnvelopeFooter() {
           duration: 1.0,
           ease: 'power2.inOut',
           scale: 0.80,
+          
         },
         10
       );

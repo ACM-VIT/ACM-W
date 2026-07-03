@@ -175,3 +175,5 @@ export function LottieAnimation({
     </div>
   )
 }
+
+export default LottieAnimation
