@@ -176,6 +176,26 @@ function BlogStampsDesktop() {
     setIsFlipped(false);
   };
 
+  const hoverCard = (cardIdx: number, entering: boolean) => {
+    if (activeIdx !== null) return;
+    const el = cardRefs.current[cardIdx];
+    const slot = order.indexOf(cardIdx);
+    if (!el || slot < 0) return;
+    const { ty } = getFanProps(slot);
+    gsap.to(el, {
+      y: entering ? ty - cardH * 0.05 : ty,
+      duration: 0.35,
+      ease: "power2.out",
+    });
+  };
+
+  const hint =
+    activeIdx === null
+      ? "tap a card to read more"
+      : !isFlipped
+        ? "tap again"
+        : "";
+
   const handleCardClick = (cardIdx: number) => {
     if (activeIdx === null) zoomCard(cardIdx);
     else if (activeIdx === cardIdx) {
@@ -213,25 +233,56 @@ function BlogStampsDesktop() {
         userSelect: "none",
       }}
     >
-      <h2
+      <style>{`
+        @keyframes blog-hint-in {
+          from { opacity: 0; transform: translateY(0.25rem); }
+          to { opacity: 0.8; transform: none; }
+        }
+      `}</style>
+
+      <div
         style={{
-          fontSize: "clamp(2.5rem, 4vw, 3.125rem)",
-          fontFamily: "Kovanov, Georgia, serif",
-          color: "#580a0a",
-          letterSpacing: "0.015em",
-          fontWeight: "bold",
-          lineHeight: "normal",
-          textTransform: "uppercase",
           position: "absolute",
           top: headingTop,
-          margin: 0,
-          filter: activeIdx !== null ? "blur(6px)" : "none",
-          opacity: activeIdx !== null ? 0.35 : 1,
-          transition: "filter 0.25s ease, opacity 0.25s ease",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          zIndex: 30,
+          pointerEvents: "none",
         }}
       >
-        Blogs
-      </h2>
+        <h2
+          style={{
+            fontSize: "clamp(2.5rem, 4vw, 3.125rem)",
+            fontFamily: "Kovanov, Georgia, serif",
+            color: "#580a0a",
+            letterSpacing: "0.015em",
+            fontWeight: "bold",
+            lineHeight: "normal",
+            textTransform: "uppercase",
+            margin: 0,
+            filter: activeIdx !== null ? "blur(6px)" : "none",
+            opacity: activeIdx !== null ? 0.35 : 1,
+            transition: "filter 0.25s ease, opacity 0.25s ease",
+          }}
+        >
+          Blogs
+        </h2>
+        <p
+          key={hint}
+          style={{
+            margin: "0.55rem 0 0",
+            fontStyle: "italic",
+            fontSize: "clamp(0.72rem, 0.95vw, 0.85rem)",
+            letterSpacing: "0.05em",
+            color: "#8b4040",
+            opacity: 0,
+            animation: hint ? "blog-hint-in 0.7s ease 0.5s both" : "none",
+          }}
+        >
+          {hint || " "}
+        </p>
+      </div>
 
       <button
         onClick={() => navigate(-1)}
@@ -320,6 +371,8 @@ function BlogStampsDesktop() {
                 e.stopPropagation();
                 handleCardClick(cardIdx);
               }}
+              onMouseEnter={() => hoverCard(cardIdx, true)}
+              onMouseLeave={() => hoverCard(cardIdx, false)}
               style={{
                 position: "absolute",
                 width: cardW,
