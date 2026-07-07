@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import EnvelopeMenu from "./EnvelopeMenu";
 import EnvelopeFooter from './components/EnvelopeFooter';
-import loaderAnimationPath from "./assets/Loader.svg";
-
-const cacheBuster = Date.now();
+import PostcardLoader from "./components/PostcardLoader";
 import About from "./pages/About";
 import BlogStamps from "./pages/BlogStamps";
 import ContributorsSection from "./pages/Contributors";
@@ -64,11 +62,7 @@ export default function App() {
       <GlobalNavbar />
 
       <section id="home" className="fullscreen-lottie">
-        <img
-          src={`${loaderAnimationPath}?t=${cacheBuster}`}
-          alt="Loading animation"
-          className="fullscreen-animation"
-        />
+        <PostcardLoader />
       </section>
 
       <section id="about" style={{ position: "relative", zIndex: 20 }}>
