@@ -17,9 +17,9 @@ import teamImg from './assets/team.svg';
 const cards = [
   { id: 1, img: contributorsImg, alt: 'Contributors stamp', link: '#contributors', x: "0%", y: "-117%" },
   { id: 2, img: aboutAcmwImg, alt: 'About ACM-W stamp', link: '#about', x: "84%", y: "-55%" },
-  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about', x: "84%", y: "70%" },
+  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about-acm', x: "84%", y: "70%" },
   { id: 4, img: blogsImg, alt: 'Blogs stamp', link: '#blogs', x: "0%", y: "133%" },
-  { id: 5, img: womenInStemImg, alt: 'Women in STEM stamp', link: '#women-in-stem', x: "-84%", y: "70%" },
+  { id: 5, img: womenInStemImg, alt: 'Women in STEM stamp', link: '#title-card-section', x: "-84%", y: "70%" },
   { id: 6, img: teamImg, alt: 'Team stamp', link: '#team', x: "-84%", y: "-55%" },
 ];
 

@@ -34,7 +34,7 @@ export default function About() {
           </div>
         </section>
 
-        <section className="about_section about_section--top">
+        <section id="about-acm" className="about_section about_section--top">
           <div className="about_card-wrap about_card-wrap--acmvit">
             <figure className="about_polaroid about_polaroid--acmvit">
               <img src={aboutAcmVitImg} alt="ACM-VIT members group photo" className="about_polaroid-img" />
