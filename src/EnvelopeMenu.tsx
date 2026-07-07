@@ -88,7 +88,9 @@ export default function EnvelopeMenu() {
           }
         }}
       >
-        <div className="absolute top-0 left-0 w-full flex justify-center">
+        {/* h-full is load-bearing: menu-group and the cards are sized in
+            percentages, which collapse to 0 against an auto-height parent */}
+        <div className="absolute top-0 left-0 h-full w-full flex justify-center">
           <div className="menu-group relative flex h-1/4 w-1/3 items-center justify-center z-50">
             <button
               type="button"
@@ -157,7 +159,7 @@ export default function EnvelopeMenu() {
                     }
                   }
                 }}
-                className="nav-card absolute flex h-1/3 w-1/2 flex-col items-center justify-center z-0 origin-center transition-transform hover:!scale-110"
+                className="nav-card absolute flex h-[133.33%] w-[150%] flex-col items-center justify-center z-0 origin-center transition-transform hover:!scale-110"
               >
                 <img src={card.img} alt={card.alt} className="h-[78%] w-[73%] object-contain mix-blend-multiply drop-shadow-sm" />
               </a>
