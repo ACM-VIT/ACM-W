@@ -131,7 +131,14 @@ export default function EnvelopeMenu() {
                       }
                     }
 
-                    target.scrollIntoView({ behavior: 'smooth' });
+                    // TitleCard reveals via a ScrollTrigger onEnter that only
+                    // fires once the scroll crosses PAST its pin start; landing
+                    // exactly on the start leaves its content at opacity 0 (a
+                    // blank screen). Land a hair past it so the reveal plays.
+                    const pastPinStart = card.link === '#title-card-section' ? 24 : 0;
+                    const top =
+                      target.getBoundingClientRect().top + window.scrollY + pastPinStart;
+                    window.scrollTo({ top, behavior: 'smooth' });
 
                     // After the smooth scroll settles, force ScrollTrigger to
                     // re-evaluate all scroll-position callbacks (e.g. globe hide/show).
