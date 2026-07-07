@@ -17,9 +17,9 @@ import teamImg from './assets/team.svg';
 const cards = [
   { id: 1, img: contributorsImg, alt: 'Contributors stamp', link: '#contributors', x: "0%", y: "-117%" },
   { id: 2, img: aboutAcmwImg, alt: 'About ACM-W stamp', link: '#about', x: "84%", y: "-55%" },
-  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about', x: "84%", y: "70%" },
+  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about-acm', x: "84%", y: "70%" },
   { id: 4, img: blogsImg, alt: 'Blogs stamp', link: '#blogs', x: "0%", y: "133%" },
-  { id: 5, img: womenInStemImg, alt: 'Women in STEM stamp', link: '#women-in-stem', x: "-84%", y: "70%" },
+  { id: 5, img: womenInStemImg, alt: 'Women in STEM stamp', link: '#title-card-section', x: "-84%", y: "70%" },
   { id: 6, img: teamImg, alt: 'Team stamp', link: '#team', x: "-84%", y: "-55%" },
 ];
 
@@ -88,7 +88,9 @@ export default function EnvelopeMenu() {
           }
         }}
       >
-        <div className="absolute top-0 left-0 w-full flex justify-center">
+        {/* h-full is load-bearing: menu-group and the cards are sized in
+            percentages, which collapse to 0 against an auto-height parent */}
+        <div className="absolute top-0 left-0 h-full w-full flex justify-center">
           <div className="menu-group relative flex h-1/4 w-1/3 items-center justify-center z-50">
             <button
               type="button"
@@ -129,7 +131,14 @@ export default function EnvelopeMenu() {
                       }
                     }
 
-                    target.scrollIntoView({ behavior: 'smooth' });
+                    // TitleCard reveals via a ScrollTrigger onEnter that only
+                    // fires once the scroll crosses PAST its pin start; landing
+                    // exactly on the start leaves its content at opacity 0 (a
+                    // blank screen). Land a hair past it so the reveal plays.
+                    const pastPinStart = card.link === '#title-card-section' ? 24 : 0;
+                    const top =
+                      target.getBoundingClientRect().top + window.scrollY + pastPinStart;
+                    window.scrollTo({ top, behavior: 'smooth' });
 
                     // After the smooth scroll settles, force ScrollTrigger to
                     // re-evaluate all scroll-position callbacks (e.g. globe hide/show).
@@ -157,7 +166,7 @@ export default function EnvelopeMenu() {
                     }
                   }
                 }}
-                className="nav-card absolute flex h-1/3 w-1/2 flex-col items-center justify-center z-0 origin-center transition-transform hover:!scale-110"
+                className="nav-card absolute flex h-[133.33%] w-[150%] flex-col items-center justify-center z-0 origin-center transition-transform hover:!scale-110"
               >
                 <img src={card.img} alt={card.alt} className="h-[78%] w-[73%] object-contain mix-blend-multiply drop-shadow-sm" />
               </a>

@@ -22,7 +22,6 @@ export default function About() {
   return (
     <main className="about">
       <div className="about_cards">
-        {/* Section 1 — overlay lives outside the figure so its z-index escapes the filter stacking context */}
         <section className="about_section">
           <div className="about_card-wrap">
             <figure className="about_polaroid about_polaroid--acmw">
@@ -35,8 +34,7 @@ export default function About() {
           </div>
         </section>
 
-        {/* Section 2 — slides on top of section 1 at scroll boundary */}
-        <section className="about_section about_section--top">
+        <section id="about-acm" className="about_section about_section--top">
           <div className="about_card-wrap about_card-wrap--acmvit">
             <figure className="about_polaroid about_polaroid--acmvit">
               <img src={aboutAcmVitImg} alt="ACM-VIT members group photo" className="about_polaroid-img" />

@@ -133,7 +133,6 @@ const CAM_ZOOM_Z = 1.3;
 export default function WomenInStem() {
   const globeRef = useRef<Globe3DHandle>(null);
   const globeContainerRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let matchMedia: gsap.MatchMedia | undefined;
@@ -186,45 +185,23 @@ export default function WomenInStem() {
         );
       };
 
-      /* ─── Globe visibility: show while women-in-stem is active ─── */
+      /* The globe is fully scroll-driven — no idle auto-rotate phase. */
+      globe.setAutoRotate(false);
+      globe.setDragEnabled(false);
+
+      /* ─── Globe visibility: show while women-in-stem is active ───
+         Starts at "top bottom" so the big globe is revealed as the
+         TitleCard scrolls away, with no idle scroll span before the
+         first scientist section pins and drives the rotation. */
       ScrollTrigger.create({
         trigger: "#women-in-stem",
-        start: "top top",
+        start: "top bottom",
         end: "max",
         onToggle: ({ isActive }) => {
           globeEl.style.visibility = isActive ? "visible" : "hidden";
         },
         onRefresh: ({ isActive }) => {
           globeEl.style.visibility = isActive ? "visible" : "hidden";
-        },
-      });
-
-      /* ─── Hero exit: lock rotation & drag ─── */
-      ScrollTrigger.create({
-        trigger: heroRef.current,
-        start: "top 75%",
-        onEnter: () => {
-          globeEl.style.visibility = "visible";
-          globeEl.style.pointerEvents = "auto";
-          globe.setAutoRotate(true);
-          globe.setDragEnabled(true);
-        },
-        onLeave: () => {
-          globe.setAutoRotate(false);
-          globe.setDragEnabled(false);
-          globeEl.style.pointerEvents = "none";
-        },
-        onEnterBack: () => {
-          globeEl.style.visibility = "visible";
-          globeEl.style.pointerEvents = "auto";
-          globe.setAutoRotate(true);
-          globe.setDragEnabled(true);
-        },
-        onLeaveBack: () => {
-          globe.setAutoRotate(false);
-          globe.setDragEnabled(false);
-          globeEl.style.visibility = "hidden";
-          globeEl.style.pointerEvents = "none";
         },
       });
 
@@ -408,18 +385,9 @@ export default function WomenInStem() {
           rotationSpeed={0.002}
           initialRotX={GLOBE_BASE_ROT_X}
           initialRotY={0}
-          enableDrag={true}
+          enableDrag={false}
         />
       </div>
-
-      {/* ── Hero ── */}
-      <section
-        ref={heroRef}
-        className="relative z-10 h-screen w-full flex flex-col items-center"
-        style={{ paddingTop: "clamp(3rem, 7vh, 3.5rem)" }}
-      >
-
-      </section>
 
       {/* ── Scientists ── */}
       {scientists.map((sci) => (
