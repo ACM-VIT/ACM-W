@@ -30,6 +30,11 @@ const REVEAL_WIDTH = 190;
 /** Left-to-right reveal speed, in postcard units per second. */
 const WRITE_SPEED = 90;
 
+/** Little heart outline (~10 wide, ~10 tall, dip at 0,0, point at 0,3). */
+const HEART_D =
+  "M 0,3 C -1.2,0.6 -5,-1.4 -5,-4 C -5,-6 -3.4,-7 -1.9,-7 C -0.8,-7 0,-6.4 0,-5.4 C 0,-6.4 0.8,-7 1.9,-7 C 3.4,-7 5,-6 5,-4 C 5,-1.4 1.2,0.6 0,3";
+const HEART_GAP = 10;
+
 export default function PostcardLoader() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -44,6 +49,7 @@ export default function PostcardLoader() {
     const writing = document.createElementNS(SVG_NS, "g");
     writing.setAttribute("aria-hidden", "true");
 
+    const textEls: SVGTextElement[] = [];
     const clipRects = LINES.map(({ text, x, baseline }, i) => {
       const clipId = `postcard-writing-clip-${i}`;
 
@@ -67,10 +73,33 @@ export default function PostcardLoader() {
 
       writing.appendChild(clipPath);
       writing.appendChild(textEl);
+      textEls.push(textEl);
       return rect;
     });
 
+    // Hand-drawn heart after the last line's text; positioned lazily so the
+    // text width is measured with the final (loaded) font.
+    const heart = document.createElementNS(SVG_NS, "path");
+    heart.setAttribute("d", HEART_D);
+    heart.setAttribute("fill", "none");
+    heart.setAttribute("stroke", "#221a14");
+    heart.setAttribute("stroke-width", "1.1");
+    heart.setAttribute("stroke-linecap", "round");
+    heart.setAttribute("stroke-linejoin", "round");
+    heart.setAttribute("visibility", "hidden");
+    writing.appendChild(heart);
+
     cardGroup.appendChild(writing);
+
+    const lastLine = LINES[LINES.length - 1];
+    const positionHeart = () => {
+      const textWidth = textEls[textEls.length - 1].getComputedTextLength();
+      heart.setAttribute(
+        "transform",
+        `translate(${lastLine.x + textWidth + HEART_GAP} ${lastLine.baseline - 3})`,
+      );
+      heart.setAttribute("visibility", "visible");
+    };
 
     const reduceMotion =
       typeof window.matchMedia === "function" &&
@@ -81,6 +110,7 @@ export default function PostcardLoader() {
       clipRects.forEach((rect) =>
         rect.setAttribute("width", String(REVEAL_WIDTH)),
       );
+      positionHeart();
     } else {
       timeline = gsap.timeline({ delay: LOADER_INTRO_SECONDS });
       clipRects.forEach((rect) => {
@@ -94,6 +124,17 @@ export default function PostcardLoader() {
           ">0.25",
         );
       });
+      // Draw the heart's outline once the text has finished writing.
+      timeline.call(() => {
+        positionHeart();
+        const length = heart.getTotalLength();
+        gsap.set(heart, { strokeDasharray: length, strokeDashoffset: length });
+        gsap.to(heart, {
+          strokeDashoffset: 0,
+          duration: 0.5,
+          ease: "power1.out",
+        });
+      }, undefined, ">0.15");
     }
 
     return () => {
@@ -107,7 +148,7 @@ export default function PostcardLoader() {
       ref={containerRef}
       className="fullscreen-animation"
       role="img"
-      aria-label="Envelope opening to reveal a postcard that reads welcome to acm-w"
+      aria-label="Envelope opening to reveal a postcard that reads welcome to acm-w, with a little heart"
       dangerouslySetInnerHTML={{ __html: loaderMarkup }}
     />
   );
