@@ -7,11 +7,12 @@ import planeImg from "../assets/plane.png";
 gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
 
 const FLIGHT_PATH =
-  "M 150,120" +
-  " C 300,100 250,250 200,400" +
-  " C 150,700 400,820 720,820" +
-  " C 950,820 1100,750 1200,600" +
-  " C 1260,510 1320,480 1400,500";
+  "M 90,130 " +
+  "C 140,80 230,80 250,180 " + 
+  "C 270,300 180,450 230,600 " + 
+  "C 280,750 700,950 1050,750 " + 
+  "C 1200,620 1220,520 1320,560 " + 
+  "C 1400,590 1450,720 1550,680";
 
 export default function PaperPlaneAnimation() {
   const svgRef = useRef<SVGSVGElement>(null);
