@@ -24,6 +24,7 @@ const galleryPhotos: (string | null)[] = Array.from({ length: 9 }, (_, i) =>
 
 // Alternating postcard frames — portrait PNGs rotated -90deg to landscape
 const postcardFrames = [footerPink1, footerBlack1, footerPink2, footerBlack2];
+const postcardAccentColors = ["#FEC3E3", "#130043", "#FEC3E3", "#130043"];
 
 /*
  * Frame geometry (from SVG reference):
@@ -144,7 +145,8 @@ export default function Footer() {
     <footer
       style={{
         position: "relative",
-        zIndex: 2,
+        zIndex: 50,
+        isolation: "isolate",
         width: "100%",
         overflow: "hidden",
         backgroundColor: "#B49880",
@@ -210,6 +212,7 @@ export default function Footer() {
           >
             {galleryPhotos.map((photo, index) => {
               const frame = postcardFrames[index % postcardFrames.length];
+              const accentColor = postcardAccentColors[index % postcardAccentColors.length];
               const isFirstInGroup = index % 3 === 0;
 
               return (
@@ -224,56 +227,22 @@ export default function Footer() {
                     position: "relative",
                     scrollSnapAlign: isFirstInGroup ? "start" : undefined,
                     overflow: "hidden",
+                    background: "#f8f1e4",
+                    borderRadius: "18px",
                     /* No explicit border-radius — the frame PNG has its own rounded corners */
                   }}
                 >
-                  {/* Photo layer — sits behind the frame.
-                      Inset matches the white content area inside the frame borders.
-                      The frame has ~3 border layers totaling roughly 14-18% from each edge. */}
                   <div
+                    aria-hidden="true"
                     style={{
                       position: "absolute",
-                      top: "10%",
-                      left: "7%",
-                      right: "7%",
-                      bottom: "10%",
-                      borderRadius: "6px",
-                      overflow: "hidden",
-                      zIndex: 1,
+                      inset: 0,
+                      zIndex: 0,
+                      background: "#f8f1e4",
                     }}
-                  >
-                    {photo ? (
-                      <img
-                        src={photo}
-                        alt={`Gallery photo ${index + 1}`}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          display: "block",
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          background: "#f8f1e4",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "#130043",
-                          fontSize: "0.85rem",
-                          fontFamily: "Kovanov, Georgia, serif",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        Photo {index + 1}
-                      </div>
-                    )}
-                  </div>
+                  />
 
-                  {/* PNG frame overlay — rotated -90° from portrait to landscape.
+                  {/* PNG postcard base — rotated -90° from portrait to landscape.
                       Sized so that after rotation, the frame exactly covers the container. */}
                   <img
                     src={frame}
@@ -289,8 +258,79 @@ export default function Footer() {
                       objectFit: "fill",
                       transform: "translate(-50%, -50%) rotate(-90deg)",
                       transformOrigin: "center center",
-                      zIndex: 2,
+                      zIndex: 1,
                       pointerEvents: "none",
+                    }}
+                  />
+
+                  {/* Photo layer — clipped inside the postcard outline and rendered above the base. */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "13%",
+                      left: "10%",
+                      right: "10%",
+                      bottom: "13%",
+                      borderRadius: "6px",
+                      overflow: "hidden",
+                      zIndex: 2,
+                      background: "#f8f1e4",
+                    }}
+                  >
+                    {photo ? (
+                      <img
+                        src={photo}
+                        alt={`Gallery photo ${index + 1}`}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          objectPosition: "center",
+                          display: "block",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#130043",
+                          fontSize: "0.85rem",
+                          fontFamily: "Kovanov, Georgia, serif",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        Photo {index + 1}
+                      </div>
+                    )}
+                  </div>
+
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      inset: "5%",
+                      zIndex: 3,
+                      border: `clamp(8px, 1.4vw, 18px) solid ${accentColor}`,
+                      borderRadius: "14px",
+                      pointerEvents: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      inset: "10%",
+                      zIndex: 4,
+                      border: "clamp(4px, 0.85vw, 11px) solid #F8F6F1",
+                      borderRadius: "8px",
+                      pointerEvents: "none",
+                      boxSizing: "border-box",
                     }}
                   />
                 </div>
