@@ -7,6 +7,9 @@ export default function BestChapter() {
       style={{
         position: "relative",
         width: "100%",
+        paddingTop: "clamp(3rem, 8vh, 5rem)",
+        paddingBottom: "clamp(6rem, 16vh, 10rem)",
+        overflow: "visible",
       }}
     >
       <div
@@ -19,7 +22,6 @@ export default function BestChapter() {
           padding: "clamp(4rem, 12vh, 6.25rem) clamp(1rem, 4vw, 1.5rem)",
           position: "relative",
           width: "100%",
-          overflow: "hidden",
         }}
       >
         <h2

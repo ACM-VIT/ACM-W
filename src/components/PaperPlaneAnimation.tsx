@@ -7,12 +7,10 @@ import planeImg from "../assets/plane.png";
 gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
 
 const FLIGHT_PATH =
-  "M 75,25 C 115,10 155,45 190,28" +
-  " C 150,75 95,140 65,220" +
-  " C 38,320 32,430 50,530" +
-  " C 68,575 155,608 310,618" +
-  " C 510,628 720,618 880,598" +
-  " C 940,588 990,572 1040,555";
+  "M 150,120" +
+  " C 300,100 250,250 200,400" +
+  " C 150,650 400,750 720,750" +
+  " S 1200,650 1350,650";
 
 export default function PaperPlaneAnimation() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -33,7 +31,7 @@ export default function PaperPlaneAnimation() {
         strokeDashoffset: pathLen,
       });
 
-      gsap.set(planeGroup, { x: 75, y: 25 });
+      gsap.set(planeGroup, { x: 150, y: 120 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -45,7 +43,7 @@ export default function PaperPlaneAnimation() {
 
       tl.to(
         maskPath,
-        { strokeDashoffset: 0, duration: 3.5, ease: "power1.inOut" },
+        { strokeDashoffset: 0, duration: 5.5, ease: "power1.inOut" },
         0
       );
 
@@ -57,7 +55,7 @@ export default function PaperPlaneAnimation() {
             autoRotate: true,
             alignOrigin: [0.5, 0.5],
           },
-          duration: 3.5,
+          duration: 5.5,
           ease: "power1.inOut",
         },
         0
@@ -70,17 +68,17 @@ export default function PaperPlaneAnimation() {
   return (
     <svg
       ref={svgRef}
-      viewBox="0 0 1000 700"
-      preserveAspectRatio="xMidYMid meet"
+      viewBox="0 0 1440 800"
+      preserveAspectRatio="xMidYMid slice"
       style={{
         position: "absolute",
-        inset: 0,
+        top: 0,
+        left: 0,
         width: "100%",
         height: "100%",
         overflow: "visible",
         pointerEvents: "none",
         zIndex: 50,
-        background: "transparent",
       }}
     >
       <defs>
@@ -90,7 +88,7 @@ export default function PaperPlaneAnimation() {
             d={FLIGHT_PATH}
             fill="none"
             stroke="white"
-            strokeWidth="10"
+            strokeWidth="12"
             strokeLinecap="round"
           />
         </mask>
@@ -102,17 +100,17 @@ export default function PaperPlaneAnimation() {
         stroke="#1a1a1a"
         strokeWidth="2.5"
         strokeLinecap="round"
-        strokeDasharray="12 10"
+        strokeDasharray="14 11"
         mask="url(#plane-trail-mask)"
       />
 
       <g ref={planeGroupRef}>
         <image
           href={planeImg}
-          x="-18"
-          y="-18"
-          width="36"
-          height="36"
+          x="-23"
+          y="-23"
+          width="46"
+          height="46"
         />
       </g>
     </svg>
