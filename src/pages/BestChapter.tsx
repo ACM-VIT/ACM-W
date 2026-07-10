@@ -7,13 +7,8 @@ export default function BestChapter() {
       style={{
         position: "relative",
         width: "100%",
-        /* no background here — inherits from parent/section */
       }}
     >
-      {/* Top beige area */}
-      <div style={{ background: "#E8DCC8", width: "100%", height: "clamp(3rem, 8vh, 5rem)" }} />
-
-      {/* Brown award/title banner */}
       <div
         style={{
           background: "#B49880",
@@ -24,6 +19,7 @@ export default function BestChapter() {
           padding: "clamp(4rem, 12vh, 6.25rem) clamp(1rem, 4vw, 1.5rem)",
           position: "relative",
           width: "100%",
+          overflow: "hidden",
         }}
       >
         <h2
@@ -60,10 +56,6 @@ export default function BestChapter() {
         </p>
       </div>
 
-      {/* Bottom beige area */}
-      <div style={{ background: "#E8DCC8", width: "100%", height: "clamp(5rem, 14vh, 9rem)" }} />
-
-      {/* Animation overlay — transparent, z-50, on top of everything */}
       <PaperPlaneAnimation />
     </div>
   );
