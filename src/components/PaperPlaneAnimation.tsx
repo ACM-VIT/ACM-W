@@ -9,8 +9,9 @@ gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
 const FLIGHT_PATH =
   "M 150,120" +
   " C 300,100 250,250 200,400" +
-  " C 150,650 400,750 720,750" +
-  " S 1200,650 1350,650";
+  " C 150,700 400,820 720,820" +
+  " C 950,820 1100,750 1200,600" +
+  " C 1260,510 1320,480 1400,500";
 
 export default function PaperPlaneAnimation() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -68,7 +69,7 @@ export default function PaperPlaneAnimation() {
   return (
     <svg
       ref={svgRef}
-      viewBox="0 0 1440 800"
+      viewBox="0 0 1440 1100"
       preserveAspectRatio="xMidYMid slice"
       style={{
         position: "absolute",

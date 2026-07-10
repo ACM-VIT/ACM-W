@@ -73,7 +73,7 @@ export default function App() {
         <Events />
       </section>
 
-      <section id="best-chapter" style={{ position: "relative", zIndex: 20 }}>
+      <section id="best-chapter" style={{ position: "relative", zIndex: 20, overflow: "visible" }}>
         <BestChapter />
       </section>
 
