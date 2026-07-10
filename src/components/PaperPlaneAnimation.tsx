@@ -12,18 +12,14 @@ const FLIGHT_PATH =
   "C 180,260 300,180 400,220 " +
   // Graceful drop down
   "C 490,255 510,380 460,510 " +
-  // Smooth into bottom sweep
-  "C 410,630 480,700 580,660 " +
-  // Bump 1 — prominent rise then dip
-  "C 660,620 700,560 780,600 " +
-  // Bump 2 — prominent dip then rise
-  "C 860,640 900,700 980,660 " +
-  // Bump 3 — rise up high
-  "C 1060,620 1100,550 1180,590 " +
-  // Bump 4 — dip and rise
-  "C 1260,630 1300,680 1380,640 " +
-  // Bump 5 — final rise and exit
-  "C 1440,610 1470,560 1520,570";
+  // Deep valley — prominent dip
+  "C 400,720 550,850 820,750 " +
+  // High peak — prominent rise
+  "C 1000,680 1100,450 1280,500 " +
+  // Dip back down and exit
+  "C 1380,530 1430,620 1500,600 " +
+  // Clean exit off right edge
+  "C 1490,630 1520,625 1560,630";
 
 export default function PaperPlaneAnimation() {
   const svgRef = useRef<SVGSVGElement>(null);
