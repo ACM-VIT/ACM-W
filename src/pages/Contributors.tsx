@@ -67,7 +67,7 @@ const contributors: Contributor[] = [
   {
     name: "Ishita Joshi",
     imageSrc: "ishita",
-    bio: "Built the auth system & API layer.",
+    bio: "Have courage and be kind - Cinderella",
     primaryLink: {
       href: "https://github.com/Ishitajoshii",
       iconSrc: githubIcon,
@@ -112,7 +112,7 @@ const contributors: Contributor[] = [
   {
     name: "Sudiksha Kathuria",
     imageSrc: "sudiksha",
-    bio: "Built the auth system & API layer.",
+    bio: "For the hope of it all",
     primaryLink: {
       href: "https://github.com/sudiksha-kathuria",
       iconSrc: githubIcon,
@@ -142,7 +142,7 @@ const contributors: Contributor[] = [
   {
     name: "Ananya Bisht",
     imageSrc: "ananya",
-    bio: "Built the auth system & API layer.",
+    bio: "It always seems impossible until it's done",
     primaryLink: {
       href: "https://github.com/ananyab1404",
       iconSrc: githubIcon,

@@ -196,7 +196,7 @@ export default function WomenInStem() {
       ScrollTrigger.create({
         trigger: "#women-in-stem",
         start: "top bottom",
-        end: "max",
+        end: "bottom top",
         onToggle: ({ isActive }) => {
           globeEl.style.visibility = isActive ? "visible" : "hidden";
         },
