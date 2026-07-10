@@ -7,12 +7,23 @@ import planeImg from "../assets/plane.png";
 gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
 
 const FLIGHT_PATH =
-  "M 120,150 " +
-  "C 220,150 350,120 420,240 " + 
-  "C 480,380 380,500 420,650 " + 
-  "C 460,820 900,850 1180,750 " + 
-  "C 1300,650 1300,480 1420,520 " + 
-  "C 1520,560 1580,750 1650,700";
+  // First bump — keep exactly
+  "M 60,240 " +
+  "C 180,260 300,180 400,220 " +
+  // Graceful drop down
+  "C 490,255 510,380 460,510 " +
+  // Smooth into bottom sweep
+  "C 410,630 480,700 580,660 " +
+  // Bump 1 — prominent rise then dip
+  "C 660,620 700,560 780,600 " +
+  // Bump 2 — prominent dip then rise
+  "C 860,640 900,700 980,660 " +
+  // Bump 3 — rise up high
+  "C 1060,620 1100,550 1180,590 " +
+  // Bump 4 — dip and rise
+  "C 1260,630 1300,680 1380,640 " +
+  // Bump 5 — final rise and exit
+  "C 1440,610 1470,560 1520,570";
 
 export default function PaperPlaneAnimation() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -33,7 +44,7 @@ export default function PaperPlaneAnimation() {
         strokeDashoffset: pathLen,
       });
 
-      gsap.set(planeGroup, { x: 150, y: 120 });
+      gsap.set(planeGroup, { x: 60, y: 240 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
