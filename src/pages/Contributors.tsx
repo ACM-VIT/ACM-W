@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import cardBg from "../assets/contributors/ContributorsPostcard.png";
 
 import githubIcon from "../assets/teams/github.png";
@@ -351,9 +351,9 @@ export default function ContributorsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const [scrollDistance, setScrollDistance] = useState(0);
+  const scrollDistanceRef = useRef(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const section = sectionRef.current;
     const viewport = scrollRef.current;
     const track = trackRef.current;
@@ -363,13 +363,14 @@ export default function ContributorsSection() {
 
     const measure = () => {
       const distance = Math.max(0, track.scrollWidth - viewport.clientWidth);
-      setScrollDistance(distance);
+      scrollDistanceRef.current = distance;
+      section.style.height = distance > 0 ? `calc(100vh + ${distance}px)` : "auto";
       return distance;
     };
 
     const update = () => {
       frameId = null;
-      const distance = measure();
+      const distance = scrollDistanceRef.current;
       if (distance <= 0) {
         track.style.transform = "translate3d(0, 0, 0)";
         return;
@@ -387,16 +388,21 @@ export default function ContributorsSection() {
       }
     };
 
-    const resizeObserver = new ResizeObserver(requestUpdate);
+    const requestMeasure = () => {
+      measure();
+      requestUpdate();
+    };
+
+    const resizeObserver = new ResizeObserver(requestMeasure);
     resizeObserver.observe(viewport);
     resizeObserver.observe(track);
     window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
-    requestUpdate();
+    window.addEventListener("resize", requestMeasure);
+    requestMeasure();
 
     return () => {
       window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
+      window.removeEventListener("resize", requestMeasure);
       resizeObserver.disconnect();
       if (frameId !== null) window.cancelAnimationFrame(frameId);
     };
@@ -406,9 +412,6 @@ export default function ContributorsSection() {
     <section
       ref={sectionRef}
       className="relative w-full bg-[#B49880]"
-      style={{
-        height: scrollDistance > 0 ? `calc(100vh + ${scrollDistance}px)` : undefined,
-      }}
     >
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-25 mix-blend-multiply"
