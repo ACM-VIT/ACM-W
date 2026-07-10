@@ -52,7 +52,6 @@ const CONTAINER_AR = `${FRAME_H} / ${FRAME_W}`; // "275 / 216"
 const IMG_WIDTH_PCT = `${((FRAME_W / FRAME_H) * 100).toFixed(2)}%`;   // ~78.55%
 const IMG_HEIGHT_PCT = `${((FRAME_H / FRAME_W) * 100).toFixed(2)}%`;  // ~127.31%
 const CARDS_PER_PAGE = 3;
-const FOOTER_HEIGHT = "clamp(19rem, 27.36vw, 24.625rem)";
 
 export default function Footer() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -150,9 +149,9 @@ export default function Footer() {
         width: "100%",
         overflow: "hidden",
         backgroundColor: "#B49880",
-        minHeight: FOOTER_HEIGHT,
-        padding: "clamp(1.75rem, 4.2vw, 5.5rem) 0 clamp(1.25rem, 2.6vw, 2rem)",
+        padding: "clamp(1rem, 2.2vw, 2rem) 0 0",
         border: "1px solid #000",
+        marginBottom: "-1px",
         boxSizing: "border-box",
       }}
     >
@@ -344,7 +343,7 @@ export default function Footer() {
           style={{
             display: "flex",
             gap: "12px",
-            marginTop: "clamp(0.75rem, 1.8vw, 1.25rem)",
+            marginTop: "clamp(0.5rem, 1.2vw, 0.875rem)",
             justifyContent: "center",
           }}
         >

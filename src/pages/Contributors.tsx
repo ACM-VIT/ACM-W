@@ -348,31 +348,68 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
 }
 
 export default function ContributorsSection() {
+  const sectionRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [scrollDistance, setScrollDistance] = useState(0);
 
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+    const section = sectionRef.current;
+    const viewport = scrollRef.current;
+    const track = trackRef.current;
+    if (!section || !viewport || !track) return;
 
-    const onWheel = (e: WheelEvent) => {
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return;
-      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (delta === 0) return;
-      const atStart = el.scrollLeft <= 0 && delta < 0;
-      const atEnd = el.scrollLeft >= maxScroll && delta > 0;
-      if (atStart || atEnd) return;
+    let frameId: number | null = null;
 
-      e.preventDefault();
-      el.scrollLeft += delta;
+    const measure = () => {
+      const distance = Math.max(0, track.scrollWidth - viewport.clientWidth);
+      setScrollDistance(distance);
+      return distance;
     };
 
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    const update = () => {
+      frameId = null;
+      const distance = measure();
+      if (distance <= 0) {
+        track.style.transform = "translate3d(0, 0, 0)";
+        return;
+      }
+
+      const rect = section.getBoundingClientRect();
+      const availableScroll = Math.max(1, section.offsetHeight - window.innerHeight);
+      const progress = Math.min(Math.max(-rect.top / availableScroll, 0), 1);
+      track.style.transform = `translate3d(${-distance * progress}px, 0, 0)`;
+    };
+
+    const requestUpdate = () => {
+      if (frameId === null) {
+        frameId = window.requestAnimationFrame(update);
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(requestUpdate);
+    resizeObserver.observe(viewport);
+    resizeObserver.observe(track);
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    requestUpdate();
+
+    return () => {
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+      resizeObserver.disconnect();
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
+    };
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#B49880] py-16 sm:py-20">
+    <section
+      ref={sectionRef}
+      className="relative w-full bg-[#B49880]"
+      style={{
+        height: scrollDistance > 0 ? `calc(100vh + ${scrollDistance}px)` : undefined,
+      }}
+    >
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-25 mix-blend-multiply"
         style={{
@@ -382,7 +419,7 @@ export default function ContributorsSection() {
         }}
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[min(92vw,72rem)] flex-col items-center px-[clamp(1rem,4vw,1.5rem)]">
+      <div className="sticky top-0 z-10 mx-auto flex min-h-screen w-full max-w-[min(92vw,72rem)] flex-col justify-center overflow-hidden px-[clamp(1rem,4vw,1.5rem)] py-16 sm:py-20">
         <h2
           className="text-center text-[clamp(2rem,5vw,2.5rem)] font-bold tracking-[0.08em]"
           style={{ fontFamily: "Kovanov, Georgia, serif", color: "#580A0A" }}
@@ -394,18 +431,20 @@ export default function ContributorsSection() {
           ref={scrollRef}
           className="mt-12 w-full"
           style={{
-            overflowX: "auto",
+            overflowX: "hidden",
             overflowY: "visible",
             msOverflowStyle: "none",
             scrollbarWidth: "none",
           }}
         >
           <div
+            ref={trackRef}
             style={{
               display: "flex",
               gap: "clamp(1rem, 3vw, 1.5rem)",
               width: "max-content",
               padding: "0.25rem 0.25rem 1rem",
+              willChange: "transform",
             }}
           >
             {contributors.map((c) => (
