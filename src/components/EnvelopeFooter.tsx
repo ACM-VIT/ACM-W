@@ -23,6 +23,9 @@ import twitterIcon from '../assets/footer/twitter.png';
 import linkedInIcon from '../assets/footer/linkedIn.png';
 import ytIcon from '../assets/footer/yt.png';
 
+// Feather cursor — recolored at runtime for the envelope hover
+import featherCursorImg from '../assets/feather-cursor.png';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -92,6 +95,51 @@ export default function EnvelopeFooter() {
   // Two-part flap refs
   const insideFlapRef = useRef<HTMLDivElement>(null);
   const outsideFlapRef = useRef<HTMLDivElement>(null);
+
+  // ---- Light cursor on envelope hover ----
+  // The site-wide cursor is a dark feather PNG. When hovering over the
+  // envelope asset itself (not the section background), we swap to a
+  // #FFF9E9 recolored version. Built at runtime from the same source
+  // PNG using canvas — zero extra assets needed.
+  useEffect(() => {
+    let style: HTMLStyleElement | null = null;
+
+    const img = new Image();
+    img.src = featherCursorImg;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d')!;
+
+      // Draw the original dark feather
+      ctx.drawImage(img, 0, 0);
+
+      // Recolor: 'source-in' replaces RGB of existing pixels
+      // while preserving their original alpha channel.
+      ctx.globalCompositeOperation = 'source-in';
+      ctx.fillStyle = '#FFF9E9';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL('image/png');
+
+      // Inject a scoped style — targets only the envelope wrapper
+      // and its children. The cursor reverts automatically when
+      // the mouse leaves because parent elements keep the dark cursor.
+      style = document.createElement('style');
+      style.textContent = `
+        .envelope-wrapper,
+        .envelope-wrapper * {
+          cursor: url("${dataUrl}") 4 4, auto !important;
+        }
+      `;
+      document.head.appendChild(style);
+    };
+
+    return () => {
+      if (style?.parentNode) style.parentNode.removeChild(style);
+    };
+  }, []);
 
   // ---- Scroll-tracking ref: defer GSAP init until the section is near ----
   // On a cold page load, images haven't loaded yet so the envelope wrapper
