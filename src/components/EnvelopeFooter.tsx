@@ -103,10 +103,16 @@ export default function EnvelopeFooter() {
   // PNG using canvas — zero extra assets needed.
   useEffect(() => {
     let style: HTMLStyleElement | null = null;
+    let cancelled = false;
 
     const img = new Image();
     img.src = featherCursorImg;
     img.onload = () => {
+      // Guard: if the component unmounted (or HMR replaced it) while
+      // the image was loading, bail out so we don't leak a stale
+      // <style> into document.head.
+      if (cancelled) return;
+
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
@@ -137,6 +143,7 @@ export default function EnvelopeFooter() {
     };
 
     return () => {
+      cancelled = true;
       if (style?.parentNode) style.parentNode.removeChild(style);
     };
   }, []);
