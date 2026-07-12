@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useState, type FormEvent } from 'react';
+import { useRef, useEffect, useState, type FormEvent } from 'react';
 import emailjs from '@emailjs/browser';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -60,11 +60,11 @@ export default function EnvelopeFooter() {
     }
 
     const templateParams = {
-      from_name:    formData.name,
-      from_email:   formData.email,
-      phone:        formData.phone,
-      message:      formData.message,
-      to_email:     'outreach.acmvit@gmail.com',
+      from_name: formData.name,
+      from_email: formData.email,
+      phone: formData.phone,
+      message: formData.message,
+      to_email: 'outreach.acmvit@gmail.com',
     };
 
     try {
@@ -93,7 +93,51 @@ export default function EnvelopeFooter() {
   const insideFlapRef = useRef<HTMLDivElement>(null);
   const outsideFlapRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
+  // ---- Scroll-tracking ref: defer GSAP init until the section is near ----
+  // On a cold page load, images haven't loaded yet so the envelope wrapper
+  // has ~0px height and ScrollTrigger calculates wrong positions. By waiting
+  // until the user scrolls near the section, images are decoded and the DOM
+  // has its true height. On HMR the images are cached so everything works
+  // instantly — that's why a file-save "fixes" it.
+  const [hasReachedSection, setHasReachedSection] = useState(false);
+  const scrollCheckRef = useRef<number | null>(null);
+
+  // Effect 1: Scroll listener — checks if the section is approaching
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const checkScroll = () => {
+      scrollCheckRef.current = null;
+      const rect = section.getBoundingClientRect();
+      // Fire when the section top is within 2 viewport heights of view
+      if (rect.top < window.innerHeight * 2) {
+        setHasReachedSection(true);
+      }
+    };
+
+    const onScroll = () => {
+      if (scrollCheckRef.current === null) {
+        scrollCheckRef.current = requestAnimationFrame(checkScroll);
+      }
+    };
+
+    // Check immediately in case the page loaded scrolled down
+    checkScroll();
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (scrollCheckRef.current !== null) {
+        cancelAnimationFrame(scrollCheckRef.current);
+      }
+    };
+  }, []);
+
+  // Effect 2: Build GSAP timeline once the section is in scroll range
+  useEffect(() => {
+    if (!hasReachedSection) return;
+
     const section = sectionRef.current;
     const pinContainer = pinContainerRef.current;
     const envelopeWrapper = envelopeWrapperRef.current;
@@ -142,7 +186,6 @@ export default function EnvelopeFooter() {
         y: -185,
         scale: 0.80,
         z: 1.2,
-
       });
 
       // Wrapper: no rotation yet
@@ -186,7 +229,7 @@ export default function EnvelopeFooter() {
           scale: 1.1,
           duration: 2,
           ease: 'power2.inOut',
-          
+
         },
         1.5
       );
@@ -293,7 +336,7 @@ export default function EnvelopeFooter() {
           duration: 1.0,
           ease: 'power2.inOut',
           scale: 0.80,
-          
+
         },
         10
       );
@@ -346,8 +389,14 @@ export default function EnvelopeFooter() {
       );
     }, section);
 
-    return () => ctx.revert();
-  }, []);
+    // Deferred refresh so ScrollTrigger recalculates with final layout
+    const rafId = requestAnimationFrame(() => ScrollTrigger.refresh());
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      ctx.revert();
+    };
+  }, [hasReachedSection]);
 
   return (
     <section ref={sectionRef} className="scroll-section" id="contact">
@@ -423,8 +472,8 @@ export default function EnvelopeFooter() {
                   >
                     {status === 'loading' && 'Sending…'}
                     {status === 'success' && 'thank you'}
-                    {status === 'error'   && 'Try again'}
-                    {status === 'idle'    && 'Submit'}
+                    {status === 'error' && 'Try again'}
+                    {status === 'idle' && 'Submit'}
                   </button>
                 </form>
               </div>
