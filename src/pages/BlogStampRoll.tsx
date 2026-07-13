@@ -36,10 +36,11 @@ export default function BlogStampRoll() {
       style={{
         minHeight: "100vh",
         background: "#FFF9E9",
-        padding: "clamp(1rem, 3vh, 1.25rem) clamp(0.75rem, 3vw, 1rem) clamp(1.5rem, 4vh, 1.875rem)",
+        padding: "clamp(1rem, 3vh, 1.25rem) clamp(0.75rem, 3vw, 1rem) clamp(1.5rem, 3vh, 1.5rem)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
         overflow: "hidden",
         fontFamily: "'Georgia', serif",
       }}
@@ -86,9 +87,9 @@ export default function BlogStampRoll() {
             >
               <div
                 style={{
-                  width: "88vw",
+                  width: "75vw",
                   maxWidth: "21.25rem",
-                  height: "min(72svh, 135vw)",
+                  height: "min(68svh, 112vw)",
                 }}
               >
                 <StampBorder>
