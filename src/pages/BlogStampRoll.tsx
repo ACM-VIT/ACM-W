@@ -40,7 +40,6 @@ export default function BlogStampRoll() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
         overflow: "hidden",
         fontFamily: "'Georgia', serif",
       }}
