@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import cardBg from "../assets/contributors/ContributorsPostcard.png";
 
 import githubIcon from "../assets/teams/github.png";
@@ -175,14 +175,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
   const [flipped, setFlipped] = useState(false);
 
   return (
-    <div
-      style={{
-        width: "clamp(9rem, 18vw, 12.5rem)",
-        aspectRatio: "5 / 7",
-        flexShrink: 0,
-        perspective: "56rem",
-      }}
-    >
+    <div style={{ width: 200, height: 280, flexShrink: 0, perspective: "900px" }}>
       <div
         style={{
           position: "relative",
@@ -215,7 +208,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
               height: "100%",
               display: "flex",
               flexDirection: "column",
-              padding: "6% 6% 0",
+              padding: "12px 12px 0px 12px",
             }}
           >
             <div style={{ flex: 1, overflow: "hidden", borderRadius: 1 }}>
@@ -225,10 +218,10 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
                 style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
               />
             </div>
-            <div style={{ height: "16.4%", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 2%" }}>
+            <div style={{ height: 46, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
               <span
                 style={{
-                  fontSize: "clamp(0.65rem, 1.25vw, 0.72rem)",
+                  fontSize: 11.5,
                   fontWeight: 700,
                   color: "#000000",
                   textAlign: "center",
@@ -271,13 +264,13 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              padding: "8% 7%",
-              gap: "3.5%",
+              padding: "20px 16px",
+              gap: 10,
             }}
           >
             <p
               style={{
-                fontSize: "clamp(0.72rem, 1.35vw, 0.82rem)",
+                fontSize: 13,
                 fontWeight: 700,
                 color: "#000000",
                 textAlign: "center",
@@ -289,11 +282,11 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
               {contributor.name}
             </p>
 
-            <div style={{ width: "18%", height: "0.35%", borderRadius: 1, flexShrink: 0 }} />
+            <div style={{ width: 36, height: 1, borderRadius: 1, flexShrink: 0 }} />
 
             <p
               style={{
-                fontSize: "clamp(0.58rem, 1.1vw, 0.66rem)",
+                fontSize: 10.5,
                 color: "rgb(0,0,0)",
                 textAlign: "center",
                 margin: 0,
@@ -306,7 +299,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
               {contributor.bio}
             </p>
 
-            <div style={{ display: "flex", gap: "12%", marginTop: "2%" }}>
+            <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
               {contributor.primaryLink?.href && (
                 <a
                   href={contributor.primaryLink.href}
@@ -319,7 +312,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
                   <img
                     src={contributor.primaryLink.iconSrc}
                     alt={contributor.primaryLink.label}
-                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                    style={{ width: 40, height: 40, objectFit: "contain" }}
                   />
                 </a>
               )}
@@ -335,7 +328,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
                   <img
                     src={contributor.secondaryLink.iconSrc}
                     alt={contributor.secondaryLink.label}
-                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                    style={{ width: 40, height: 40, objectFit: "contain" }}
                   />
                 </a>
               )}
@@ -348,74 +341,31 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
 }
 
 export default function ContributorsSection() {
-  const sectionRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const scrollDistanceRef = useRef(0);
 
-  useLayoutEffect(() => {
-    const section = sectionRef.current;
-    const viewport = scrollRef.current;
-    const track = trackRef.current;
-    if (!section || !viewport || !track) return;
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
 
-    let frameId: number | null = null;
+    const onWheel = (e: WheelEvent) => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (delta === 0) return;
+      const atStart = el.scrollLeft <= 0 && delta < 0;
+      const atEnd = el.scrollLeft >= maxScroll && delta > 0;
+      if (atStart || atEnd) return;
 
-    const measure = () => {
-      const distance = Math.max(0, track.scrollWidth - viewport.clientWidth);
-      scrollDistanceRef.current = distance;
-      section.style.height = distance > 0 ? `calc(100vh + ${distance}px)` : "auto";
-      return distance;
+      e.preventDefault();
+      el.scrollLeft += delta;
     };
 
-    const update = () => {
-      frameId = null;
-      const distance = scrollDistanceRef.current;
-      if (distance <= 0) {
-        track.style.transform = "translate3d(0, 0, 0)";
-        return;
-      }
-
-      const rect = section.getBoundingClientRect();
-      const availableScroll = Math.max(1, section.offsetHeight - window.innerHeight);
-      const progress = Math.min(Math.max(-rect.top / availableScroll, 0), 1);
-      track.style.transform = `translate3d(${-distance * progress}px, 0, 0)`;
-    };
-
-    const requestUpdate = () => {
-      if (frameId === null) {
-        frameId = window.requestAnimationFrame(update);
-      }
-    };
-
-    const requestMeasure = () => {
-      measure();
-      requestUpdate();
-    };
-
-    const resizeObserver =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(requestMeasure)
-        : null;
-    resizeObserver?.observe(viewport);
-    resizeObserver?.observe(track);
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestMeasure);
-    requestMeasure();
-
-    return () => {
-      window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestMeasure);
-      resizeObserver?.disconnect();
-      if (frameId !== null) window.cancelAnimationFrame(frameId);
-    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative w-full bg-[#B49880]"
-    >
+    <section className="relative w-full overflow-hidden bg-[#B49880] py-16 sm:py-20">
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-25 mix-blend-multiply"
         style={{
@@ -425,9 +375,9 @@ export default function ContributorsSection() {
         }}
       />
 
-      <div className="sticky top-0 z-10 mx-auto flex min-h-screen w-full max-w-[min(92vw,72rem)] flex-col justify-center overflow-hidden px-[clamp(1rem,4vw,1.5rem)] py-16 sm:py-20">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-6">
         <h2
-          className="text-center text-[clamp(2rem,5vw,2.5rem)] font-bold tracking-[0.08em]"
+          className="text-center text-[32px] font-bold tracking-[0.08em] sm:text-[40px]"
           style={{ fontFamily: "Kovanov, Georgia, serif", color: "#580A0A" }}
         >
           CONTRIBUTORS
@@ -437,22 +387,13 @@ export default function ContributorsSection() {
           ref={scrollRef}
           className="mt-12 w-full"
           style={{
-            overflowX: "hidden",
+            overflowX: "auto",
             overflowY: "visible",
             msOverflowStyle: "none",
             scrollbarWidth: "none",
           }}
         >
-          <div
-            ref={trackRef}
-            style={{
-              display: "flex",
-              gap: "clamp(1rem, 3vw, 1.5rem)",
-              width: "max-content",
-              padding: "0.25rem 0.25rem 1rem",
-              willChange: "transform",
-            }}
-          >
+          <div style={{ display: "flex", gap: 24, width: "max-content", padding: "4px 4px 16px" }}>
             {contributors.map((c) => (
               <ContributorCard key={c.name} contributor={c} />
             ))}
@@ -475,8 +416,8 @@ const iconLinkStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  width: "clamp(1.75rem, 4vw, 2.125rem)",
-  aspectRatio: "1 / 1",
+  width: 34,
+  height: 34,
   borderRadius: 8,
   textDecoration: "none",
   backdropFilter: "blur(4px)",
