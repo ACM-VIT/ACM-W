@@ -393,9 +393,12 @@ export default function ContributorsSection() {
       requestUpdate();
     };
 
-    const resizeObserver = new ResizeObserver(requestMeasure);
-    resizeObserver.observe(viewport);
-    resizeObserver.observe(track);
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(requestMeasure)
+        : null;
+    resizeObserver?.observe(viewport);
+    resizeObserver?.observe(track);
     window.addEventListener("scroll", requestUpdate, { passive: true });
     window.addEventListener("resize", requestMeasure);
     requestMeasure();
@@ -403,7 +406,7 @@ export default function ContributorsSection() {
     return () => {
       window.removeEventListener("scroll", requestUpdate);
       window.removeEventListener("resize", requestMeasure);
-      resizeObserver.disconnect();
+      resizeObserver?.disconnect();
       if (frameId !== null) window.cancelAnimationFrame(frameId);
     };
   }, []);
