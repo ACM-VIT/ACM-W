@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useState, type FormEvent } from 'react';
+import { useRef, useEffect, useState, type FormEvent } from 'react';
 import emailjs from '@emailjs/browser';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -22,6 +22,9 @@ import instaIcon from '../assets/footer/insta.png';
 import twitterIcon from '../assets/footer/twitter.png';
 import linkedInIcon from '../assets/footer/linkedIn.png';
 import ytIcon from '../assets/footer/yt.png';
+
+// Feather cursor — recolored at runtime for the envelope hover
+import featherCursorImg from '../assets/feather-cursor.png';
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -60,11 +63,11 @@ export default function EnvelopeFooter() {
     }
 
     const templateParams = {
-      from_name:    formData.name,
-      from_email:   formData.email,
-      phone:        formData.phone,
-      message:      formData.message,
-      to_email:     'outreach.acmvit@gmail.com',
+      from_name: formData.name,
+      from_email: formData.email,
+      phone: formData.phone,
+      message: formData.message,
+      to_email: 'outreach.acmvit@gmail.com',
     };
 
     try {
@@ -93,7 +96,103 @@ export default function EnvelopeFooter() {
   const insideFlapRef = useRef<HTMLDivElement>(null);
   const outsideFlapRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
+  // ---- Light cursor on envelope hover ----
+  // The site-wide cursor is a dark feather PNG. When hovering over the
+  // envelope asset itself (not the section background), we swap to a
+  // #FFF9E9 recolored version. Built at runtime from the same source
+  // PNG using canvas — zero extra assets needed.
+  useEffect(() => {
+    let style: HTMLStyleElement | null = null;
+    let cancelled = false;
+
+    const img = new Image();
+    img.src = featherCursorImg;
+    img.onload = () => {
+      // Guard: if the component unmounted (or HMR replaced it) while
+      // the image was loading, bail out so we don't leak a stale
+      // <style> into document.head.
+      if (cancelled) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d')!;
+
+      // Draw the original dark feather
+      ctx.drawImage(img, 0, 0);
+
+      // Recolor: 'source-in' replaces RGB of existing pixels
+      // while preserving their original alpha channel.
+      ctx.globalCompositeOperation = 'source-in';
+      ctx.fillStyle = '#FFF9E9';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL('image/png');
+
+      // Inject a scoped style — targets only the envelope wrapper
+      // and its children. The cursor reverts automatically when
+      // the mouse leaves because parent elements keep the dark cursor.
+      style = document.createElement('style');
+      style.textContent = `
+        .envelope-wrapper,
+        .envelope-wrapper * {
+          cursor: url("${dataUrl}") 4 4, auto !important;
+        }
+      `;
+      document.head.appendChild(style);
+    };
+
+    return () => {
+      cancelled = true;
+      if (style?.parentNode) style.parentNode.removeChild(style);
+    };
+  }, []);
+
+  // ---- Scroll-tracking ref: defer GSAP init until the section is near ----
+  // On a cold page load, images haven't loaded yet so the envelope wrapper
+  // has ~0px height and ScrollTrigger calculates wrong positions. By waiting
+  // until the user scrolls near the section, images are decoded and the DOM
+  // has its true height. On HMR the images are cached so everything works
+  // instantly — that's why a file-save "fixes" it.
+  const [hasReachedSection, setHasReachedSection] = useState(false);
+  const scrollCheckRef = useRef<number | null>(null);
+
+  // Effect 1: Scroll listener — checks if the section is approaching
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const checkScroll = () => {
+      scrollCheckRef.current = null;
+      const rect = section.getBoundingClientRect();
+      // Fire when the section top is within 2 viewport heights of view
+      if (rect.top < window.innerHeight * 2) {
+        setHasReachedSection(true);
+      }
+    };
+
+    const onScroll = () => {
+      if (scrollCheckRef.current === null) {
+        scrollCheckRef.current = requestAnimationFrame(checkScroll);
+      }
+    };
+
+    // Check immediately in case the page loaded scrolled down
+    checkScroll();
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (scrollCheckRef.current !== null) {
+        cancelAnimationFrame(scrollCheckRef.current);
+      }
+    };
+  }, []);
+
+  // Effect 2: Build GSAP timeline once the section is in scroll range
+  useEffect(() => {
+    if (!hasReachedSection) return;
+
     const section = sectionRef.current;
     const pinContainer = pinContainerRef.current;
     const envelopeWrapper = envelopeWrapperRef.current;
@@ -110,6 +209,13 @@ export default function EnvelopeFooter() {
     ) return;
 
     const ctx = gsap.context(() => {
+      // ---- Responsive value scaling ----
+      // The animation was designed for a 600px-wide envelope. On mobile
+      // the wrapper is ~300px, so all pixel-based GSAP values must scale
+      // proportionally. We compute a ratio once at init time.
+      const wrapperWidth = envelopeWrapper.getBoundingClientRect().width || 600;
+      const r = wrapperWidth / 600; // 1.0 on desktop, ~0.5 on mobile
+
       // ---- Initial state setup ----
 
       // Brown card: starts enlarged (scale 1.4) so the user can
@@ -119,7 +225,7 @@ export default function EnvelopeFooter() {
         scale: 1.4,
         rotateX: 0,
         rotateZ: 0,
-        x: 10,
+        x: 10 * r,
       });
 
       // Envelope layers: hidden initially
@@ -139,10 +245,9 @@ export default function EnvelopeFooter() {
       gsap.set(outsideFlap, {
         opacity: 0,
         rotateX: -90,
-        y: -185,
+        y: -185 * r,
         scale: 0.80,
         z: 1.2,
-
       });
 
       // Wrapper: no rotation yet
@@ -186,7 +291,7 @@ export default function EnvelopeFooter() {
           scale: 1.1,
           duration: 2,
           ease: 'power2.inOut',
-          
+
         },
         1.5
       );
@@ -202,7 +307,7 @@ export default function EnvelopeFooter() {
           duration: 1.5,
           ease: 'power2.inOut',
           z: 1.1,
-          x: -1,
+          x: -1 * r,
         },
         3.5
       );
@@ -218,7 +323,7 @@ export default function EnvelopeFooter() {
           duration: 1.2,
           ease: 'power2.out',
           scale: 0.80,
-          y: 40,
+          y: 40 * r,
           z: 1,
         },
         5
@@ -243,7 +348,7 @@ export default function EnvelopeFooter() {
           opacity: 1,
           duration: 0.8,
           ease: 'power2.out',
-          y: -185,
+          y: -185 * r,
           scale: 0.80,
           z: 1,
 
@@ -263,7 +368,7 @@ export default function EnvelopeFooter() {
           scale: 1,
           duration: 2,
           ease: 'power2.inOut',
-          x: -5,
+          x: -5 * r,
           y: '25%',
 
           z: 1.1,
@@ -293,7 +398,7 @@ export default function EnvelopeFooter() {
           duration: 1.0,
           ease: 'power2.inOut',
           scale: 0.80,
-          
+
         },
         10
       );
@@ -312,7 +417,7 @@ export default function EnvelopeFooter() {
           duration: 1.0,
           ease: 'power2.inOut',
           scale: 0.80,
-          y: -190,
+          y: -190 * r,
           z: 1.2,
 
         },
@@ -346,8 +451,14 @@ export default function EnvelopeFooter() {
       );
     }, section);
 
-    return () => ctx.revert();
-  }, []);
+    // Deferred refresh so ScrollTrigger recalculates with final layout
+    const rafId = requestAnimationFrame(() => ScrollTrigger.refresh());
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      ctx.revert();
+    };
+  }, [hasReachedSection]);
 
   return (
     <section ref={sectionRef} className="scroll-section" id="contact">
@@ -423,8 +534,8 @@ export default function EnvelopeFooter() {
                   >
                     {status === 'loading' && 'Sending…'}
                     {status === 'success' && 'thank you'}
-                    {status === 'error'   && 'Try again'}
-                    {status === 'idle'    && 'Submit'}
+                    {status === 'error' && 'Try again'}
+                    {status === 'idle' && 'Submit'}
                   </button>
                 </form>
               </div>
