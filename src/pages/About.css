@@ -128,11 +128,31 @@ body,
   margin: 0;
 }
 
-.about_cardBody p + p {
+.about_cardBody p+p {
   margin-top: 0.65em;
 }
 
 @media (max-width: 48rem) {
+  .about {
+    min-height: auto;
+  }
+
+  .about_section {
+    padding-top: clamp(1.25rem, 3vh, 1.75rem);
+  }
+
+  .about_section--top {
+    padding-bottom: clamp(1.25rem, 3vh, 1.75rem);
+  }
+
+  .about_card-wrap {
+    aspect-ratio: 4 / 3;
+  }
+
+  .about_card-wrap--acmvit {
+    aspect-ratio: 4 / 3;
+  }
+
   .about_overlay {
     inset: 22.5% 10% 20% 10%;
   }
@@ -144,5 +164,35 @@ body,
   .about_cardBody {
     font-size: 0.625rem;
     line-height: 1.26;
+  }
+}
+
+@media (max-width: 30rem) {
+  .about_section {
+    padding-top: clamp(0.75rem, 2vh, 1.25rem);
+  }
+
+  .about_section--top {
+    padding-bottom: clamp(0.75rem, 2vh, 1.25rem);
+  }
+
+  .about_card-wrap,
+  .about_card-wrap--acmvit {
+    aspect-ratio: 3 / 2.5;
+  }
+
+  .about_overlay {
+    inset: 21% 9% 18% 9%;
+  }
+
+  .about_cardTitle {
+    font-size: clamp(1.125rem, 5vw, 1.5rem);
+  }
+
+  .about_cardBody {
+    font-size: clamp(0.5rem, 2.2vw, 0.625rem);
+    line-height: 1.22;
+    -webkit-line-clamp: 7;
+    line-clamp: 7;
   }
 }
