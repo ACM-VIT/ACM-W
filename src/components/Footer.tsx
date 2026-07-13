@@ -121,9 +121,12 @@ export default function Footer() {
     if (!el) return;
 
     const onWheel = (e: WheelEvent) => {
-      const delta =
-        Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      // Only shift on horizontal scroll
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) return;
+
+      const delta = e.deltaX;
       if (delta === 0) return;
+
       const nextPage = currentPage + (delta > 0 ? 1 : -1);
       if (nextPage < 0 || nextPage >= totalPages) return;
 
@@ -149,7 +152,9 @@ export default function Footer() {
         width: "100%",
         overflow: "hidden",
         backgroundColor: "#B49880",
-        padding: "clamp(1rem, 2.2vw, 2rem) 0 0",
+        // Keep the gallery visually attached to the section above it.
+        // The cards already have a small internal bleed allowance.
+        padding: "0",
         border: "1px solid #000",
         marginBottom: "-1px",
         boxSizing: "border-box",
