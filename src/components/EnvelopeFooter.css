@@ -469,9 +469,46 @@
 /* -----------------------------------------------
    Responsive
    ----------------------------------------------- */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .scene {
+    max-width: 480px;
+    perspective: 800px;
+  }
+
+  .envelope-wrapper {
+    max-width: 440px;
+  }
+
+  .back-face__text {
+    font-size: 1.3rem;
+  }
+
+  .back-face__text--org {
+    font-size: 1.5rem;
+  }
+
+  .back-face__heart {
+    width: 22px;
+    height: 22px;
+  }
+
+  .back-face__social-row {
+    gap: 20px;
+  }
+
+  .back-face__social-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Mobile */
 @media (max-width: 600px) {
   .scene {
     max-width: 340px;
+    perspective: 600px;
   }
 
   .envelope-wrapper {
@@ -479,28 +516,79 @@
   }
 
   .back-face__content {
-    padding: 0 16px 10% 16px;
+    padding: 0 12px 8% 12px;
   }
 
   .back-face__text {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
   }
 
   .back-face__text--org {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
+  }
+
+  .back-face__text-row {
+    gap: 6px;
   }
 
   .back-face__heart {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .back-face__social-row {
-    gap: 16px;
+    gap: 12px;
   }
 
   .back-face__social-icon {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .brown-card__heading {
+    font-size: clamp(0.7rem, 4vw, 1rem);
+  }
+
+  .brown-card__label {
+    font-size: clamp(0.45rem, 2.2vw, 0.6rem);
+  }
+
+  .brown-card__input {
+    font-size: clamp(0.45rem, 2vw, 0.55rem);
+  }
+
+  .brown-card__submit {
+    padding: clamp(3px, 1.5vw, 6px) clamp(12px, 6vw, 28px);
+    font-size: clamp(0.5rem, 2.2vw, 0.7rem);
   }
 }
+
+/* Small phones */
+@media (max-width: 400px) {
+  .scene {
+    max-width: 280px;
+    perspective: 500px;
+  }
+
+  .envelope-wrapper {
+    max-width: 260px;
+  }
+
+  .back-face__text {
+    font-size: 0.8rem;
+  }
+
+  .back-face__text--org {
+    font-size: 1rem;
+  }
+
+  .back-face__social-row {
+    gap: 8px;
+  }
+
+  .back-face__social-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+

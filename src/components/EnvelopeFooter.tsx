@@ -209,6 +209,13 @@ export default function EnvelopeFooter() {
     ) return;
 
     const ctx = gsap.context(() => {
+      // ---- Responsive value scaling ----
+      // The animation was designed for a 600px-wide envelope. On mobile
+      // the wrapper is ~300px, so all pixel-based GSAP values must scale
+      // proportionally. We compute a ratio once at init time.
+      const wrapperWidth = envelopeWrapper.getBoundingClientRect().width || 600;
+      const r = wrapperWidth / 600; // 1.0 on desktop, ~0.5 on mobile
+
       // ---- Initial state setup ----
 
       // Brown card: starts enlarged (scale 1.4) so the user can
@@ -218,7 +225,7 @@ export default function EnvelopeFooter() {
         scale: 1.4,
         rotateX: 0,
         rotateZ: 0,
-        x: 10,
+        x: 10 * r,
       });
 
       // Envelope layers: hidden initially
@@ -238,7 +245,7 @@ export default function EnvelopeFooter() {
       gsap.set(outsideFlap, {
         opacity: 0,
         rotateX: -90,
-        y: -185,
+        y: -185 * r,
         scale: 0.80,
         z: 1.2,
       });
@@ -300,7 +307,7 @@ export default function EnvelopeFooter() {
           duration: 1.5,
           ease: 'power2.inOut',
           z: 1.1,
-          x: -1,
+          x: -1 * r,
         },
         3.5
       );
@@ -316,7 +323,7 @@ export default function EnvelopeFooter() {
           duration: 1.2,
           ease: 'power2.out',
           scale: 0.80,
-          y: 40,
+          y: 40 * r,
           z: 1,
         },
         5
@@ -341,7 +348,7 @@ export default function EnvelopeFooter() {
           opacity: 1,
           duration: 0.8,
           ease: 'power2.out',
-          y: -185,
+          y: -185 * r,
           scale: 0.80,
           z: 1,
 
@@ -361,7 +368,7 @@ export default function EnvelopeFooter() {
           scale: 1,
           duration: 2,
           ease: 'power2.inOut',
-          x: -5,
+          x: -5 * r,
           y: '25%',
 
           z: 1.1,
@@ -410,7 +417,7 @@ export default function EnvelopeFooter() {
           duration: 1.0,
           ease: 'power2.inOut',
           scale: 0.80,
-          y: -190,
+          y: -190 * r,
           z: 1.2,
 
         },
