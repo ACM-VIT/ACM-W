@@ -350,7 +350,8 @@ export default function ContributorsSection() {
     const onWheel = (e: WheelEvent) => {
       const maxScroll = el.scrollWidth - el.clientWidth;
       if (maxScroll <= 0) return;
-      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) return;
+      const delta = e.deltaX;
       if (delta === 0) return;
       const atStart = el.scrollLeft <= 0 && delta < 0;
       const atEnd = el.scrollLeft >= maxScroll && delta > 0;
