@@ -263,7 +263,7 @@ export default function EventsPage() {
                     reverse ? "order-1 max-[56.25rem]:order-none" : ""
                   }`}
                 >
-                  <h2 className="mb-4 text-[clamp(1.5rem,3vw,2rem)] text-[#5B0F0F]">
+                  <h2 className="mb-4 font-[Kovanov,Georgia,serif] text-[clamp(1.5rem,3vw,2rem)] font-bold text-[#5B0F0F]">
                     {event.title}
                   </h2>
                   <p className="font-[Kovanov,Georgia,serif] text-[clamp(0.95rem,1.1vw,1.08rem)] font-bold leading-[1.8] text-[#321515] max-sm:text-[0.95rem] max-sm:leading-[1.65]">

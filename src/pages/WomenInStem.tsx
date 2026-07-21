@@ -405,12 +405,11 @@ export default function WomenInStem() {
           />
 
           {/* Scientist photo */}
-          <div
-            className={`photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0${sci.hasFrame ? "" : " photo-frame--needs-border"
-              }`}
-          >
-            <img src={sci.photo} alt={sci.name} />
-          </div>
+          <img
+            className="photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0"
+            src={sci.photo}
+            alt={sci.name}
+          />
 
           {/* Text */}
           <div
