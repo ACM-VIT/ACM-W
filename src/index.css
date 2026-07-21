@@ -126,8 +126,9 @@ body {
 }
 
 .scientist-subtitle {
-  font-family: Georgia, serif;
+  font-family: "Kovanov", Georgia, serif;
   font-size: clamp(0.8rem, 1vw, 0.95rem);
+  font-weight: 700;
   letter-spacing: 0.25rem;
   text-transform: uppercase;
   color: #7a4444;
@@ -135,8 +136,9 @@ body {
 }
 
 .scientist-desc {
-  font-family: "Quicksand", Arial, sans-serif;
+  font-family: "Kovanov", Georgia, serif;
   font-size: clamp(0.95rem, 1.1vw, 1.15rem);
+  font-weight: 700;
   line-height: 1.8;
   color: #5e4d4d;
   margin: 0;
