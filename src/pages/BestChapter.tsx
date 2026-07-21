@@ -44,8 +44,8 @@ export default function BestChapter() {
 
         <p
           style={{
-            fontFamily: "Georgia, serif",
-            fontStyle: "italic",
+            fontFamily: "Kovanov, serif",
+            fontStyle: "normal",
             fontWeight: "normal",
             fontSize: "clamp(1.1rem, 2vw, 1.6rem)",
             color: "#580A0A",
