@@ -136,6 +136,9 @@ export default function WomenInStem() {
 
   useEffect(() => {
     let matchMedia: gsap.MatchMedia | undefined;
+    /* The scientist timelines live inside `matchMedia`, so revert() disposes
+       them. This one is created outside it and has to be killed by hand. */
+    let visibilityST: ScrollTrigger | undefined;
 
     const timer = setTimeout(() => {
       const globe = globeRef.current;
@@ -194,7 +197,7 @@ export default function WomenInStem() {
          inactive partway through Marie Curie, and visibility was pinned to
          hidden for every scientist after her. A negative priority refreshes
          this last, once the pinned height is real. */
-      ScrollTrigger.create({
+      visibilityST = ScrollTrigger.create({
         trigger: "#women-in-stem",
         start: "top bottom",
         end: "bottom top",
@@ -368,7 +371,7 @@ export default function WomenInStem() {
     return () => {
       clearTimeout(timer);
       matchMedia?.revert();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      visibilityST?.kill();
     };
   }, []);
 
