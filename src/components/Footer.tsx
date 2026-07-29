@@ -340,6 +340,9 @@ export default function Footer() {
             display: "flex",
             gap: "12px",
             marginTop: "clamp(0.5rem, 1.2vw, 0.875rem)",
+            /* Shift only the dots upward — a transform leaves the row's box in
+               flow, so the rule below the footer keeps its original position. */
+            transform: "translateY(-0.75rem)",
             justifyContent: "center",
           }}
         >
