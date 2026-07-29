@@ -1,0 +1,594 @@
+/* ================================================
+   EnvelopeFooter – Scroll-driven 3D Envelope Animation
+   ================================================ */
+
+/* The main section that gets pinned by ScrollTrigger.
+   Height determines how much scrolling drives the animation.
+   Longer = slower, more controlled animation. */
+.scroll-section {
+  position: relative;
+  width: 100%;
+  height: 600vh;
+  overflow: visible;
+}
+
+/* The pinned inner container — stays on screen during scroll */
+.scroll-section__pin-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible; /* Must NOT be hidden — clips pointer events on the scaled card */
+  background-color: #e6ddd0;
+  /* Match the site's dot texture background */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' fill='%23e6ddd0'/%3E%3Cg fill='%234a1010' fill-opacity='0.05'%3E%3Ccircle cx='18' cy='24' r='1'/%3E%3Ccircle cx='62' cy='41' r='1'/%3E%3Ccircle cx='121' cy='29' r='1'/%3E%3Ccircle cx='33' cy='86' r='1'/%3E%3Ccircle cx='95' cy='74' r='1'/%3E%3Ccircle cx='142' cy='98' r='1'/%3E%3Ccircle cx='49' cy='131' r='1'/%3E%3Ccircle cx='109' cy='143' r='1'/%3E%3Ccircle cx='149' cy='151' r='1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 3D scene — gives depth via perspective */
+.scene {
+  perspective: 1000px;
+  width: 100%;
+  max-width: 650px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* -----------------------------------------------
+   THE WRAPPER — The relative parent for all layers.
+   All envelope pieces are absolutely positioned
+   inside this container and stacked via z-index ONLY.
+   ----------------------------------------------- */
+.envelope-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  transform-style: preserve-3d;
+}
+
+/* -----------------------------------------------
+   FRONT FACE — All visible layers before the flip.
+   Contains the 4 front-facing layers. Must preserve-3d
+   so the flap rotateX renders in 3D space.
+   ----------------------------------------------- */
+.front-face {
+  position: relative;
+  width: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  pointer-events: none; /* Prevent invisible 3D layers from swallowing clicks */
+}
+
+/* -----------------------------------------------
+   Z-INDEX STACK (bottom → top):
+     1. envelopeBackside  (back face card — behind everything)
+     2. envelopeInterior   (tan inside back wall)
+     3. brownCard          (sliding contact card)
+     4. envelopePocket     (front red pocket)
+     5. flap-container     (two-part flap: insideFlap + outsideFlap)
+   ----------------------------------------------- */
+
+/* Layer 1: Envelope backside (social links card).
+   Pre-rotated 180° so it faces correctly after the
+   wrapper does its final 180° rotateY flip. */
+.envelope-backside {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(180deg) translateZ(1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Layer 2: Envelope interior (tan inside back wall).
+   This is the ONLY in-flow child — its natural image height
+   defines the wrapper's height. All other layers overlay it. */
+.envelope-interior {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  z-index: 2;
+  transform: translateZ(-10px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  pointer-events: none;
+}
+
+.envelope-interior img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Layer 3: Brown contact card.
+   Horizontally centered via left:50% + translateX(-50%).
+   GSAP controls vertical position (y) for slide animation. */
+.brown-card {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  width: 70%;
+  height: auto;
+  transform: translate(-50%, 0) translateZ(0px);
+  z-index: 3;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  pointer-events: auto;
+}
+
+/* Background texture — fills the card, sits behind the form.
+   pointer-events: none is critical: in a preserve-3d stacking context
+   this image would otherwise absorb clicks before they reach the
+   absolutely-positioned form overlay above it. */
+.brown-card__bg {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(74, 16, 16, 0.2);
+  pointer-events: none;
+}
+
+/* Form overlay — MUST stay within bg image bounds.
+   overflow: hidden is the safety net. */
+.brown-card__form {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6% 8%;
+  box-sizing: border-box;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+/* "CONTACT US" header — strict #580A0A */
+.brown-card__heading {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: clamp(0.9rem, 3.5vw, 1.5rem);
+  font-weight: 700;
+  color: #580A0A;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Fields wrapper — takes remaining space, distributes evenly */
+.brown-card__fields {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+  justify-content: space-evenly;
+  min-height: 0;
+}
+
+/* Each field row — label + input share one baseline */
+.brown-card__field {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  border-bottom: 1px solid rgba(74, 40, 20, 0.35);
+}
+
+.brown-card__label {
+  display: inline;
+  flex-shrink: 0;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: clamp(0.55rem, 1.8vw, 0.75rem);
+  font-weight: 600;
+  color: #3a2a1a;
+  line-height: 1.2;
+  padding-bottom: 2px;
+  
+}
+
+/* Inputs fill remaining row width; border is on the parent .brown-card__field */
+.brown-card__input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: clamp(0.55rem, 1.6vw, 0.7rem);
+  color: #3a2a1a;
+  padding: 2px 4px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+  pointer-events: auto;
+  cursor: text;
+}
+
+.brown-card__field:focus-within {
+  border-bottom-color: #580A0A;
+}
+
+.brown-card__input::placeholder {
+  color: rgba(58, 42, 26, 0.4);
+}
+
+/* Kill Chrome's autofill white/blue background.
+   Chrome forces its own background via internal !important styles —
+   the only override is a massive inset box-shadow that covers it. */
+.brown-card__input:-webkit-autofill,
+.brown-card__input:-webkit-autofill:hover,
+.brown-card__input:-webkit-autofill:focus,
+.brown-card__input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: #3a2a1a !important;
+  background-color: transparent !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Textarea — no resize, minimal height */
+.brown-card__textarea {
+  resize: none;
+  line-height: 1.3;
+}
+
+/* Submit button — strict #580A0A background */
+.brown-card__submit {
+  margin: 0;
+  padding: clamp(4px, 1.2vw, 8px) clamp(16px, 5vw, 36px);
+  background-color: #580A0A;
+  color: #f5ebe0;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.brown-card__submit:hover {
+  background-color: #6e1212;
+  transform: scale(1.03);
+}
+
+.brown-card__submit:active {
+  transform: scale(0.98);
+}
+
+.brown-card__submit--loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.brown-card__submit--success {
+}
+
+.brown-card__submit--error {
+  background-color: #8b1a1a;
+}
+
+/* Layer 4: Envelope pocket (front red pocket).
+   Full dimensions — top half is transparent in the asset,
+   so the card and interior show through above the pocket line. */
+.envelope-pocket {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  transform: translateZ(10px);
+  pointer-events: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.envelope-pocket img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Layer 5: Two-part flap container.
+   Both insideFlap and outsideFlap are upright triangles (pointing UP).
+   They hinge from their BOTTOM edge (transform-origin: bottom center).
+   The container preserves 3D so both halves share the same 3D space.
+   IMPORTANT: inside-flap is position: relative so the container gets
+   real height from the image. Without this, height collapses to 0
+   and transform-origin: bottom center resolves to the TOP. */
+.flap-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2;
+  transform: translateZ(-5px);
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+/* inside-flap is RELATIVE so the container gets its height from
+   the flap image. This makes transform-origin: bottom center
+   correctly point to the base of the triangle. */
+.inside-flap {
+  position: relative;
+  width: 100%;
+  height: auto;
+  transform-origin: bottom center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* outside-flap is ABSOLUTE, overlaying the inside-flap in the
+   exact same space. Same dimensions, same hinge point. */
+.outside-flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom center;
+}
+
+.inside-flap img,
+.outside-flap img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* -----------------------------------------------
+   BACK FACE — Just the envelope backside image,
+   centered and scaled to 0.85.
+   ----------------------------------------------- */
+.back-face__img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transform: scale(0.85);
+}
+
+/* -----------------------------------------------
+   BACK FACE CONTENT — Absolutely positioned overlay
+   inside .envelope-backside. Does NOT modify the
+   parent's width/height/transform/backface-visibility.
+   ----------------------------------------------- */
+.back-face__content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 12% 24px;
+  box-sizing: border-box;
+  pointer-events: auto;
+  /* Scale to match the backside image's scale(0.85) */
+  transform: scale(0.85);
+}
+
+/* Two-line text block — centered in the upper area */
+.back-face__text-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 4px;
+}
+
+/* "Made with ♥ by" inline row */
+.back-face__text-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.back-face__text {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: #f5ebe0;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Second line — "ACM-W VIT" bigger */
+.back-face__text--org {
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+}
+
+.back-face__heart {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  vertical-align: middle;
+  /* Subtle pulse animation for delight */
+  animation: heartbeat 1.4s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.15); }
+}
+
+/* Social icons row — anchored to the bottom */
+.back-face__social-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.back-face__social-row a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.back-face__social-row a:hover {
+  transform: scale(1.15);
+  opacity: 0.85;
+}
+
+.back-face__social-icon {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: brightness(0) invert(0.92) sepia(0.08) saturate(0.5);
+}
+
+/* -----------------------------------------------
+   Responsive
+   ----------------------------------------------- */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .scene {
+    max-width: 480px;
+    perspective: 800px;
+  }
+
+  .envelope-wrapper {
+    max-width: 440px;
+  }
+
+  .back-face__text {
+    font-size: 1.3rem;
+  }
+
+  .back-face__text--org {
+    font-size: 1.5rem;
+  }
+
+  .back-face__heart {
+    width: 22px;
+    height: 22px;
+  }
+
+  .back-face__social-row {
+    gap: 20px;
+  }
+
+  .back-face__social-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .scene {
+    max-width: 340px;
+    perspective: 600px;
+  }
+
+  .envelope-wrapper {
+    max-width: 300px;
+  }
+
+  .back-face__content {
+    padding: 0 12px 8% 12px;
+  }
+
+  .back-face__text {
+    font-size: 0.95rem;
+  }
+
+  .back-face__text--org {
+    font-size: 1.15rem;
+  }
+
+  .back-face__text-row {
+    gap: 6px;
+  }
+
+  .back-face__heart {
+    width: 16px;
+    height: 16px;
+  }
+
+  .back-face__social-row {
+    gap: 12px;
+  }
+
+  .back-face__social-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .brown-card__heading {
+    font-size: clamp(0.7rem, 4vw, 1rem);
+  }
+
+  .brown-card__label {
+    font-size: clamp(0.45rem, 2.2vw, 0.6rem);
+  }
+
+  .brown-card__input {
+    font-size: clamp(0.45rem, 2vw, 0.55rem);
+  }
+
+  .brown-card__submit {
+    padding: clamp(3px, 1.5vw, 6px) clamp(12px, 6vw, 28px);
+    font-size: clamp(0.5rem, 2.2vw, 0.7rem);
+  }
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  .scene {
+    max-width: 280px;
+    perspective: 500px;
+  }
+
+  .envelope-wrapper {
+    max-width: 260px;
+  }
+
+  .back-face__text {
+    font-size: 0.8rem;
+  }
+
+  .back-face__text--org {
+    font-size: 1rem;
+  }
+
+  .back-face__social-row {
+    gap: 8px;
+  }
+
+  .back-face__social-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+

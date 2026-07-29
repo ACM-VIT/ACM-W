@@ -1,112 +1,250 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&display=swap');
 @import "tailwindcss";
+
+@font-face {
+  font-family: "Kovanov";
+  src: url("./assets/Kovanov-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kovanov";
+  src: url("./assets/Kovanov-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Quicksand";
+  src: url("./assets/Quicksand-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+html {
+  cursor: url("./assets/feather-cursor.png") 4 4, auto;
 }
 
 body {
   margin: 0;
+  background: #fff9e9;
+  overflow-x: hidden;
+  color: #580A0A;
+  cursor: url("./assets/feather-cursor.png") 4 4, auto;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+* {
+  cursor: url("./assets/feather-cursor.png") 4 4, auto !important;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+
+/* ─── Globe fixed container ─── */
+.globe-fixed-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  visibility: hidden;
+  pointer-events: auto;
+  will-change: opacity;
 }
-p {
+
+.globe-fixed-container > div,
+.globe-fixed-container canvas {
+  width: min(58rem, 100vw, 100svh) !important;
+  height: min(58rem, 100vw, 100svh) !important;
+}
+
+.globe-soft-edge {
+  -webkit-mask-image: none;
+  mask-image: none;
+  --globe-edge-alpha-62: 0.82;
+  --globe-edge-alpha-78: 0.48;
+  --globe-edge-alpha-91: 0.16;
+  --globe-edge-alpha-100: 0;
+}
+
+.globe-soft-edge.is-globe-zooming {
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 50%,
+    #000 0%,
+    #000 46%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-62)) 62%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-78)) 78%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-91)) 91%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-100)) 100%
+  );
+  mask-image: radial-gradient(
+    circle at 50% 50%,
+    #000 0%,
+    #000 46%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-62)) 62%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-78)) 78%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-91)) 91%,
+    rgba(0, 0, 0, var(--globe-edge-alpha-100)) 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+/* ─── Photo (no frame) ─── */
+.photo-frame {
+  display: block;
+  width: min(23.75rem, 30vw);
+  height: auto;
+  object-fit: cover;
+}
+
+/* ─── Scientist text styling ─── */
+
+.scientist-name {
+  font-family: "Kovanov", Georgia, serif;
+  font-size: clamp(2.2rem, 4vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: #580a0a;
+  margin: 0 0 clamp(0.75rem, 2vh, 1rem);
+}
+
+.scientist-subtitle {
+  font-family: "Kovanov", Georgia, serif;
+  font-size: clamp(0.8rem, 1vw, 0.95rem);
+  font-weight: 700;
+  letter-spacing: 0.25rem;
+  text-transform: uppercase;
+  color: #7a4444;
+  margin: 0 0 clamp(1rem, 2.5vh, 1.5rem);
+}
+
+.scientist-desc {
+  font-family: "Kovanov", Georgia, serif;
+  font-size: clamp(0.95rem, 1.1vw, 1.15rem);
+  font-weight: 700;
+  line-height: 1.8;
+  color: #5e4d4d;
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* ───────────────────────────── */
+/* Tablet */
+/* ───────────────────────────── */
+
+@media (max-width: 64rem) {
+  .scientist-name {
+    font-size: 2.8rem;
+  }
+
+  .scientist-desc {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .photo-frame {
+    width: min(18.75rem, 48vw);
+  }
+
+  .country-img {
+    width: min(26.25rem, 70vw) !important;
+  }
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* ───────────────────────────── */
+/* Mobile */
+/* ───────────────────────────── */
+
+@media (max-width: 48rem) {
+  .women-in-stem-hero-title {
+    font-size: clamp(1.75rem, 8.5vw, 2.5rem) !important;
+    padding: 0 1.25rem;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .scientist-section {
+    overflow: hidden;
+  }
+
+  .country-img {
+    width: min(18.75rem, 75vw) !important;
+  }
+
+  .photo-frame {
+    z-index: 2;
+    width: min(13.75rem, 55vw);
+  }
+
+  .scientist-name {
+    font-size: 2rem;
+    margin-bottom: 0.625rem;
+  }
+
+  .scientist-subtitle {
+    font-size: 0.8rem;
+    letter-spacing: 0.125rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .scientist-desc {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .globe-fixed-container > div,
+  .globe-fixed-container canvas {
+    width: min(40rem, 98vw, 98svh) !important;
+    height: min(40rem, 98vw, 98svh) !important;
+  }
+}
+
+/* ───────────────────────────── */
+/* Small phones */
+/* ───────────────────────────── */
+
+@media (max-width: 30rem) {
+  .women-in-stem-hero-title {
+    font-size: clamp(1.5rem, 7.5vw, 2rem) !important;
+    padding: 0 1rem;
+  }
+
+  .scientist-name {
+    font-size: 1.6rem;
+  }
+
+  .scientist-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .photo-frame {
+    width: min(11.25rem, 50vw);
+  }
+
+  .country-img {
+    width: min(15rem, 70vw) !important;
+  }
+
+  .globe-fixed-container > div,
+  .globe-fixed-container canvas {
+    width: min(29rem, 96vw, 96svh) !important;
+    height: min(29rem, 96vw, 96svh) !important;
+  }
 }
