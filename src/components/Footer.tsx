@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
-// Postcard frame PNGs — native landscape 276×216 (552×432 at 2×), no rotation needed
+// Postcard frame PNGs — native landscape 276×216 (552×432 at 2×), no rotation needed.
+// The two doodled frames ship as a cleaned frame + a separate transparent doodle,
+// so the doodle can ride the border band instead of being buried under the photo.
 import framePink from "../assets/footer/Group 1000007240.png";
-import frameNavyBalloon from "../assets/footer/Group 1000007244.png";
-import framePinkLighthouse from "../assets/footer/Group 1000007243.png";
 import frameNavy from "../assets/footer/Group 1000007241.png";
+import framePinkClean from "../assets/footer/frame-pink-clean.png";
+import frameNavyClean from "../assets/footer/frame-navy-clean.png";
+import doodleLighthouse from "../assets/footer/doodle-lighthouse.png";
+import doodleBalloon from "../assets/footer/doodle-balloon.png";
 
 // Gallery photos — dynamically import the first 9 photos from the gallery folder.
 const photoModules = import.meta.glob<{ default: string }>(
@@ -22,19 +26,16 @@ const galleryPhotos: (string | null)[] = Array.from({ length: 9 }, (_, i) =>
   sortedPhotos[i] ?? null
 );
 
-// Alternating postcard frames — pink / navy, two of them carrying a doodle.
-const postcardFrames = [framePink, frameNavyBalloon, framePinkLighthouse, frameNavy];
-
 /*
  * Frame geometry:
  *   Landscape frame PNG: 276 × 216 (552 × 432 at 2×) — already landscape,
  *   so the frame simply fills the card with no rotation.
  *
- * Each frame draws its own double border (outer cream ring + inked inner rule),
- * so the card needs no CSS borders of its own. The inner white window measured
- * off the PNGs starts at ~7% from the left/right edges and ~9% from the
- * top/bottom; the photo is inset slightly past that so the ink stroke stays
- * visible on top of it.
+ * Each frame draws its own double border (outer colour ring + cream band +
+ * inked inner rule), so the card needs no CSS borders of its own. The inner
+ * white window measured off the PNGs starts at ~7% from the left/right edges
+ * and ~9% from the top/bottom; the photo is inset slightly past that so the
+ * ink stroke stays visible on top of it.
  */
 const FRAME_W = 276;
 const FRAME_H = 216;
@@ -42,6 +43,28 @@ const CONTAINER_AR = `${FRAME_W} / ${FRAME_H}`; // "276 / 216"
 // Photo window inside the frame's inked rule
 const PHOTO_INSET_X = "7.8%";
 const PHOTO_INSET_Y = "9.8%";
+
+/*
+ * Doodle placement. The left border band runs from the card edge to the inked
+ * rule at 7.8%; its cream stretch (~2.5%–7%) is the readable part, so a doodle
+ * this wide sits on the cream with a slight bite into the outer colour ring.
+ * Both doodles are navy ink, which reads on the pink and the navy frame alike
+ * because the band under them is cream either way.
+ */
+const DOODLE_WIDTH = "5.6%";
+const DOODLE_LEFT = "1.6%";
+
+/* Alternating postcard frames — pink / navy, every one carrying a border doodle.
+   The doodle is an overlay rather than part of the frame art, so the two plain
+   frames get one too. Motif and vertical anchor both alternate, so no page of
+   three cards ever shows the same doodle in the same spot twice. */
+const postcards = [
+  { frame: framePink, doodle: doodleBalloon, doodleY: { bottom: "12%" } },
+  { frame: frameNavyClean, doodle: doodleBalloon, doodleY: { top: "12%" } },
+  { frame: framePinkClean, doodle: doodleLighthouse, doodleY: { bottom: "12%" } },
+  { frame: frameNavy, doodle: doodleLighthouse, doodleY: { top: "12%" } },
+] as const;
+
 const CARDS_PER_PAGE = 3;
 
 export default function Footer() {
@@ -206,7 +229,7 @@ export default function Footer() {
             }}
           >
             {galleryPhotos.map((photo, index) => {
-              const frame = postcardFrames[index % postcardFrames.length];
+              const { frame, doodle, doodleY } = postcards[index % postcards.length];
               const isFirstInGroup = index % 3 === 0;
 
               return (
@@ -285,6 +308,26 @@ export default function Footer() {
                       </div>
                     )}
                   </div>
+
+                  {/* Doodle motif — rides the left border band, above the photo
+                      so it is never clipped by the photo window. */}
+                  {doodle && (
+                    <img
+                      src={doodle}
+                      alt=""
+                      aria-hidden="true"
+                      draggable={false}
+                      style={{
+                        position: "absolute",
+                        left: DOODLE_LEFT,
+                        ...doodleY,
+                        width: DOODLE_WIDTH,
+                        height: "auto",
+                        zIndex: 3,
+                        pointerEvents: "none",
+                      }}
+                    />
+                  )}
                 </div>
               );
             })}
