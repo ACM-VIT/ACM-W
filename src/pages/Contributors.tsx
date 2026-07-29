@@ -350,15 +350,20 @@ export default function ContributorsSection() {
     const onWheel = (e: WheelEvent) => {
       const maxScroll = el.scrollWidth - el.clientWidth;
       if (maxScroll <= 0) return;
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) return;
-      const delta = e.deltaX;
-      if (delta === 0) return;
+
+      // Vertical wheel drives the horizontal reel; horizontal input still works.
+      const raw = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (raw === 0) return;
+      // deltaMode 1 = lines, 2 = pages — normalise to pixels.
+      const delta = e.deltaMode === 1 ? raw * 16 : e.deltaMode === 2 ? raw * el.clientWidth : raw;
+
+      // Hand the gesture back to the page once the reel bottoms out.
       const atStart = el.scrollLeft <= 0 && delta < 0;
-      const atEnd = el.scrollLeft >= maxScroll && delta > 0;
+      const atEnd = el.scrollLeft >= maxScroll - 1 && delta > 0;
       if (atStart || atEnd) return;
 
       e.preventDefault();
-      el.scrollLeft += delta;
+      el.scrollLeft = Math.max(0, Math.min(maxScroll, el.scrollLeft + delta));
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });
@@ -390,6 +395,7 @@ export default function ContributorsSection() {
           style={{
             overflowX: "auto",
             overflowY: "visible",
+            overscrollBehaviorX: "contain",
             msOverflowStyle: "none",
             scrollbarWidth: "none",
           }}
