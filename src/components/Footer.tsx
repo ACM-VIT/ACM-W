@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
-// Postcard frame PNGs — portrait 432×552 (or 216×276); rotated -90° to landscape
-import footerPink1 from "../assets/footer/footer_pink1.png";
-import footerBlack1 from "../assets/footer/footer_black1.png";
-import footerPink2 from "../assets/footer/footer_pink2.png";
-import footerBlack2 from "../assets/footer/footer_black2.png";
+// Postcard frame PNGs — native landscape 276×216 (552×432 at 2×), no rotation needed
+import framePink from "../assets/footer/Group 1000007240.png";
+import frameNavyBalloon from "../assets/footer/Group 1000007244.png";
+import framePinkLighthouse from "../assets/footer/Group 1000007243.png";
+import frameNavy from "../assets/footer/Group 1000007241.png";
 
 // Gallery photos — dynamically import the first 9 photos from the gallery folder.
 const photoModules = import.meta.glob<{ default: string }>(
@@ -22,35 +22,26 @@ const galleryPhotos: (string | null)[] = Array.from({ length: 9 }, (_, i) =>
   sortedPhotos[i] ?? null
 );
 
-// Alternating postcard frames — portrait PNGs rotated -90deg to landscape
-const postcardFrames = [footerPink1, footerBlack1, footerPink2, footerBlack2];
-const postcardAccentColors = ["#FEC3E3", "#130043", "#FEC3E3", "#130043"];
+// Alternating postcard frames — pink / navy, two of them carrying a doodle.
+const postcardFrames = [framePink, frameNavyBalloon, framePinkLighthouse, frameNavy];
 
 /*
- * Frame geometry (from SVG reference):
- *   Portrait frame PNG: 216 × 275  (or 432 × 552 at 2×)
- *   After -90deg rotation -> landscape: 275w x 216h
+ * Frame geometry:
+ *   Landscape frame PNG: 276 × 216 (552 × 432 at 2×) — already landscape,
+ *   so the frame simply fills the card with no rotation.
  *
- * The container is sized as 275:216 landscape.
- * Inside the container the frame image is rotated -90°.
- *
- * When an element is rotated -90° with transform-origin: center center:
- *   - Its rendered width = original height
- *   - Its rendered height = original width
- * To fill the container exactly:
- *   - Set the frame img width  = container height (216 units, becomes rendered height after rotation)
- *   - Set the frame img height = container width  (275 units, becomes rendered width after rotation)
- * In percentage terms (relative to container):
- *   - img width  = (containerH / containerW) * 100% = (216 / 275) * 100% ~= 78.55%
- *   - img height = (containerW / containerH) * 100% = (275 / 216) * 100% ~= 127.31%
+ * Each frame draws its own double border (outer cream ring + inked inner rule),
+ * so the card needs no CSS borders of its own. The inner white window measured
+ * off the PNGs starts at ~7% from the left/right edges and ~9% from the
+ * top/bottom; the photo is inset slightly past that so the ink stroke stays
+ * visible on top of it.
  */
-const FRAME_W = 216; // original portrait width
-const FRAME_H = 275; // original portrait height
-// Landscape container aspect ratio after rotation
-const CONTAINER_AR = `${FRAME_H} / ${FRAME_W}`; // "275 / 216"
-// Frame img sizing (percentages of container)
-const IMG_WIDTH_PCT = `${((FRAME_W / FRAME_H) * 100).toFixed(2)}%`;   // ~78.55%
-const IMG_HEIGHT_PCT = `${((FRAME_H / FRAME_W) * 100).toFixed(2)}%`;  // ~127.31%
+const FRAME_W = 276;
+const FRAME_H = 216;
+const CONTAINER_AR = `${FRAME_W} / ${FRAME_H}`; // "276 / 216"
+// Photo window inside the frame's inked rule
+const PHOTO_INSET_X = "7.8%";
+const PHOTO_INSET_Y = "9.8%";
 const CARDS_PER_PAGE = 3;
 
 export default function Footer() {
@@ -216,7 +207,6 @@ export default function Footer() {
           >
             {galleryPhotos.map((photo, index) => {
               const frame = postcardFrames[index % postcardFrames.length];
-              const accentColor = postcardAccentColors[index % postcardAccentColors.length];
               const isFirstInGroup = index % 3 === 0;
 
               return (
@@ -224,30 +214,17 @@ export default function Footer() {
                   key={index}
                   data-card-index={index}
                   style={{
-                    /* Landscape container: 275w x 216h (frame rotated -90deg) */
+                    /* Landscape container matching the frame PNG: 276w x 216h */
                     width: "clamp(16rem, 25vw, 21.5rem)",
                     aspectRatio: CONTAINER_AR,
                     flexShrink: 0,
                     position: "relative",
                     scrollSnapAlign: isFirstInGroup ? "start" : undefined,
-                    overflow: "hidden",
-                    background: "#f8f1e4",
-                    borderRadius: "18px",
-                    /* No explicit border-radius — the frame PNG has its own rounded corners */
+                    /* No background or border-radius — the frame PNG carries its
+                       own rounded outline and transparent corners. */
                   }}
                 >
-                  <div
-                    aria-hidden="true"
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      zIndex: 0,
-                      background: "#f8f1e4",
-                    }}
-                  />
-
-                  {/* PNG postcard base — rotated -90° from portrait to landscape.
-                      Sized so that after rotation, the frame exactly covers the container. */}
+                  {/* PNG postcard frame — fills the card, drawn behind the photo. */}
                   <img
                     src={frame}
                     alt=""
@@ -255,27 +232,24 @@ export default function Footer() {
                     draggable={false}
                     style={{
                       position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      width: IMG_WIDTH_PCT,
-                      height: IMG_HEIGHT_PCT,
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
                       objectFit: "fill",
-                      transform: "translate(-50%, -50%) rotate(-90deg)",
-                      transformOrigin: "center center",
                       zIndex: 1,
                       pointerEvents: "none",
                     }}
                   />
 
-                  {/* Photo layer — clipped inside the postcard outline and rendered above the base. */}
+                  {/* Photo layer — sits inside the frame's inner window. */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "13%",
-                      left: "10%",
-                      right: "10%",
-                      bottom: "13%",
-                      borderRadius: "6px",
+                      top: PHOTO_INSET_Y,
+                      left: PHOTO_INSET_X,
+                      right: PHOTO_INSET_X,
+                      bottom: PHOTO_INSET_Y,
+                      borderRadius: "4px",
                       overflow: "hidden",
                       zIndex: 2,
                       background: "#f8f1e4",
@@ -311,32 +285,6 @@ export default function Footer() {
                       </div>
                     )}
                   </div>
-
-                  <div
-                    aria-hidden="true"
-                    style={{
-                      position: "absolute",
-                      inset: "5%",
-                      zIndex: 3,
-                      border: `clamp(8px, 1.4vw, 18px) solid ${accentColor}`,
-                      borderRadius: "14px",
-                      pointerEvents: "none",
-                      boxSizing: "border-box",
-                    }}
-                  />
-
-                  <div
-                    aria-hidden="true"
-                    style={{
-                      position: "absolute",
-                      inset: "10%",
-                      zIndex: 4,
-                      border: "clamp(4px, 0.85vw, 11px) solid #F8F6F1",
-                      borderRadius: "8px",
-                      pointerEvents: "none",
-                      boxSizing: "border-box",
-                    }}
-                  />
                 </div>
               );
             })}
