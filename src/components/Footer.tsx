@@ -135,12 +135,14 @@ export default function Footer() {
     if (!el) return;
 
     const onWheel = (e: WheelEvent) => {
-      // Only shift on horizontal scroll
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) return;
+      // Vertical wheel turns the pages; horizontal input still works.
+      const raw = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      // deltaMode 1 = lines, 2 = pages — normalise to pixels.
+      const delta = e.deltaMode === 1 ? raw * 16 : e.deltaMode === 2 ? raw * el.clientWidth : raw;
+      // Ignore trackpad drift so a stray pixel can't flip a page.
+      if (Math.abs(delta) < 8) return;
 
-      const delta = e.deltaX;
-      if (delta === 0) return;
-
+      // Hand the gesture back to the page at either end of the gallery.
       const nextPage = currentPage + (delta > 0 ? 1 : -1);
       if (nextPage < 0 || nextPage >= totalPages) return;
 
