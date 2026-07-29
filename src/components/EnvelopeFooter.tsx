@@ -2,6 +2,8 @@ import { useRef, useEffect, useState, type FormEvent } from 'react';
 import emailjs from '@emailjs/browser';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { executeRecaptcha } from '../lib/recaptcha';
+import { cooldownRemainingMs, recordSubmission } from '../lib/rateLimit';
 import './EnvelopeFooter.css';
 
 // Assets from src/assets/footer/
@@ -41,16 +43,48 @@ export default function EnvelopeFooter() {
     message: '',
   });
 
-  type FormStatus = 'idle' | 'loading' | 'success' | 'error';
+  type FormStatus = 'idle' | 'loading' | 'success' | 'error' | 'throttled';
   const [status, setStatus] = useState<FormStatus>('idle');
+
+  // Seconds left on the throttle, surfaced on the submit button.
+  const [retryIn, setRetryIn] = useState(0);
+
+  // Tick the throttle down and release the button when it expires.
+  useEffect(() => {
+    if (status !== 'throttled') return;
+
+    const tick = () => {
+      const remaining = cooldownRemainingMs();
+      if (remaining <= 0) {
+        setRetryIn(0);
+        setStatus('idle');
+        return;
+      }
+      setRetryIn(Math.ceil(remaining / 1000));
+    };
+
+    const id = setInterval(tick, 500);
+    return () => clearInterval(id);
+  }, [status]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (status === 'loading') return;
+
+    // Throttle first — a blocked submit shouldn't spend a reCAPTCHA check.
+    const wait = cooldownRemainingMs();
+    if (wait > 0) {
+      setRetryIn(Math.ceil(wait / 1000));
+      setStatus('throttled');
+      return;
+    }
+
     setStatus('loading');
 
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+    const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
     if (!serviceId || !templateId || !publicKey) {
       console.error('Missing EmailJS config: set VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, and VITE_EMAILJS_PUBLIC_KEY.');
@@ -62,15 +96,30 @@ export default function EnvelopeFooter() {
       console.log('EmailJS config loaded', { serviceId, templateId, publicKey: 'set' });
     }
 
-    const templateParams = {
+    // The recipient is intentionally absent: it is hardcoded in the EmailJS
+    // template's "To Email" field. These VITE_* values are all inlined into
+    // the public bundle, so a browser-supplied recipient would let anyone
+    // relay mail to any address on ACM-W's EmailJS quota.
+    const templateParams: Record<string, string> = {
       from_name: formData.name,
       from_email: formData.email,
       phone: formData.phone,
       message: formData.message,
-      to_email: 'outreach.acmvit@gmail.com',
     };
 
     try {
+      if (recaptchaSiteKey) {
+        templateParams['g-recaptcha-response'] = await executeRecaptcha(recaptchaSiteKey);
+      } else {
+        console.warn(
+          'VITE_RECAPTCHA_SITE_KEY is not set — submitting without a reCAPTCHA token. ' +
+          'EmailJS will reject this send once reCAPTCHA is enabled on the template.'
+        );
+      }
+
+      // Counted once the send is actually attempted, so a burst of failures
+      // still can't hammer the API.
+      recordSubmission();
       await emailjs.send(serviceId, templateId, templateParams, { publicKey });
       setStatus('success');
     } catch (err: unknown) {
@@ -530,11 +579,12 @@ export default function EnvelopeFooter() {
                   <button
                     type="submit"
                     className={`brown-card__submit brown-card__submit--${status}`}
-                    disabled={status === 'loading'}
+                    disabled={status === 'loading' || status === 'throttled'}
                   >
                     {status === 'loading' && 'Sending…'}
                     {status === 'success' && 'thank you'}
                     {status === 'error' && 'Try again'}
+                    {status === 'throttled' && `Wait ${retryIn}s`}
                     {status === 'idle' && 'Submit'}
                   </button>
                 </form>
