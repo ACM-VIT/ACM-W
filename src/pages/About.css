@@ -29,10 +29,13 @@ body,
    page scrolls on the main scrollbar — no inner scroll container. */
 .about_section {
   position: relative;
-  padding-top: clamp(3rem, 7vh, 3.75rem);
+  padding-top: clamp(0.75rem, 2vh, 1.25rem);
 }
 
+/* Second card rides slightly over the bottom of the first. Later in the DOM,
+   so it paints on top without needing a z-index. */
 .about_section--top {
+  margin-top: clamp(-4.5rem, -4vw, -1.75rem);
   padding-bottom: clamp(3rem, 7vh, 3.75rem);
 }
 
@@ -138,10 +141,11 @@ body,
   }
 
   .about_section {
-    padding-top: clamp(1.25rem, 3vh, 1.75rem);
+    padding-top: clamp(0.5rem, 1.5vh, 0.875rem);
   }
 
   .about_section--top {
+    margin-top: clamp(-2.5rem, -5vw, -1rem);
     padding-bottom: clamp(1.25rem, 3vh, 1.75rem);
   }
 
@@ -169,10 +173,11 @@ body,
 
 @media (max-width: 30rem) {
   .about_section {
-    padding-top: clamp(0.75rem, 2vh, 1.25rem);
+    padding-top: clamp(0.25rem, 1vh, 0.625rem);
   }
 
   .about_section--top {
+    margin-top: clamp(-2rem, -4.5vw, -0.75rem);
     padding-bottom: clamp(0.75rem, 2vh, 1.25rem);
   }
 
