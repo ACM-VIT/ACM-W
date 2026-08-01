@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState, type FormEvent } from 'react';
-import emailjs from '@emailjs/browser';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './EnvelopeFooter.css';
@@ -47,39 +46,32 @@ export default function EnvelopeFooter() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('loading');
-
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-
-    if (!serviceId || !templateId || !publicKey) {
-      console.error('Missing EmailJS config: set VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, and VITE_EMAILJS_PUBLIC_KEY.');
-      setStatus('error');
-      return;
-    }
-
-    if (import.meta.env.DEV) {
-      console.log('EmailJS config loaded', { serviceId, templateId, publicKey: 'set' });
-    }
-
-    const templateParams = {
-      from_name: formData.name,
-      from_email: formData.email,
-      phone: formData.phone,
-      message: formData.message,
-      to_email: 'outreach.acmvit@gmail.com',
-    };
-
     try {
-      await emailjs.send(serviceId, templateId, templateParams, { publicKey });
+      const response = await fetch('https://sweet-union-7b5e.jahnavisingh512.workers.dev', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
       setStatus('success');
     } catch (err: unknown) {
-      console.error('EmailJS error:', err);
+      console.error('Form submission error:', err);
       if (err instanceof Error) {
         console.error('Error message:', err.message);
       }
       setStatus('error');
     }
+
   };
 
   const handleChange = (field: string, value: string) => {
