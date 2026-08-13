@@ -16,7 +16,6 @@
     "cf:pages:deploy": "npm run build && wrangler --config=wrangler.pages.jsonc pages deploy dist --project-name acm-w"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
     "@types/three": "^0.184.1",
     "gsap": "^3.15.0",
     "lottie-web": "^5.13.0",

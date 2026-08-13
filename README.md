@@ -93,6 +93,13 @@ For Cloudflare Pages Git integration, use:
 - Build command: `npm run build`
 - Build output directory: `dist`
 
+### Contact Form
+
+The contact form opens the visitor's configured mail application with the
+message addressed to `acm@vit.ac.in`. It does not require an email provider,
+API key, or environment variables. Visitors need a mail application configured
+on their device for the message to be sent.
+
 ---
 
 ## Contributing

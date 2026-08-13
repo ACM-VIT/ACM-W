@@ -3,10 +3,9 @@
 // This is a courtesy guard, not a security control: it lives in the browser,
 // so anyone determined can clear localStorage or edit the bundle around it.
 // Its job is to stop honest double-clicks, impatient resubmits and casual
-// spam from burning the EmailJS monthly quota.
+// spam from opening unnecessary mail drafts.
 //
-// The authoritative limit is the account-level one in the EmailJS dashboard
-// (Account -> Security -> rate limiting), which cannot be bypassed from here.
+// This is only a courtesy guard in the current browser.
 
 const STORAGE_KEY = 'acmw:contact-submissions';
 
