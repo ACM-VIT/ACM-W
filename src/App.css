@@ -25,6 +25,12 @@
     height: auto;
     aspect-ratio: 1440 / 1024;
   }
+
+  .fullscreen-animation svg #background,
+  .fullscreen-animation svg #foreground,
+  .fullscreen-animation svg #flab {
+    display: none;
+  }
 }
 
 .lottie-stage,
