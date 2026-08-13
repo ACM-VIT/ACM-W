@@ -8,14 +8,36 @@ import StampBorder from "../components/StampBorder";
 
 const SPREAD = 90;
 
+// Cards dealt into the fan at once. The arrows page through the whole archive a
+// set at a time and wrap around at either end, so the rotation never runs out.
+const PAGE_SIZE = 5;
+const PAGE_COUNT = Math.max(1, Math.ceil(blogs.length / PAGE_SIZE));
+
+// The last page is pulled back so it stays a full fan instead of dealing a
+// lonely card or two: 12 posts give pages starting at 0, 5 and 7.
+const pageStart = (page: number) =>
+  Math.min(page * PAGE_SIZE, Math.max(0, blogs.length - PAGE_SIZE));
+
 function BlogStampsDesktop() {
   const [viewport, setViewport] = useState({ w: 1200, h: 800 });
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [order, setOrder] = useState(() => blogs.map((_, i) => i));
+  const [page, setPage] = useState(0);
+
+  const start = pageStart(page);
+  const visible = blogs.slice(start, start + PAGE_SIZE);
+  const n = visible.length;
+
+  // Slot order within the fan, holding indices into `visible`.
+  const [order, setOrder] = useState<number[]>(() =>
+    Array.from({ length: Math.min(PAGE_SIZE, blogs.length) }, (_, i) => i)
+  );
 
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const n = blogs.length;
+  // Set whenever the next layout pass should deal the cards up from the bottom
+  // rather than slide them between fan positions.
+  const dealRef = useRef(true);
+  const pagingRef = useRef(false);
 
   useEffect(() => {
     const update = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
@@ -23,17 +45,6 @@ function BlogStampsDesktop() {
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
-
-  const getFanProps = (slot: number) => {
-    const centerSlot = Math.floor(n / 2);
-    const step = SPREAD / (n - 1);
-    const angle = -SPREAD / 2 + slot * step;
-    const offset = slot - centerSlot;
-    const tx = offset * fanSpacing;
-    const ty = Math.abs(offset) * fanDrop;
-    const zIndex = 10 - Math.abs(offset);
-    return { angle, zIndex, tx, ty };
-  };
 
   const cardW = Math.min(viewport.w * 0.28, viewport.h * 0.42);
   const cardH = cardW * 1.25;
@@ -53,52 +64,68 @@ function BlogStampsDesktop() {
   const bodySize = 9 * contentScale;
   const linkSize = 10 * contentScale;
 
-  useEffect(() => {
-    order.forEach((cardIdx, slot) => {
-      const el = cardRefs.current[cardIdx];
-      if (!el) return;
-      const { angle, zIndex, tx, ty } = getFanProps(slot);
-      gsap.fromTo(
-        el,
-        { y: viewport.h * 0.375, opacity: 0, rotation: 0, x: 0 },
-        {
-          y: ty,
-          x: tx,
-          opacity: 1,
-          rotation: angle,
-          zIndex,
-          duration: 0.75,
-          ease: "back.out(1.5)",
-          delay: 0.15 + slot * 0.09,
-        }
-      );
-    });
-  }, []);
+  const getFanProps = (slot: number) => {
+    const centerSlot = Math.floor(n / 2);
+    const step = n > 1 ? SPREAD / (n - 1) : 0;
+    const angle = -SPREAD / 2 + slot * step;
+    const offset = slot - centerSlot;
+    const tx = offset * fanSpacing;
+    const ty = Math.abs(offset) * fanDrop;
+    const zIndex = 10 - Math.abs(offset);
+    return { angle, zIndex, tx, ty };
+  };
 
   useEffect(() => {
     if (activeIdx !== null) return;
+    const deal = dealRef.current;
+    dealRef.current = false;
+    // The next set is on screen, so the arrows are live again.
+    if (deal) pagingRef.current = false;
+
     order.forEach((cardIdx, slot) => {
       const el = cardRefs.current[cardIdx];
       if (!el) return;
       const { angle, zIndex, tx, ty } = getFanProps(slot);
-      gsap.to(el, {
-        rotation: angle,
-        x: tx,
-        y: ty,
-        scale: 1,
-        opacity: 1,
-        zIndex,
-        duration: 0.55,
-        ease: "back.out(1.4)",
-        delay: slot * 0.03,
-      });
+
+      if (deal) {
+        gsap.fromTo(
+          el,
+          { y: viewport.h * 0.375, x: 0, rotation: 0, scale: 1, opacity: 0 },
+          {
+            y: ty,
+            x: tx,
+            opacity: 1,
+            rotation: angle,
+            zIndex,
+            duration: 0.75,
+            ease: "back.out(1.5)",
+            delay: 0.15 + slot * 0.09,
+            overwrite: "auto",
+          }
+        );
+      } else {
+        gsap.to(el, {
+          rotation: angle,
+          x: tx,
+          y: ty,
+          scale: 1,
+          opacity: 1,
+          zIndex,
+          duration: 0.55,
+          ease: "back.out(1.4)",
+          delay: slot * 0.03,
+          overwrite: "auto",
+        });
+      }
     });
-  }, [order, activeIdx]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order, activeIdx, page, viewport]);
 
   const zoomCard = (i: number) => {
     const el = cardRefs.current[i];
     if (!el) return;
-    cardRefs.current.forEach((c, j) => {
+    visible.forEach((_, j) => {
+      const c = cardRefs.current[j];
       if (j === i || !c) return;
       const dir = j < i ? -1 : 1;
       gsap.to(c, {
@@ -207,14 +234,67 @@ function BlogStampsDesktop() {
     }
   };
 
+  // Sweeps the current set off the way it is travelling, then deals the next
+  // one in. Wraps past either end, so the arrows keep rotating forever.
+  const turnPage = (dir: number) => {
+    const targets = order
+      .map((cardIdx, slot) => ({ el: cardRefs.current[cardIdx], slot }))
+      .filter((target): target is { el: HTMLDivElement; slot: number } =>
+        Boolean(target.el)
+      );
+
+    const deal = () => {
+      dealRef.current = true;
+      setPage((prev) => (prev + dir + PAGE_COUNT) % PAGE_COUNT);
+      setOrder(Array.from({ length: n }, (_, i) => i));
+    };
+
+    if (!targets.length) {
+      pagingRef.current = false;
+      deal();
+      return;
+    }
+
+    pagingRef.current = true;
+    gsap.to(
+      targets.map((target) => target.el),
+      {
+        x: (i: number) => getFanProps(targets[i].slot).tx + dir * viewport.w * 0.16,
+        y: viewport.h * 0.42,
+        rotation: (i: number) => getFanProps(targets[i].slot).angle + dir * 14,
+        opacity: 0,
+        duration: 0.4,
+        ease: "power2.in",
+        stagger: { each: 0.05, from: dir > 0 ? "start" : "end" },
+        overwrite: "auto",
+        onComplete: deal,
+      }
+    );
+  };
+
   const navigate = (dir: number) => {
-    closeZoom();
-    setTimeout(() => {
-      setOrder((prev) => {
-        if (dir < 0) return [...prev.slice(1), prev[0]];
-        return [prev[prev.length - 1], ...prev.slice(0, -1)];
-      });
-    }, 420);
+    if (pagingRef.current) return;
+
+    const step = () => {
+      // With a single page there is nothing to turn to, so shuffle the fan the
+      // way it always did.
+      if (PAGE_COUNT === 1) {
+        setOrder((prev) =>
+          dir < 0
+            ? [...prev.slice(1), prev[0]]
+            : [prev[prev.length - 1], ...prev.slice(0, -1)]
+        );
+        return;
+      }
+      turnPage(dir);
+    };
+
+    if (activeIdx !== null) {
+      closeZoom();
+      setTimeout(step, 420);
+    } else {
+      step();
+    }
   };
 
   return (
@@ -280,8 +360,22 @@ function BlogStampsDesktop() {
             animation: hint ? "blog-hint-in 0.7s ease 0.5s both" : "none",
           }}
         >
-          {hint || " "}
+          {hint || " "}
         </p>
+        {PAGE_COUNT > 1 && (
+          <p
+            style={{
+              margin: "0.3rem 0 0",
+              fontSize: "clamp(0.66rem, 0.85vw, 0.75rem)",
+              letterSpacing: "0.16em",
+              color: "#a06565",
+              opacity: activeIdx !== null ? 0 : 0.9,
+              transition: "opacity 0.25s ease",
+            }}
+          >
+            {page + 1} / {PAGE_COUNT}
+          </p>
+        )}
       </div>
 
       <button
@@ -303,7 +397,7 @@ function BlogStampsDesktop() {
           alignItems: "center",
           justifyContent: "center",
         }}
-        aria-label="Previous"
+        aria-label="Previous blogs"
       >
         <img
           src={leftArr}
@@ -330,7 +424,7 @@ function BlogStampsDesktop() {
           alignItems: "center",
           justifyContent: "center",
         }}
-        aria-label="Next"
+        aria-label="Next blogs"
       >
         <img
           src={rightArr}
@@ -374,7 +468,8 @@ function BlogStampsDesktop() {
           }}
         >
           {order.map((cardIdx) => {
-            const blog = blogs[cardIdx];
+            const blog = visible[cardIdx];
+            if (!blog) return null;
             return (
               <div
                 key={blog.id}
@@ -429,6 +524,7 @@ function BlogStampsDesktop() {
                         <img
                           src={blog.image}
                           alt={blog.title}
+                          decoding="async"
                           style={{
                             width: "100%",
                             height: imageHeight,
@@ -542,6 +638,8 @@ function BlogStampsDesktop() {
                         </p>
                         <a
                           href={blog.link}
+                          target="_blank"
+                          rel="noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           style={{
                             textAlign: "center",
