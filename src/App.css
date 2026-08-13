@@ -123,6 +123,25 @@
   pointer-events: none;
 }
 
+.desktop-envelope-menu-shell {
+  width: clamp(10.75rem, 20vw, 14rem);
+}
+
+.desktop-envelope-menu-group {
+  width: 35%;
+  height: 28%;
+}
+
+.desktop-envelope-nav-card {
+  width: 170%;
+  height: 150%;
+}
+
+.desktop-envelope-nav-card-img {
+  width: 92%;
+  height: 92%;
+}
+
 @media (max-width: 48rem) {
   html {
     scroll-padding-top: 3.75rem;

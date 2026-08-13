@@ -48,7 +48,7 @@ function GlobalNavbar() {
 
   return (
     <div
-      className={`desktop-envelope-navbar fixed top-12 left-12 z-50 transition-all duration-500 origin-center ${
+      className={`desktop-envelope-navbar fixed top-24 left-20 z-50 transition-all duration-500 origin-center ${
         showNavbar ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
       }`}
     >

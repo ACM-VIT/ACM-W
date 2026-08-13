@@ -15,12 +15,12 @@ import womenInStemImg from './assets/womeninstem.svg';
 import teamImg from './assets/team.svg';
 
 const cards = [
-  { id: 1, img: contributorsImg, alt: 'Contributors stamp', link: '#contributors', x: "0%", y: "-117%" },
-  { id: 2, img: aboutAcmwImg, alt: 'About ACM-W stamp', link: '#about', x: "84%", y: "-55%" },
-  { id: 3, img: aboutAcmImg, alt: 'About ACM stamp', link: '#about-acm', x: "84%", y: "70%" },
-  { id: 4, img: blogsImg, alt: 'Blogs stamp', link: '#blogs', x: "0%", y: "133%" },
-  { id: 5, img: womenInStemImg, alt: 'Women in STEM stamp', link: '#title-card-section', x: "-84%", y: "70%" },
-  { id: 6, img: teamImg, alt: 'Team stamp', link: '#team', x: "-84%", y: "-55%" },
+  { id: 1, img: contributorsImg, alt: 'Contributors stamp', link: '#contributors', x: "0%",   y: "-125%" },
+  { id: 2, img: aboutAcmwImg,    alt: 'About ACM-W stamp',  link: '#about',        x: "84%",  y: "-63%"  },
+  { id: 3, img: aboutAcmImg,     alt: 'About ACM stamp',    link: '#about-acm',    x: "84%",  y: "63%"   },
+  { id: 4, img: blogsImg,        alt: 'Blogs stamp',        link: '#blogs',        x: "3%",   y: "125%"  },
+  { id: 5, img: womenInStemImg,  alt: 'Women in STEM stamp',link: '#title-card-section', x: "-84%", y: "63%"  },
+  { id: 6, img: teamImg,         alt: 'Team stamp',         link: '#team',         x: "-84%", y: "-63%"  },
 ];
 
 // Timing for a single stamp's journey out of the envelope (seconds).
@@ -105,7 +105,7 @@ export default function EnvelopeMenu() {
       {/* We give it a generous relative wrapper so the hover hit-box covers the cards too */}
       <div
         ref={containerRef}
-        className="relative aspect-square w-[clamp(9rem,18vw,12rem)]"
+        className="desktop-envelope-menu-shell relative aspect-square"
         onPointerEnter={(e) => {
           if (e.pointerType !== 'touch') {
             setIsHovered(true);
@@ -126,7 +126,7 @@ export default function EnvelopeMenu() {
         {/* h-full is load-bearing: menu-group and the cards are sized in
             percentages, which collapse to 0 against an auto-height parent */}
         <div className="absolute top-0 left-0 h-full w-full flex justify-center">
-          <div className="menu-group relative flex h-1/4 w-1/3 items-center justify-center z-50">
+          <div className="menu-group desktop-envelope-menu-group relative flex items-center justify-center z-50">
             <button
               type="button"
               aria-expanded={isHovered}
@@ -207,9 +207,9 @@ export default function EnvelopeMenu() {
                 // No transition-* here: GSAP writes `transform` every frame, and a
                 // CSS transition on it damps the whole animation into a lag. The
                 // hover scale lives on the img instead, which GSAP never touches.
-                className={`nav-card nav-card-${card.id} group absolute flex h-[133.33%] w-[150%] flex-col items-center justify-center origin-center`}
+                className={`nav-card nav-card-${card.id} desktop-envelope-nav-card group absolute flex flex-col items-center justify-center origin-center`}
               >
-                <img src={card.img} alt={card.alt} className="h-[78%] w-[73%] object-contain mix-blend-multiply drop-shadow-sm transition-transform duration-150 group-hover:scale-110" />
+                <img src={card.img} alt={card.alt} className="desktop-envelope-nav-card-img object-contain mix-blend-multiply drop-shadow-sm transition-transform duration-150 group-hover:scale-110" />
               </a>
             ))}
 
