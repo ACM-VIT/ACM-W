@@ -380,7 +380,10 @@ export default function WomenInStem() {
   return (
     <div className="bg-[#fff9e9] text-[#580A0A] overflow-x-hidden">
       {/* ── Fixed globe ── */}
-      <div ref={globeContainerRef} className="globe-fixed-container">
+      <div
+        ref={globeContainerRef}
+        className="globe-fixed-container women-in-stem-globe-container"
+      >
         <Globe3D
           ref={globeRef}
           className="globe-soft-edge"
