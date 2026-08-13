@@ -65,7 +65,7 @@ export default function EnvelopeFooter() {
     return () => clearInterval(id);
   }, [status]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (status === 'loading') return;
 
@@ -79,19 +79,21 @@ export default function EnvelopeFooter() {
 
     setStatus('loading');
 
-    const subject = 'Contact form message from ACM-W VIT';
-    const body = [
-      `Name: ${formData.name}`,
-      `Email: ${formData.email}`,
-      `Phone: ${formData.phone || 'Not provided'}`,
-      '',
-      formData.message,
-    ].join('\n');
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    window.location.href = `mailto:acm@vit.ac.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setStatus('success');
-    setFormData({ name: '', email: '', phone: '', message: '' });
-    return;
+      if (!response.ok) throw new Error(`Contact API failed with ${response.status}`);
+
+      setStatus('success');
+      setFormData({ name: '', email: '', phone: '', message: '' });
+    } catch (err) {
+      console.error('Contact form error:', err);
+      setStatus('error');
+    }
 
     /*
         console.warn(
