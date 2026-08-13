@@ -128,8 +128,8 @@ const CAM_DEFAULT_Z = 3.0;
 /** Full zoom-in (close-up of a country region) */
 const CAM_ZOOM_Z = 1.3;
 /** Shorter pin distances keep the same animation beats but require less scroll. */
-const SCIENTIST_SCROLL_END = "+=240%";
-const LAST_SCIENTIST_SCROLL_END = "+=200%";
+const SCIENTIST_SCROLL_END = "+=180%";
+const LAST_SCIENTIST_SCROLL_END = "+=167%";
 
 /* ─── Component ─── */
 
