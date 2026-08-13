@@ -127,6 +127,9 @@ const scientists: ScientistData[] = [
 const CAM_DEFAULT_Z = 3.0;
 /** Full zoom-in (close-up of a country region) */
 const CAM_ZOOM_Z = 1.3;
+/** Shorter pin distances keep the same animation beats but require less scroll. */
+const SCIENTIST_SCROLL_END = "+=240%";
+const LAST_SCIENTIST_SCROLL_END = "+=200%";
 
 /* ─── Component ─── */
 
@@ -265,7 +268,7 @@ export default function WomenInStem() {
             scrollTrigger: {
               trigger: section,
               start: "top top",
-              end: isLast ? "+=280%" : "+=340%",
+              end: isLast ? LAST_SCIENTIST_SCROLL_END : SCIENTIST_SCROLL_END,
               scrub: 1,
               pin: true,
               anticipatePin: 1,
