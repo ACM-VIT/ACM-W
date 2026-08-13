@@ -1,0 +1,104 @@
+.mobile-envelope-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  display: none;
+  width: 100%;
+  height: 3.5rem;
+  align-items: center;
+  gap: 0.45rem;
+  overflow: hidden;
+  background: #710819;
+  border-bottom: 2px solid #f2e8cf;
+  box-shadow: 0 0.35rem 1.2rem rgba(88, 10, 10, 0.22);
+}
+
+.mobile-envelope-toggle {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  flex: 0 0 3.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  padding: 0.5rem;
+  border: 0;
+  background: #580a0a;
+}
+
+.mobile-envelope-toggle img {
+  display: block;
+  width: 2.45rem;
+  height: 2.45rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0.12rem 0.12rem rgba(0, 0, 0, 0.2));
+}
+
+.mobile-envelope-links {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 0.35rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.45rem 0.7rem 0.45rem 0;
+  scrollbar-width: none;
+  transform: translateX(-0.75rem);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.mobile-envelope-links::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-envelope-links.is-open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-envelope-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 2.35rem;
+  max-width: 9rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(242, 232, 207, 0.72);
+  border-radius: 6px;
+  background: #f2e8cf;
+  color: #580a0a;
+  font-family: "Kovanov", Georgia, serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+  text-decoration: none;
+  white-space: normal;
+}
+
+.mobile-envelope-link:focus-visible,
+.mobile-envelope-toggle:focus-visible {
+  outline: 2px solid #f2e8cf;
+  outline-offset: -4px;
+}
+
+@media (max-width: 48rem) {
+  .mobile-envelope-navbar {
+    display: flex;
+  }
+}
+
+@media (max-width: 23.5rem) {
+  .mobile-envelope-link {
+    max-width: 7.6rem;
+    padding-inline: 0.55rem;
+    font-size: 0.72rem;
+  }
+}

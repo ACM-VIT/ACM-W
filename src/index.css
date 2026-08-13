@@ -66,6 +66,12 @@ body {
   will-change: opacity;
 }
 
+@media (max-width: 48rem) {
+  .globe-fixed-container {
+    top: 47%;
+  }
+}
+
 .globe-fixed-container > .globe-soft-edge,
 .globe-fixed-container canvas {
   width: min(58rem, 100vw, 100svh) !important;
@@ -200,8 +206,8 @@ body {
 
   .globe-fixed-container > .globe-soft-edge,
   .globe-fixed-container canvas {
-    width: min(40rem, 98vw, 98svh) !important;
-    height: min(40rem, 98vw, 98svh) !important;
+    width: min(36rem, 88vw, 88svh) !important;
+    height: min(36rem, 88vw, 88svh) !important;
   }
 }
 
@@ -234,7 +240,7 @@ body {
 
   .globe-fixed-container > .globe-soft-edge,
   .globe-fixed-container canvas {
-    width: min(29rem, 96vw, 96svh) !important;
-    height: min(29rem, 96vw, 96svh) !important;
+    width: min(26rem, 82vw, 82svh) !important;
+    height: min(26rem, 82vw, 82svh) !important;
   }
 }

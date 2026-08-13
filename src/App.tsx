@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import EnvelopeMenu from "./EnvelopeMenu";
 import EnvelopeFooter from './components/EnvelopeFooter';
+import MobileEnvelopeNavbar from "./components/MobileEnvelopeNavbar";
 import PostcardLoader from "./components/PostcardLoader";
 import About from "./pages/About";
 import BlogStamps from "./pages/BlogStamps";
@@ -47,7 +48,7 @@ function GlobalNavbar() {
 
   return (
     <div
-      className={`fixed top-12 left-12 z-50 transition-all duration-500 origin-center ${
+      className={`desktop-envelope-navbar fixed top-12 left-12 z-50 transition-all duration-500 origin-center ${
         showNavbar ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
       }`}
     >
@@ -60,6 +61,7 @@ export default function App() {
   return (
     <main className="relative overflow-x-hidden bg-[#fff9e9]">
       <GlobalNavbar />
+      <MobileEnvelopeNavbar />
 
       <section id="home" className="fullscreen-lottie">
         <PostcardLoader />

@@ -116,3 +116,13 @@
   visibility: hidden;
   pointer-events: none;
 }
+
+@media (max-width: 48rem) {
+  html {
+    scroll-padding-top: 3.75rem;
+  }
+
+  .desktop-envelope-navbar {
+    display: none;
+  }
+}
