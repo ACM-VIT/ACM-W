@@ -285,6 +285,20 @@
   background-color: #8b1a1a;
 }
 
+/* Throttled — client-side submission cooldown is still counting down */
+.brown-card__submit--throttled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* reCAPTCHA badge anchor.
+   Mounted on <body> rather than inside the envelope so Google's fixed
+   positioning isn't captured by the card's 3D transform. Kept above the
+   pinned scroll section. */
+.grecaptcha-anchor .grecaptcha-badge {
+  z-index: 100;
+}
+
 /* Layer 4: Envelope pocket (front red pocket).
    Full dimensions — top half is transparent in the asset,
    so the card and interior show through above the pocket line. */

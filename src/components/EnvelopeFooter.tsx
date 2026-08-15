@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, type FormEvent } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { cooldownRemainingMs } from '../lib/rateLimit';
 import './EnvelopeFooter.css';
 
 // Assets from src/assets/footer/
@@ -40,11 +41,42 @@ export default function EnvelopeFooter() {
     message: '',
   });
 
-  type FormStatus = 'idle' | 'loading' | 'success' | 'error';
+  type FormStatus = 'idle' | 'loading' | 'success' | 'error' | 'throttled';
   const [status, setStatus] = useState<FormStatus>('idle');
+
+  // Seconds left on the throttle, surfaced on the submit button.
+  const [retryIn, setRetryIn] = useState(0);
+
+  // Tick the throttle down and release the button when it expires.
+  useEffect(() => {
+    if (status !== 'throttled') return;
+
+    const tick = () => {
+      const remaining = cooldownRemainingMs();
+      if (remaining <= 0) {
+        setRetryIn(0);
+        setStatus('idle');
+        return;
+      }
+      setRetryIn(Math.ceil(remaining / 1000));
+    };
+
+    const id = setInterval(tick, 500);
+    return () => clearInterval(id);
+  }, [status]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (status === 'loading') return;
+
+    // Throttle first — a blocked submit shouldn't spend a reCAPTCHA check.
+    const wait = cooldownRemainingMs();
+    if (wait > 0) {
+      setRetryIn(Math.ceil(wait / 1000));
+      setStatus('throttled');
+      return;
+    }
+
     setStatus('loading');
     try {
       const response = await fetch('https://sweet-union-7b5e.jahnavisingh512.workers.dev', {
@@ -64,6 +96,7 @@ export default function EnvelopeFooter() {
       }
 
       setStatus('success');
+      setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (err: unknown) {
       console.error('Form submission error:', err);
       if (err instanceof Error) {
@@ -522,11 +555,12 @@ export default function EnvelopeFooter() {
                   <button
                     type="submit"
                     className={`brown-card__submit brown-card__submit--${status}`}
-                    disabled={status === 'loading'}
+                    disabled={status === 'loading' || status === 'throttled'}
                   >
                     {status === 'loading' && 'Sending…'}
                     {status === 'success' && 'thank you'}
                     {status === 'error' && 'Try again'}
+                    {status === 'throttled' && `Wait ${retryIn}s`}
                     {status === 'idle' && 'Submit'}
                   </button>
                 </form>

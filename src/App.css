@@ -10,10 +10,27 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 100vw;
+  width: 100%;
   height: 100svh;
-  aspect-ratio: 1440 / 1024;
+  max-width: 100vw;
   overflow: hidden;
+}
+
+@media (max-width: 48rem) {
+  .fullscreen-lottie {
+    min-height: auto;
+  }
+
+  .fullscreen-animation {
+    height: auto;
+    aspect-ratio: 1440 / 1024;
+  }
+
+  .fullscreen-animation svg #background,
+  .fullscreen-animation svg #foreground,
+  .fullscreen-animation svg #flab {
+    display: none;
+  }
 }
 
 .lottie-stage,
@@ -100,8 +117,37 @@
   transform: translateX(54%) rotate(16deg);
   background: #580a0a;
 }
+
 .globe-fixed-container {
   visibility: hidden;
   pointer-events: none;
 }
 
+.desktop-envelope-menu-shell {
+  width: clamp(10.75rem, 20vw, 14rem);
+}
+
+.desktop-envelope-menu-group {
+  width: 35%;
+  height: 28%;
+}
+
+.desktop-envelope-nav-card {
+  width: 170%;
+  height: 150%;
+}
+
+.desktop-envelope-nav-card-img {
+  width: 92%;
+  height: 92%;
+}
+
+@media (max-width: 48rem) {
+  html {
+    scroll-padding-top: 3.75rem;
+  }
+
+  .desktop-envelope-navbar {
+    display: none;
+  }
+}

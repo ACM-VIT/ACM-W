@@ -106,7 +106,14 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
      * within the 45° FOV (half = 22.5°), leaving ~3° margin
      * on every side and eliminating the rectangular-clipping artifact.
      */
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+    /*
+     * near = 0.1, not 0.01: the closest the camera ever gets is z 1.3 (the
+     * country zoom-in), where the nearest geometry sits at ~0.28, so 0.1 is
+     * still a comfortable margin — and it buys ~10x the depth-buffer precision,
+     * which is what keeps the country lines from sparkling against the sphere
+     * when zoomed in.
+     */
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.z = 3.0;
 
     const resizeRenderer = () => {
@@ -163,29 +170,35 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       color: new THREE.Color(lineColor),
     });
 
-    function ll2v(lat: number, lng: number) {
+    /*
+     * Every country ring feeds ONE shared vertex buffer. Giving each ring its
+     * own LineSegments meant hundreds of draw calls per frame, which is what
+     * made the scroll-driven rotation stutter once the globe was scaled up to
+     * full-viewport size.
+     */
+    const linePositions: number[] = [];
+
+    /* Lifted 0.2% off the surface so the borders aren't exactly coplanar with
+       the sphere. Sub-pixel at any real size, but it removes the depth tie that
+       makes lines flicker in and out at grazing angles. */
+    const lineRadius = radius * 1.002;
+
+    function pushVertex(lat: number, lng: number) {
       const phi = ((90 - lat) * Math.PI) / 180;
       const theta = ((lng + 180) * Math.PI) / 180;
-      return new THREE.Vector3(
-        -radius * Math.sin(phi) * Math.cos(theta),
-        radius * Math.cos(phi),
-        radius * Math.sin(phi) * Math.sin(theta),
+      const sinPhi = Math.sin(phi);
+      linePositions.push(
+        -lineRadius * sinPhi * Math.cos(theta),
+        lineRadius * Math.cos(phi),
+        lineRadius * sinPhi * Math.sin(theta),
       );
     }
 
     function addRing(coords: number[][]) {
-      const pts: THREE.Vector3[] = [];
       for (let i = 0; i < coords.length - 1; i += 1) {
-        pts.push(ll2v(coords[i][1], coords[i][0]));
-        pts.push(ll2v(coords[i + 1][1], coords[i + 1][0]));
+        pushVertex(coords[i][1], coords[i][0]);
+        pushVertex(coords[i + 1][1], coords[i + 1][0]);
       }
-      if (!pts.length) return;
-      group.add(
-        new THREE.LineSegments(
-          new THREE.BufferGeometry().setFromPoints(pts),
-          lineMat,
-        ),
-      );
     }
 
     function addFeature(geom: GeoGeometry) {
@@ -199,7 +212,13 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       }
     }
 
-    // Load world topology
+    // Load world topology. The effect can be torn down before this resolves,
+    // so nothing is added to the scene after `disposed` flips.
+    let disposed = false;
+    let lineGeometry: THREE.BufferGeometry | undefined;
+    let fallbackGeometry: THREE.WireframeGeometry | undefined;
+    let fallbackMat: THREE.LineBasicMaterial | undefined;
+
     void (async () => {
       try {
         const [topoSrc, world] = await Promise.all([
@@ -221,20 +240,28 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
         topojson
           .feature(world, world.objects.countries)
           .features.forEach((f) => addFeature(f.geometry));
-      } catch {
-        // Fallback: wireframe sphere
-        group.add(
-          new THREE.LineSegments(
-            new THREE.WireframeGeometry(
-              new THREE.SphereGeometry(radius, 32, 32),
-            ),
-            new THREE.LineBasicMaterial({
-              color: new THREE.Color(lineColor),
-              opacity: 0.15,
-              transparent: true,
-            }),
-          ),
+
+        if (disposed || !linePositions.length) return;
+
+        lineGeometry = new THREE.BufferGeometry();
+        lineGeometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(linePositions, 3),
         );
+        group.add(new THREE.LineSegments(lineGeometry, lineMat));
+      } catch {
+        if (disposed) return;
+
+        // Fallback: wireframe sphere
+        const fallbackSphere = new THREE.SphereGeometry(radius, 32, 32);
+        fallbackGeometry = new THREE.WireframeGeometry(fallbackSphere);
+        fallbackSphere.dispose();
+        fallbackMat = new THREE.LineBasicMaterial({
+          color: new THREE.Color(lineColor),
+          opacity: 0.15,
+          transparent: true,
+        });
+        group.add(new THREE.LineSegments(fallbackGeometry, fallbackMat));
       }
     })();
 
@@ -293,6 +320,7 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
     internals.current = { group, camera, renderer, scene };
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(animationId);
       resizeObserver.disconnect();
       canvas.removeEventListener("pointerdown", onPointerDown);
@@ -303,6 +331,9 @@ const Globe3D = forwardRef<Globe3DHandle, Globe3DProps>(function Globe3D(
       sphereGeometry.dispose();
       rimGeometry.dispose();
       lineMat.dispose();
+      lineGeometry?.dispose();
+      fallbackGeometry?.dispose();
+      fallbackMat?.dispose();
     };
   }, [initialRotX, initialRotY, lineColor, rotationSpeed, size, sphereColor]);
 

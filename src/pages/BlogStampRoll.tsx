@@ -4,9 +4,19 @@ import leftArr from "../assets/leftArr.png";
 import rightArr from "../assets/rightArr.png";
 import { blogs } from "../data/blogs";
 
+// The archive is long enough that a dot per post would run off the screen, so
+// the strip slides a window along the list instead.
+const MAX_DOTS = 7;
+
 export default function BlogStampRoll() {
   const [current, setCurrent] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  const dotCount = Math.min(MAX_DOTS, blogs.length);
+  const dotStart = Math.min(
+    Math.max(current - Math.floor(dotCount / 2), 0),
+    Math.max(0, blogs.length - dotCount)
+  );
 
   const next = () => {
     setCurrent((prev) => (prev + 1) % blogs.length);
@@ -36,7 +46,7 @@ export default function BlogStampRoll() {
       style={{
         minHeight: "100vh",
         background: "#FFF9E9",
-        padding: "clamp(1rem, 3vh, 1.25rem) clamp(0.75rem, 3vw, 1rem) clamp(1.5rem, 4vh, 1.875rem)",
+        padding: "clamp(1rem, 3vh, 1.25rem) clamp(0.75rem, 3vw, 1rem) clamp(1.5rem, 3vh, 1.5rem)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -86,9 +96,9 @@ export default function BlogStampRoll() {
             >
               <div
                 style={{
-                  width: "88vw",
+                  width: "75vw",
                   maxWidth: "21.25rem",
-                  height: "min(72svh, 135vw)",
+                  height: "min(68svh, 112vw)",
                 }}
               >
                 <StampBorder>
@@ -104,6 +114,8 @@ export default function BlogStampRoll() {
                       src={blog.image}
                       alt={blog.title}
                       draggable={false}
+                      loading="lazy"
+                      decoding="async"
                       style={{
                         width: "100%",
                         height: "48%",
@@ -234,10 +246,11 @@ export default function BlogStampRoll() {
           marginTop: "clamp(1rem, 3vh, 1.125rem)",
         }}
       >
-        {blogs.map((_, idx) => (
+        {Array.from({ length: dotCount }, (_, i) => dotStart + i).map((idx) => (
           <button
             key={idx}
             onClick={() => setCurrent(idx)}
+            aria-label={`Blog ${idx + 1}`}
             style={{
               width: "0.5rem",
               aspectRatio: "1 / 1",

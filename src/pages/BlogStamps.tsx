@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import leftArr from "../assets/leftArr.png";
 import rightArr from "../assets/rightArr.png";
@@ -8,14 +8,36 @@ import StampBorder from "../components/StampBorder";
 
 const SPREAD = 90;
 
+// Cards dealt into the fan at once. The arrows page through the whole archive a
+// set at a time and wrap around at either end, so the rotation never runs out.
+const PAGE_SIZE = 5;
+const PAGE_COUNT = Math.max(1, Math.ceil(blogs.length / PAGE_SIZE));
+
+// The last page is pulled back so it stays a full fan instead of dealing a
+// lonely card or two: 12 posts give pages starting at 0, 5 and 7.
+const pageStart = (page: number) =>
+  Math.min(page * PAGE_SIZE, Math.max(0, blogs.length - PAGE_SIZE));
+
 function BlogStampsDesktop() {
   const [viewport, setViewport] = useState({ w: 1200, h: 800 });
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [order, setOrder] = useState(() => blogs.map((_, i) => i));
+  const [page, setPage] = useState(0);
+
+  const start = pageStart(page);
+  const visible = blogs.slice(start, start + PAGE_SIZE);
+  const n = visible.length;
+
+  // Slot order within the fan, holding indices into `visible`.
+  const [order, setOrder] = useState<number[]>(() =>
+    Array.from({ length: Math.min(PAGE_SIZE, blogs.length) }, (_, i) => i)
+  );
 
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const n = blogs.length;
+  // Set whenever the next layout pass should deal the cards up from the bottom
+  // rather than slide them between fan positions.
+  const dealRef = useRef(true);
+  const pagingRef = useRef(false);
 
   useEffect(() => {
     const update = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
@@ -23,17 +45,6 @@ function BlogStampsDesktop() {
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
-
-  const getFanProps = (slot: number) => {
-    const centerSlot = Math.floor(n / 2);
-    const step = SPREAD / (n - 1);
-    const angle = -SPREAD / 2 + slot * step;
-    const offset = slot - centerSlot;
-    const tx = offset * fanSpacing;
-    const ty = Math.abs(offset) * fanDrop;
-    const zIndex = 10 - Math.abs(offset);
-    return { angle, zIndex, tx, ty };
-  };
 
   const cardW = Math.min(viewport.w * 0.28, viewport.h * 0.42);
   const cardH = cardW * 1.25;
@@ -53,57 +64,73 @@ function BlogStampsDesktop() {
   const bodySize = 9 * contentScale;
   const linkSize = 10 * contentScale;
 
-  useEffect(() => {
-    order.forEach((cardIdx, slot) => {
-      const el = cardRefs.current[cardIdx];
-      if (!el) return;
-      const { angle, zIndex, tx, ty } = getFanProps(slot);
-      gsap.fromTo(
-        el,
-        { y: viewport.h * 0.375, opacity: 0, rotation: 0, x: 0 },
-        {
-          y: ty,
-          x: tx,
-          opacity: 1,
-          rotation: angle,
-          zIndex,
-          duration: 0.75,
-          ease: "back.out(1.5)",
-          delay: 0.15 + slot * 0.09,
-        }
-      );
-    });
-  }, []);
+  const getFanProps = (slot: number) => {
+    const centerSlot = Math.floor(n / 2);
+    const step = n > 1 ? SPREAD / (n - 1) : 0;
+    const angle = -SPREAD / 2 + slot * step;
+    const offset = slot - centerSlot;
+    const tx = offset * fanSpacing;
+    const ty = Math.abs(offset) * fanDrop;
+    const zIndex = 10 - Math.abs(offset);
+    return { angle, zIndex, tx, ty };
+  };
 
   useEffect(() => {
     if (activeIdx !== null) return;
+    const deal = dealRef.current;
+    dealRef.current = false;
+    // The next set is on screen, so the arrows are live again.
+    if (deal) pagingRef.current = false;
+
     order.forEach((cardIdx, slot) => {
       const el = cardRefs.current[cardIdx];
       if (!el) return;
       const { angle, zIndex, tx, ty } = getFanProps(slot);
-      gsap.to(el, {
-        rotation: angle,
-        x: tx,
-        y: ty,
-        scale: 1,
-        opacity: 1,
-        zIndex,
-        duration: 0.55,
-        ease: "back.out(1.4)",
-        delay: slot * 0.03,
-      });
+
+      if (deal) {
+        gsap.fromTo(
+          el,
+          { y: viewport.h * 0.375, x: 0, rotation: 0, scale: 1, opacity: 0 },
+          {
+            y: ty,
+            x: tx,
+            opacity: 1,
+            rotation: angle,
+            zIndex,
+            duration: 0.75,
+            ease: "back.out(1.5)",
+            delay: 0.15 + slot * 0.09,
+            overwrite: "auto",
+          }
+        );
+      } else {
+        gsap.to(el, {
+          rotation: angle,
+          x: tx,
+          y: ty,
+          scale: 1,
+          opacity: 1,
+          zIndex,
+          duration: 0.55,
+          ease: "back.out(1.4)",
+          delay: slot * 0.03,
+          overwrite: "auto",
+        });
+      }
     });
-  }, [order, activeIdx]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order, activeIdx, page, viewport]);
 
   const zoomCard = (i: number) => {
     const el = cardRefs.current[i];
     if (!el) return;
-    cardRefs.current.forEach((c, j) => {
+    visible.forEach((_, j) => {
+      const c = cardRefs.current[j];
       if (j === i || !c) return;
       const dir = j < i ? -1 : 1;
       gsap.to(c, {
         x: dir * viewport.w * 0.04,
-        opacity: 0.28,
+        opacity: 0,
         duration: 0.4,
         ease: "power2.out",
       });
@@ -207,14 +234,67 @@ function BlogStampsDesktop() {
     }
   };
 
+  // Sweeps the current set off the way it is travelling, then deals the next
+  // one in. Wraps past either end, so the arrows keep rotating forever.
+  const turnPage = (dir: number) => {
+    const targets = order
+      .map((cardIdx, slot) => ({ el: cardRefs.current[cardIdx], slot }))
+      .filter((target): target is { el: HTMLDivElement; slot: number } =>
+        Boolean(target.el)
+      );
+
+    const deal = () => {
+      dealRef.current = true;
+      setPage((prev) => (prev + dir + PAGE_COUNT) % PAGE_COUNT);
+      setOrder(Array.from({ length: n }, (_, i) => i));
+    };
+
+    if (!targets.length) {
+      pagingRef.current = false;
+      deal();
+      return;
+    }
+
+    pagingRef.current = true;
+    gsap.to(
+      targets.map((target) => target.el),
+      {
+        x: (i: number) => getFanProps(targets[i].slot).tx + dir * viewport.w * 0.16,
+        y: viewport.h * 0.42,
+        rotation: (i: number) => getFanProps(targets[i].slot).angle + dir * 14,
+        opacity: 0,
+        duration: 0.4,
+        ease: "power2.in",
+        stagger: { each: 0.05, from: dir > 0 ? "start" : "end" },
+        overwrite: "auto",
+        onComplete: deal,
+      }
+    );
+  };
+
   const navigate = (dir: number) => {
-    closeZoom();
-    setTimeout(() => {
-      setOrder((prev) => {
-        if (dir < 0) return [...prev.slice(1), prev[0]];
-        return [prev[prev.length - 1], ...prev.slice(0, -1)];
-      });
-    }, 420);
+    if (pagingRef.current) return;
+
+    const step = () => {
+      // With a single page there is nothing to turn to, so shuffle the fan the
+      // way it always did.
+      if (PAGE_COUNT === 1) {
+        setOrder((prev) =>
+          dir < 0
+            ? [...prev.slice(1), prev[0]]
+            : [prev[prev.length - 1], ...prev.slice(0, -1)]
+        );
+        return;
+      }
+      turnPage(dir);
+    };
+
+    if (activeIdx !== null) {
+      closeZoom();
+      setTimeout(step, 420);
+    } else {
+      step();
+    }
   };
 
   return (
@@ -280,23 +360,44 @@ function BlogStampsDesktop() {
             animation: hint ? "blog-hint-in 0.7s ease 0.5s both" : "none",
           }}
         >
-          {hint || " "}
+          {hint || " "}
         </p>
+        {PAGE_COUNT > 1 && (
+          <p
+            style={{
+              margin: "0.3rem 0 0",
+              fontSize: "clamp(0.66rem, 0.85vw, 0.75rem)",
+              letterSpacing: "0.16em",
+              color: "#a06565",
+              opacity: activeIdx !== null ? 0 : 0.9,
+              transition: "opacity 0.25s ease",
+            }}
+          >
+            {page + 1} / {PAGE_COUNT}
+          </p>
+        )}
       </div>
 
       <button
         onClick={() => navigate(-1)}
         style={{
           position: "absolute",
-          left: "1.2vw",
-          top: fanTop + viewport.h * 0.005,
+          left: 0,
+          top: "50%",
+          transform: "translateY(-50%)",
           background: "none",
           border: "none",
           cursor: "pointer",
           zIndex: 60,
           pointerEvents: "auto",
+          padding: "clamp(0.75rem, 2vw, 1.5rem)",
+          minWidth: "48px",
+          minHeight: "48px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-        aria-label="Previous"
+        aria-label="Previous blogs"
       >
         <img
           src={leftArr}
@@ -308,15 +409,22 @@ function BlogStampsDesktop() {
         onClick={() => navigate(1)}
         style={{
           position: "absolute",
-          right: "1.2vw",
-          top: fanTop + viewport.h * 0.005,
+          right: 0,
+          top: "50%",
+          transform: "translateY(-50%)",
           background: "none",
           border: "none",
           cursor: "pointer",
           zIndex: 60,
           pointerEvents: "auto",
+          padding: "clamp(0.75rem, 2vw, 1.5rem)",
+          minWidth: "48px",
+          minHeight: "48px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-        aria-label="Next"
+        aria-label="Next blogs"
       >
         <img
           src={rightArr}
@@ -360,192 +468,196 @@ function BlogStampsDesktop() {
           }}
         >
           {order.map((cardIdx) => {
-            const blog = blogs[cardIdx];
+            const blog = visible[cardIdx];
+            if (!blog) return null;
             return (
-            <div
-              key={blog.id}
-              ref={(el) => {
-                cardRefs.current[cardIdx] = el;
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCardClick(cardIdx);
-              }}
-              onMouseEnter={() => hoverCard(cardIdx, true)}
-              onMouseLeave={() => hoverCard(cardIdx, false)}
-              style={{
-                position: "absolute",
-                width: cardW,
-                height: cardH,
-                bottom: 0,
-                left: -cardW / 2,
-                opacity: 0,
-                transformOrigin: "bottom center",
-                cursor: "pointer",
-                pointerEvents: "all",
-              }}
-            >
               <div
-                className="stamp-inner"
+                key={blog.id}
+                ref={(el) => {
+                  cardRefs.current[cardIdx] = el;
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCardClick(cardIdx);
+                }}
+                onMouseEnter={() => hoverCard(cardIdx, true)}
+                onMouseLeave={() => hoverCard(cardIdx, false)}
                 style={{
-                  position: "relative",
-                  width: "100%",
-                  height: "100%",
-                  transformStyle: "preserve-3d",
-                  perspective: "56rem",
+                  position: "absolute",
+                  width: cardW,
+                  height: cardH,
+                  bottom: 0,
+                  left: -cardW / 2,
+                  opacity: 0,
+                  transformOrigin: "bottom center",
+                  cursor: "pointer",
+                  pointerEvents: "all",
                 }}
               >
                 <div
+                  className="stamp-inner"
                   style={{
-                    position: "absolute",
-                    inset: 0,
-                    backfaceVisibility: "hidden",
+                    position: "relative",
+                    width: "100%",
+                    height: "100%",
+                    transformStyle: "preserve-3d",
+                    perspective: "56rem",
                   }}
                 >
-                  <StampBorder>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        width: "100%",
-                        height: "100%",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <img
-                        src={blog.image}
-                        alt={blog.title}
-                        style={{
-                          width: "100%",
-                          height: imageHeight,
-                          objectFit: "cover",
-                        }}
-                        draggable={false}
-                      />
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      backfaceVisibility: "hidden",
+                    }}
+                  >
+                    <StampBorder>
                       <div
                         style={{
                           display: "flex",
                           flexDirection: "column",
-                          flex: 1,
-                          padding: "2.2% 2.2% 1.7%",
-                          textAlign: "center",
+                          width: "100%",
+                          height: "100%",
+                          overflow: "hidden",
                         }}
                       >
+                        <img
+                          src={blog.image}
+                          alt={blog.title}
+                          decoding="async"
+                          style={{
+                            width: "100%",
+                            height: imageHeight,
+                            objectFit: "cover",
+                          }}
+                          draggable={false}
+                        />
                         <div
                           style={{
                             display: "flex",
                             flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            textAlign: "center",
                             flex: 1,
-                            gap: "2%",
+                            padding: "2.2% 2.2% 1.7%",
+                            textAlign: "center",
                           }}
                         >
-                          <p
+                          <div
                             style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
                               textAlign: "center",
-                              fontWeight: "bold",
-                              fontSize: titleSize,
-                              color: "#3a1212",
-                              lineHeight: 1.3,
-                              margin: 0,
+                              flex: 1,
+                              gap: "2%",
                             }}
                           >
-                            {blog.title}
-                          </p>
-                          <p
+                            <p
+                              style={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                fontSize: titleSize,
+                                color: "#3a1212",
+                                lineHeight: 1.3,
+                                margin: 0,
+                              }}
+                            >
+                              {blog.title}
+                            </p>
+                            <p
+                              style={{
+                                textAlign: "center",
+                                fontStyle: "italic",
+                                fontSize: authorSize,
+                                color: "#6b1a1a",
+                                margin: 0,
+                              }}
+                            >
+                              By: {blog.author}
+                            </p>
+                          </div>
+                          <div
                             style={{
-                              textAlign: "center",
-                              fontStyle: "italic",
-                              fontSize: authorSize,
-                              color: "#6b1a1a",
-                              margin: 0,
+                              display: "flex",
+                              justifyContent: "space-between",
+                              width: "100%",
+                              paddingTop: "1.2%",
+                              fontSize: metaSize,
+                              color: "#8b4040",
+                              borderTop: "0.5px solid #c8a090",
                             }}
                           >
-                            By: {blog.author}
-                          </p>
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            width: "100%",
-                            paddingTop: "1.2%",
-                            fontSize: metaSize,
-                            color: "#8b4040",
-                            borderTop: "0.5px solid #c8a090",
-                          }}
-                        >
-                          <span>{blog.date}</span>
-                          <span>{blog.read}</span>
+                            <span>{blog.date}</span>
+                            <span>{blog.read}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </StampBorder>
-                </div>
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    backfaceVisibility: "hidden",
-                    transform: "rotateY(180deg)",
-                  }}
-                >
-                  <StampBorder>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        width: "100%",
-                        height: "100%",
-                        padding: "2.8% 2.2% 2.2%",
-                        boxSizing: "border-box",
-                      }}
-                    >
-                      <p
+                    </StampBorder>
+                  </div>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      backfaceVisibility: "hidden",
+                      transform: "rotateY(180deg)",
+                    }}
+                  >
+                    <StampBorder>
+                      <div
                         style={{
-                          textAlign: "center",
-                          fontWeight: "bold",
-                          fontSize: titleSize,
-                          color: "#3a1212",
-                          margin: "0 0 1.7%",
+                          display: "flex",
+                          flexDirection: "column",
+                          width: "100%",
+                          height: "100%",
+                          padding: "2.8% 2.2% 2.2%",
+                          boxSizing: "border-box",
                         }}
                       >
-                        {blog.title}
-                      </p>
-                      <p
-                        style={{
-                          flex: 1,
-                          overflow: "hidden",
-                          fontSize: bodySize,
-                          color: "#3a1212",
-                          lineHeight: 1.55,
-                          margin: 0,
-                        }}
-                      >
-                        {blog.body}
-                      </p>
-                      <a
-                        href={blog.link}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                          textAlign: "center",
-                          textDecoration: "underline",
-                          marginTop: "2.2%",
-                          display: "block",
-                          fontSize: linkSize,
-                          color: "#6b1a1a",
-                        }}
-                      >
-                        Read more -&gt;
-                      </a>
-                    </div>
-                  </StampBorder>
+                        <p
+                          style={{
+                            textAlign: "center",
+                            fontWeight: "bold",
+                            fontSize: titleSize,
+                            color: "#3a1212",
+                            margin: "0 0 1.7%",
+                          }}
+                        >
+                          {blog.title}
+                        </p>
+                        <p
+                          style={{
+                            flex: 1,
+                            overflow: "hidden",
+                            fontSize: bodySize,
+                            color: "#3a1212",
+                            lineHeight: 1.55,
+                            margin: 0,
+                          }}
+                        >
+                          {blog.body}
+                        </p>
+                        <a
+                          href={blog.link}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            textAlign: "center",
+                            textDecoration: "underline",
+                            marginTop: "2.2%",
+                            display: "block",
+                            fontSize: linkSize,
+                            color: "#6b1a1a",
+                          }}
+                        >
+                          Read more -&gt;
+                        </a>
+                      </div>
+                    </StampBorder>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
+            );
           })}
         </div>
       </div>

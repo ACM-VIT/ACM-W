@@ -23,16 +23,21 @@ body,
 .about_cards {
   display: flex;
   flex-direction: column;
+  /* Pulls the whole pair up toward the hero above. */
+  margin-top: clamp(-6rem, -5vw, -2.25rem);
 }
 
 /* Sections sit in normal document flow, sized by their card, so the whole
    page scrolls on the main scrollbar — no inner scroll container. */
 .about_section {
   position: relative;
-  padding-top: clamp(3rem, 7vh, 3.75rem);
+  padding-top: 0;
 }
 
+/* Second card rides over the bottom of the first. Later in the DOM,
+   so it paints on top without needing a z-index. */
 .about_section--top {
+  margin-top: clamp(-12rem, -10vw, -4.5rem);
   padding-bottom: clamp(3rem, 7vh, 3.75rem);
 }
 
@@ -128,11 +133,36 @@ body,
   margin: 0;
 }
 
-.about_cardBody p + p {
+.about_cardBody p+p {
   margin-top: 0.65em;
 }
 
 @media (max-width: 48rem) {
+  .about {
+    min-height: auto;
+  }
+
+  .about_cards {
+    margin-top: clamp(-3rem, -6vw, -1rem);
+  }
+
+  .about_section {
+    padding-top: 0;
+  }
+
+  .about_section--top {
+    margin-top: clamp(-6rem, -12vw, -2rem);
+    padding-bottom: clamp(1.25rem, 3vh, 1.75rem);
+  }
+
+  .about_card-wrap {
+    aspect-ratio: 4 / 3;
+  }
+
+  .about_card-wrap--acmvit {
+    aspect-ratio: 4 / 3;
+  }
+
   .about_overlay {
     inset: 22.5% 10% 20% 10%;
   }
@@ -144,5 +174,40 @@ body,
   .about_cardBody {
     font-size: 0.625rem;
     line-height: 1.26;
+  }
+}
+
+@media (max-width: 30rem) {
+  .about_cards {
+    margin-top: clamp(-2.25rem, -6vw, -0.75rem);
+  }
+
+  .about_section {
+    padding-top: 0;
+  }
+
+  .about_section--top {
+    margin-top: clamp(-4.5rem, -11vw, -1.5rem);
+    padding-bottom: clamp(0.75rem, 2vh, 1.25rem);
+  }
+
+  .about_card-wrap,
+  .about_card-wrap--acmvit {
+    aspect-ratio: 3 / 2.5;
+  }
+
+  .about_overlay {
+    inset: 21% 9% 18% 9%;
+  }
+
+  .about_cardTitle {
+    font-size: clamp(1.125rem, 5vw, 1.5rem);
+  }
+
+  .about_cardBody {
+    font-size: clamp(0.5rem, 2.2vw, 0.625rem);
+    line-height: 1.22;
+    -webkit-line-clamp: 7;
+    line-clamp: 7;
   }
 }

@@ -175,14 +175,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
   const [flipped, setFlipped] = useState(false);
 
   return (
-    <div
-      style={{
-        width: "clamp(9rem, 18vw, 12.5rem)",
-        aspectRatio: "5 / 7",
-        flexShrink: 0,
-        perspective: "56rem",
-      }}
-    >
+    <div style={{ width: 200, height: 280, flexShrink: 0, perspective: "900px" }}>
       <div
         style={{
           position: "relative",
@@ -215,7 +208,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
               height: "100%",
               display: "flex",
               flexDirection: "column",
-              padding: "6% 6% 0",
+              padding: "12px 12px 0px 12px",
             }}
           >
             <div style={{ flex: 1, overflow: "hidden", borderRadius: 1 }}>
@@ -225,10 +218,10 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
                 style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
               />
             </div>
-            <div style={{ height: "16.4%", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 2%" }}>
+            <div style={{ height: 46, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
               <span
                 style={{
-                  fontSize: "clamp(0.65rem, 1.25vw, 0.72rem)",
+                  fontSize: 11.5,
                   fontWeight: 700,
                   color: "#000000",
                   textAlign: "center",
@@ -271,13 +264,13 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              padding: "8% 7%",
-              gap: "3.5%",
+              padding: "20px 16px",
+              gap: 10,
             }}
           >
             <p
               style={{
-                fontSize: "clamp(0.72rem, 1.35vw, 0.82rem)",
+                fontSize: 13,
                 fontWeight: 700,
                 color: "#000000",
                 textAlign: "center",
@@ -289,11 +282,11 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
               {contributor.name}
             </p>
 
-            <div style={{ width: "18%", height: "0.35%", borderRadius: 1, flexShrink: 0 }} />
+            <div style={{ width: 36, height: 1, borderRadius: 1, flexShrink: 0 }} />
 
             <p
               style={{
-                fontSize: "clamp(0.58rem, 1.1vw, 0.66rem)",
+                fontSize: 10.5,
                 color: "rgb(0,0,0)",
                 textAlign: "center",
                 margin: 0,
@@ -306,7 +299,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
               {contributor.bio}
             </p>
 
-            <div style={{ display: "flex", gap: "12%", marginTop: "2%" }}>
+            <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
               {contributor.primaryLink?.href && (
                 <a
                   href={contributor.primaryLink.href}
@@ -319,7 +312,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
                   <img
                     src={contributor.primaryLink.iconSrc}
                     alt={contributor.primaryLink.label}
-                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                    style={{ width: 40, height: 40, objectFit: "contain" }}
                   />
                 </a>
               )}
@@ -335,7 +328,7 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
                   <img
                     src={contributor.secondaryLink.iconSrc}
                     alt={contributor.secondaryLink.label}
-                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                    style={{ width: 40, height: 40, objectFit: "contain" }}
                   />
                 </a>
               )}
@@ -357,14 +350,20 @@ export default function ContributorsSection() {
     const onWheel = (e: WheelEvent) => {
       const maxScroll = el.scrollWidth - el.clientWidth;
       if (maxScroll <= 0) return;
-      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (delta === 0) return;
+
+      // Vertical wheel drives the horizontal reel; horizontal input still works.
+      const raw = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (raw === 0) return;
+      // deltaMode 1 = lines, 2 = pages — normalise to pixels.
+      const delta = e.deltaMode === 1 ? raw * 16 : e.deltaMode === 2 ? raw * el.clientWidth : raw;
+
+      // Hand the gesture back to the page once the reel bottoms out.
       const atStart = el.scrollLeft <= 0 && delta < 0;
-      const atEnd = el.scrollLeft >= maxScroll && delta > 0;
+      const atEnd = el.scrollLeft >= maxScroll - 1 && delta > 0;
       if (atStart || atEnd) return;
 
       e.preventDefault();
-      el.scrollLeft += delta;
+      el.scrollLeft = Math.max(0, Math.min(maxScroll, el.scrollLeft + delta));
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });
@@ -382,9 +381,9 @@ export default function ContributorsSection() {
         }}
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[min(92vw,72rem)] flex-col items-center px-[clamp(1rem,4vw,1.5rem)]">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-6">
         <h2
-          className="text-center text-[clamp(2rem,5vw,2.5rem)] font-bold tracking-[0.08em]"
+          className="text-center text-[32px] font-bold tracking-[0.08em] sm:text-[40px]"
           style={{ fontFamily: "Kovanov, Georgia, serif", color: "#580A0A" }}
         >
           CONTRIBUTORS
@@ -396,18 +395,12 @@ export default function ContributorsSection() {
           style={{
             overflowX: "auto",
             overflowY: "visible",
+            overscrollBehaviorX: "contain",
             msOverflowStyle: "none",
             scrollbarWidth: "none",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              gap: "clamp(1rem, 3vw, 1.5rem)",
-              width: "max-content",
-              padding: "0.25rem 0.25rem 1rem",
-            }}
-          >
+          <div style={{ display: "flex", gap: 24, width: "max-content", padding: "4px 4px 16px" }}>
             {contributors.map((c) => (
               <ContributorCard key={c.name} contributor={c} />
             ))}
@@ -430,8 +423,8 @@ const iconLinkStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  width: "clamp(1.75rem, 4vw, 2.125rem)",
-  aspectRatio: "1 / 1",
+  width: 34,
+  height: 34,
   borderRadius: 8,
   textDecoration: "none",
   backdropFilter: "blur(4px)",

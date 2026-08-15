@@ -66,64 +66,44 @@ body {
   will-change: opacity;
 }
 
-.globe-fixed-container > div,
+@media (max-width: 48rem) {
+  .women-in-stem-globe-container {
+    top: 54%;
+  }
+}
+
+.globe-fixed-container > .globe-soft-edge,
 .globe-fixed-container canvas {
   width: min(58rem, 100vw, 100svh) !important;
   height: min(58rem, 100vw, 100svh) !important;
 }
 
-.globe-soft-edge {
-  -webkit-mask-image: none;
-  mask-image: none;
-  --globe-edge-alpha-62: 0.82;
-  --globe-edge-alpha-78: 0.48;
-  --globe-edge-alpha-91: 0.16;
-  --globe-edge-alpha-100: 0;
+/* ─── Globe soft edge ───
+   The globe's rim is feathered by painting the page background over it in a
+   radial gradient, NOT by masking the canvas. A mask on a large WebGL canvas
+   pulls it off the compositor and forces a full re-raster on every change;
+   this overlay only ever has its `opacity` animated, which stays on the GPU.
+   Alphas are the complement of the old mask's stops, so the result is
+   pixel-identical. Keep the colour in sync with the page background. */
+.globe-edge-fade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 249, 233, 0) 0%,
+    rgba(255, 249, 233, 0) 46%,
+    rgba(255, 249, 233, 0.18) 62%,
+    rgba(255, 249, 233, 0.52) 78%,
+    rgba(255, 249, 233, 0.84) 91%,
+    rgba(255, 249, 233, 1) 100%
+  );
 }
 
-.globe-soft-edge.is-globe-zooming {
-  -webkit-mask-image: radial-gradient(
-    circle at 50% 50%,
-    #000 0%,
-    #000 46%,
-    rgba(0, 0, 0, var(--globe-edge-alpha-62)) 62%,
-    rgba(0, 0, 0, var(--globe-edge-alpha-78)) 78%,
-    rgba(0, 0, 0, var(--globe-edge-alpha-91)) 91%,
-    rgba(0, 0, 0, var(--globe-edge-alpha-100)) 100%
-  );
-  mask-image: radial-gradient(
-    circle at 50% 50%,
-    #000 0%,
-    #000 46%,
-    rgba(0, 0, 0, var(--globe-edge-alpha-62)) 62%,
-    rgba(0, 0, 0, var(--globe-edge-alpha-78)) 78%,
-    rgba(0, 0, 0, var(--globe-edge-alpha-91)) 91%,
-    rgba(0, 0, 0, var(--globe-edge-alpha-100)) 100%
-  );
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-}
-
-/* ─── Photo vintage frame ─── */
+/* ─── Photo (no frame) ─── */
 .photo-frame {
-  box-shadow:
-    4px 6px 24px rgba(0, 0, 0, 0.35),
-    0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.photo-frame--needs-border {
-  padding: clamp(0.625rem, 1.4vw, 0.875rem) clamp(0.625rem, 1.4vw, 0.875rem) clamp(1.75rem, 3vw, 2.25rem);
-  background: linear-gradient(
-    155deg,
-    #d4c5a0 0%,
-    #c9b98a 40%,
-    #bba474 100%
-  );
-}
-
-.photo-frame img {
   display: block;
   width: min(23.75rem, 30vw);
   height: auto;
@@ -142,8 +122,9 @@ body {
 }
 
 .scientist-subtitle {
-  font-family: Georgia, serif;
+  font-family: "Kovanov", Georgia, serif;
   font-size: clamp(0.8rem, 1vw, 0.95rem);
+  font-weight: 700;
   letter-spacing: 0.25rem;
   text-transform: uppercase;
   color: #7a4444;
@@ -151,8 +132,9 @@ body {
 }
 
 .scientist-desc {
-  font-family: "Quicksand", Arial, sans-serif;
+  font-family: "Kovanov", Georgia, serif;
   font-size: clamp(0.95rem, 1.1vw, 1.15rem);
+  font-weight: 700;
   line-height: 1.8;
   color: #5e4d4d;
   margin: 0;
@@ -172,7 +154,7 @@ body {
     line-height: 1.7;
   }
 
-  .photo-frame img {
+  .photo-frame {
     width: min(18.75rem, 48vw);
   }
 
@@ -203,13 +185,6 @@ body {
 
   .photo-frame {
     z-index: 2;
-  }
-
-  .photo-frame--needs-border {
-    padding: clamp(0.5rem, 2.7vw, 0.625rem) clamp(0.5rem, 2.7vw, 0.625rem) clamp(1.4rem, 7vw, 1.75rem);
-  }
-
-  .photo-frame img {
     width: min(13.75rem, 55vw);
   }
 
@@ -229,10 +204,10 @@ body {
     line-height: 1.6;
   }
 
-  .globe-fixed-container > div,
+  .globe-fixed-container > .globe-soft-edge,
   .globe-fixed-container canvas {
-    width: min(40rem, 98vw, 98svh) !important;
-    height: min(40rem, 98vw, 98svh) !important;
+    width: min(36rem, 88vw, 88svh) !important;
+    height: min(36rem, 88vw, 88svh) !important;
   }
 }
 
@@ -255,7 +230,7 @@ body {
     line-height: 1.55;
   }
 
-  .photo-frame img {
+  .photo-frame {
     width: min(11.25rem, 50vw);
   }
 
@@ -263,9 +238,9 @@ body {
     width: min(15rem, 70vw) !important;
   }
 
-  .globe-fixed-container > div,
+  .globe-fixed-container > .globe-soft-edge,
   .globe-fixed-container canvas {
-    width: min(29rem, 96vw, 96svh) !important;
-    height: min(29rem, 96vw, 96svh) !important;
+    width: min(26rem, 82vw, 82svh) !important;
+    height: min(26rem, 82vw, 82svh) !important;
   }
 }
