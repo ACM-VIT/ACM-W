@@ -299,6 +299,7 @@ export default function EnvelopeFooter() {
         rotateX: 0,
         rotateZ: 0,
         x: 10 * r,
+        z: 1.05,
       });
 
       // ---- Envelope shell: hidden off-screen below ----
@@ -306,7 +307,7 @@ export default function EnvelopeFooter() {
       // pre-positioned at their final resting transforms inside the
       // shell. The shell itself handles visibility — when it slides
       // up, everything appears together as one cohesive unit.
-      gsap.set(envelopeShell, { y: '100%', opacity: 0 });
+      gsap.set(envelopeShell, { y: '100%', visibility: 'hidden' });
 
       // Envelope layers: pre-positioned at resting layout.
       // No individual opacity:0 needed — the shell hides them.
@@ -411,12 +412,16 @@ export default function EnvelopeFooter() {
       // cohesive unit. All layers (interior, pocket, flap) are
       // pre-positioned inside — no staggered individual tweens.
       // The brown card is NOT inside the shell, so it is unaffected.
+      //
+      // NOTE: We use visibility (not opacity) to hide the shell.
+      // opacity < 1 breaks preserve-3d, flattening all children
+      // to z=0 and destroying the card's z-sandwich layering.
       // ======================================================
+      tl.set(envelopeShell, { visibility: 'visible' }, 5);
       tl.to(
         envelopeShell,
         {
           y: 0,
-          opacity: 1,
           duration: 1.5,
           ease: 'power2.out',
         },
