@@ -129,7 +129,6 @@ export default function EnvelopeFooter() {
       }
 
       setStatus('success');
-      setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (err: unknown) {
       console.error('Form submission error:', err);
       if (err instanceof Error) {
@@ -552,15 +551,17 @@ export default function EnvelopeFooter() {
                   <h2 className="brown-card__heading">CONTACT US</h2>
 
                   <div className="brown-card__field">
-                    <label className="brown-card__label" htmlFor="contact-name">Name:</label>
-                    <input
-                      id="contact-name"
-                      className="brown-card__input"
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => handleChange('name', e.target.value)}
-                      required
-                    />
+                    <div className="brown-card__field-row">
+                      <label className="brown-card__label" htmlFor="contact-name">Name:</label>
+                      <input
+                        id="contact-name"
+                        className="brown-card__input"
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => handleChange('name', e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className="brown-card__field">
