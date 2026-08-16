@@ -43,6 +43,24 @@ export default function EnvelopeFooter() {
 
   type FormStatus = 'idle' | 'loading' | 'success' | 'error' | 'throttled';
   const [status, setStatus] = useState<FormStatus>('idle');
+  const [fieldErrors, setFieldErrors] = useState({
+    email: '',
+    phone: '',
+  });
+
+  const validateEmail = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return 'Email is required.';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    return emailRegex.test(trimmed) ? '' : 'Enter a valid email address, including a domain like .com.';
+  };
+
+  const validatePhone = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (!digits) return 'Phone number is required.';
+    const phoneRegex = /^(?:\+?\d{10}|\+?\d{11,15})$/;
+    return phoneRegex.test(digits) ? '' : 'Enter a valid phone number with 10 digits or international format.';
+  };
 
   // Seconds left on the throttle, surfaced on the submit button.
   const [retryIn, setRetryIn] = useState(0);
@@ -77,6 +95,20 @@ export default function EnvelopeFooter() {
       return;
     }
 
+    const emailError = validateEmail(formData.email);
+    const phoneError = validatePhone(formData.phone);
+    const nextErrors = {
+      email: emailError,
+      phone: phoneError,
+    };
+
+    setFieldErrors(nextErrors);
+
+    if (emailError || phoneError) {
+      setStatus('error');
+      return;
+    }
+
     setStatus('loading');
     try {
       const response = await fetch('https://sweet-union-7b5e.jahnavisingh512.workers.dev', {
@@ -86,7 +118,8 @@ export default function EnvelopeFooter() {
         },
         body: JSON.stringify({
           name: formData.name,
-          email: formData.email,
+          email: formData.email.trim(),
+          phone: formData.phone.replace(/\D/g, ''),
           message: formData.message,
         }),
       });
@@ -108,7 +141,20 @@ export default function EnvelopeFooter() {
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    const nextValue = field === 'phone' ? value.replace(/\D/g, '') : value;
+    setFormData((prev) => ({ ...prev, [field]: nextValue }));
+
+    if (field === 'email') {
+      setFieldErrors((prev) => ({ ...prev, email: validateEmail(nextValue) }));
+    }
+
+    if (field === 'phone') {
+      setFieldErrors((prev) => ({ ...prev, phone: validatePhone(nextValue) }));
+    }
+
+    if (status === 'error') {
+      setStatus('idle');
+    }
   };
   const envelopeWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -527,6 +573,11 @@ export default function EnvelopeFooter() {
                       onChange={(e) => handleChange('email', e.target.value)}
                       required
                     />
+                    {fieldErrors.email && (
+                      <div style={{ color: '#7f1d1d', fontSize: '0.75rem', marginTop: '0.35rem' }}>
+                        {fieldErrors.email}
+                      </div>
+                    )}
                   </div>
 
                   <div className="brown-card__field">
@@ -535,9 +586,16 @@ export default function EnvelopeFooter() {
                       id="contact-phone"
                       className="brown-card__input"
                       type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9+]*"
                       value={formData.phone}
                       onChange={(e) => handleChange('phone', e.target.value)}
                     />
+                    {fieldErrors.phone && (
+                      <div style={{ color: '#7f1d1d', fontSize: '0.75rem', marginTop: '0.35rem' }}>
+                        {fieldErrors.phone}
+                      </div>
+                    )}
                   </div>
 
                   <div className="brown-card__field">
