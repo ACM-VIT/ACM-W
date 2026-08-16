@@ -64,6 +64,20 @@
 }
 
 /* -----------------------------------------------
+   ENVELOPE SHELL — Parent container for the envelope
+   visual layers (interior, pocket, flap). Animated as
+   a single unit via translateY for synchronized entry.
+   Position: relative keeps it in flow so front-face
+   gets its height from the interior image inside.
+   ----------------------------------------------- */
+.envelope-shell {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+/* -----------------------------------------------
    Z-INDEX STACK (bottom → top):
      1. envelopeBackside  (back face card — behind everything)
      2. envelopeInterior   (tan inside back wall)

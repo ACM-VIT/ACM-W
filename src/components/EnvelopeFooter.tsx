@@ -156,6 +156,7 @@ export default function EnvelopeFooter() {
     }
   };
   const envelopeWrapperRef = useRef<HTMLDivElement>(null);
+  const envelopeShellRef = useRef<HTMLDivElement>(null);
 
   // Front-face layer refs
   const envelopeInteriorRef = useRef<HTMLDivElement>(null);
@@ -275,8 +276,10 @@ export default function EnvelopeFooter() {
     if (
       !section || !pinContainer || !envelopeWrapper ||
       !envelopeInterior || !brownCard || !envelopePocket ||
-      !insideFlap || !outsideFlap
+      !insideFlap || !outsideFlap || !envelopeShellRef.current
     ) return;
+
+    const envelopeShell = envelopeShellRef.current;
 
     const ctx = gsap.context(() => {
       // ---- Responsive value scaling ----
@@ -298,19 +301,39 @@ export default function EnvelopeFooter() {
         x: 10 * r,
       });
 
-      // Envelope layers: hidden initially
-      gsap.set(envelopeInterior, { opacity: 0 });
-      gsap.set(envelopePocket, { opacity: 0 });
+      // ---- Envelope shell: hidden off-screen below ----
+      // The shell wraps interior, pocket, and flap. All layers are
+      // pre-positioned at their final resting transforms inside the
+      // shell. The shell itself handles visibility — when it slides
+      // up, everything appears together as one cohesive unit.
+      gsap.set(envelopeShell, { y: '100%', opacity: 0 });
 
-      // Inside flap: visible at upright position (rotateX: 0), but hidden
-      // initially — will fade in with the envelope layers.
+      // Envelope layers: pre-positioned at resting layout.
+      // No individual opacity:0 needed — the shell hides them.
+      gsap.set(envelopeInterior, {
+        scale: 0.80,
+        y: 40 * r,
+        z: 1,
+      });
+      gsap.set(envelopePocket, {
+        scale: 1.6,
+        z: 1.2,
+      });
+
+      // Inside flap: pre-positioned at resting state.
       // Hinge is at bottom center (CSS: transform-origin: bottom center).
       gsap.set(insideFlap, { transformOrigin: '50% 100%' });
-      gsap.set(insideFlap, { opacity: 0, rotateX: 0 });
+      gsap.set(insideFlap, {
+        rotateX: 0,
+        y: -185 * r,
+        scale: 0.80,
+        z: 1,
+      });
 
       // Outside flap: set pivot at base, then match insideFlap's
       // position so the handoff is seamless. Must have IDENTICAL
       // y, scale, z as insideFlap at the moment of the swap.
+      // Keeps its own opacity: 0 — only revealed during flap relay.
       gsap.set(outsideFlap, { transformOrigin: '50% 100%' });
       gsap.set(outsideFlap, {
         opacity: 0,
@@ -383,45 +406,19 @@ export default function EnvelopeFooter() {
       );
 
       // ======================================================
-      // Step 4: Envelope appears — fade in layers (5 → 6.5)
-      // Interior fades in first, then pocket, then inside flap
+      // Step 4: Envelope appears — SYNCHRONIZED SLIDE-IN (5 → 6.5)
+      // The envelope shell slides up from off-screen as a single
+      // cohesive unit. All layers (interior, pocket, flap) are
+      // pre-positioned inside — no staggered individual tweens.
+      // The brown card is NOT inside the shell, so it is unaffected.
       // ======================================================
       tl.to(
-        envelopeInterior,
+        envelopeShell,
         {
+          y: 0,
           opacity: 1,
-          duration: 1.2,
+          duration: 1.5,
           ease: 'power2.out',
-          scale: 0.80,
-          y: 40 * r,
-          z: 1,
-        },
-        5
-      );
-
-      tl.to(
-        envelopePocket,
-        {
-          opacity: 1,
-          duration: 1.2,
-          ease: 'power2.out',
-          scale: 1.6,
-          z: 1.2,
-        },
-        5.2
-      );
-
-      // Inside flap fades in at the same time as envelope layers
-      tl.to(
-        insideFlap,
-        {
-          opacity: 1,
-          duration: 0.8,
-          ease: 'power2.out',
-          y: -185 * r,
-          scale: 0.80,
-          z: 1,
-
         },
         5
       );
@@ -539,12 +536,9 @@ export default function EnvelopeFooter() {
             {/* ========== FRONT FACE ========== */}
             <div className="front-face">
 
-              {/* Z-2: Tan interior back wall */}
-              <div ref={envelopeInteriorRef} className="envelope-interior">
-                <img src={envelopeInteriorImg} alt="Envelope interior" draggable={false} />
-              </div>
-
-              {/* Z-3: Brown contact card */}
+              {/* Z-3: Brown contact card — lives directly in front-face,
+                  NOT inside the envelope-shell, so its animations
+                  (shrink, zoom, tilt) are completely independent. */}
               <div ref={brownCardRef} className="brown-card">
                 <img src={brownCardImg} alt="Contact card" className="brown-card__bg" draggable={false} />
                 <form className="brown-card__form" onSubmit={handleSubmit}>
@@ -625,21 +619,33 @@ export default function EnvelopeFooter() {
                 </form>
               </div>
 
-              {/* Z-4: Front red pocket */}
-              <div ref={envelopePocketRef} className="envelope-pocket">
-                <img src={envelopePocketImg} alt="Envelope pocket" draggable={false} />
-              </div>
+              {/* Envelope shell — wraps all visual envelope layers.
+                  Animated as a single unit via translateY for the
+                  synchronized slide-in. Brown card is NOT inside. */}
+              <div ref={envelopeShellRef} className="envelope-shell">
 
-              {/* Z-5: Two-part flap — both sit in same 3D space,
-                  stacked on top of each other. insideFlap shows first,
-                  outsideFlap takes over at the 90° handoff. */}
-              <div className="flap-container">
-                <div ref={insideFlapRef} className="inside-flap">
-                  <img src={insideFlapImg} alt="Envelope flap inside" draggable={false} />
+                {/* Z-2: Tan interior back wall */}
+                <div ref={envelopeInteriorRef} className="envelope-interior">
+                  <img src={envelopeInteriorImg} alt="Envelope interior" draggable={false} />
                 </div>
-                <div ref={outsideFlapRef} className="outside-flap">
-                  <img src={outsideFlapImg} alt="Envelope flap outside" draggable={false} />
+
+                {/* Z-4: Front red pocket */}
+                <div ref={envelopePocketRef} className="envelope-pocket">
+                  <img src={envelopePocketImg} alt="Envelope pocket" draggable={false} />
                 </div>
+
+                {/* Z-5: Two-part flap — both sit in same 3D space,
+                    stacked on top of each other. insideFlap shows first,
+                    outsideFlap takes over at the 90° handoff. */}
+                <div className="flap-container">
+                  <div ref={insideFlapRef} className="inside-flap">
+                    <img src={insideFlapImg} alt="Envelope flap inside" draggable={false} />
+                  </div>
+                  <div ref={outsideFlapRef} className="outside-flap">
+                    <img src={outsideFlapImg} alt="Envelope flap outside" draggable={false} />
+                  </div>
+                </div>
+
               </div>
 
             </div>
