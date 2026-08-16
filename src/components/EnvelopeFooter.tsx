@@ -564,37 +564,37 @@ export default function EnvelopeFooter() {
                   </div>
 
                   <div className="brown-card__field">
-                    <label className="brown-card__label" htmlFor="contact-email">E-mail:</label>
-                    <input
-                      id="contact-email"
-                      className="brown-card__input"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      required
-                    />
+                    <div className="brown-card__field-row">
+                      <label className="brown-card__label" htmlFor="contact-email">E-mail:</label>
+                      <input
+                        id="contact-email"
+                        className="brown-card__input"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleChange('email', e.target.value)}
+                        required
+                      />
+                    </div>
                     {fieldErrors.email && (
-                      <div style={{ color: '#7f1d1d', fontSize: '0.75rem', marginTop: '0.35rem' }}>
-                        {fieldErrors.email}
-                      </div>
+                      <p className="brown-card__field-error">{fieldErrors.email}</p>
                     )}
                   </div>
 
                   <div className="brown-card__field">
-                    <label className="brown-card__label" htmlFor="contact-phone">Phone:</label>
-                    <input
-                      id="contact-phone"
-                      className="brown-card__input"
-                      type="tel"
-                      inputMode="numeric"
-                      pattern="[0-9+]*"
-                      value={formData.phone}
-                      onChange={(e) => handleChange('phone', e.target.value)}
-                    />
+                    <div className="brown-card__field-row">
+                      <label className="brown-card__label" htmlFor="contact-phone">Phone:</label>
+                      <input
+                        id="contact-phone"
+                        className="brown-card__input"
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9+]*"
+                        value={formData.phone}
+                        onChange={(e) => handleChange('phone', e.target.value)}
+                      />
+                    </div>
                     {fieldErrors.phone && (
-                      <div style={{ color: '#7f1d1d', fontSize: '0.75rem', marginTop: '0.35rem' }}>
-                        {fieldErrors.phone}
-                      </div>
+                      <p className="brown-card__field-error">{fieldErrors.phone}</p>
                     )}
                   </div>
 
