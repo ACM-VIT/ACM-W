@@ -43,6 +43,24 @@ export default function EnvelopeFooter() {
 
   type FormStatus = 'idle' | 'loading' | 'success' | 'error' | 'throttled';
   const [status, setStatus] = useState<FormStatus>('idle');
+  const [fieldErrors, setFieldErrors] = useState({
+    email: '',
+    phone: '',
+  });
+
+  const validateEmail = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return 'Email is required.';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    return emailRegex.test(trimmed) ? '' : 'Enter a valid email address, including a domain like .com.';
+  };
+
+  const validatePhone = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (!digits) return 'Phone number is required.';
+    const phoneRegex = /^(?:\+?\d{10}|\+?\d{11,15})$/;
+    return phoneRegex.test(digits) ? '' : 'Enter a valid phone number with 10 digits or international format.';
+  };
 
   // Seconds left on the throttle, surfaced on the submit button.
   const [retryIn, setRetryIn] = useState(0);
@@ -77,66 +95,68 @@ export default function EnvelopeFooter() {
       return;
     }
 
-    setStatus('loading');
+    const emailError = validateEmail(formData.email);
+    const phoneError = validatePhone(formData.phone);
+    const nextErrors = {
+      email: emailError,
+      phone: phoneError,
+    };
 
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    setFieldErrors(nextErrors);
 
-      if (!response.ok) throw new Error(`Contact API failed with ${response.status}`);
-
-      setStatus('success');
-      setFormData({ name: '', email: '', phone: '', message: '' });
-    } catch (err) {
-      console.error('Contact form error:', err);
+    if (emailError || phoneError) {
       setStatus('error');
+      return;
     }
 
-    /*
-        console.warn(
-          'VITE_RECAPTCHA_SITE_KEY is not set — submitting without a reCAPTCHA token. ' +
-          'Set RECAPTCHA_SECRET_KEY on the contact API before enforcing verification.'
-        );
-      }
-
-      // Counted once the send is actually attempted, so a burst of failures
-      // still can't hammer the API.
-      recordSubmission();
-      const response = await fetch('/api/contact', {
+    setStatus('loading');
+    try {
+      const response = await fetch('https://sweet-union-7b5e.jahnavisingh512.workers.dev', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
+          email: formData.email.trim(),
+          phone: formData.phone.replace(/\D/g, ''),
           message: formData.message,
-          recaptchaToken,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Contact API failed with ${response.status}`);
+        throw new Error(`Request failed with status ${response.status}`);
       }
 
       setStatus('success');
-      setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (err: unknown) {
-      console.error('Contact form error:', err);
+      console.error('Form submission error:', err);
       if (err instanceof Error) {
         console.error('Error message:', err.message);
       }
       setStatus('error');
     }
-    */
+
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    const nextValue = field === 'phone' ? value.replace(/\D/g, '') : value;
+    setFormData((prev) => ({ ...prev, [field]: nextValue }));
+
+    if (field === 'email') {
+      setFieldErrors((prev) => ({ ...prev, email: validateEmail(nextValue) }));
+    }
+
+    if (field === 'phone') {
+      setFieldErrors((prev) => ({ ...prev, phone: validatePhone(nextValue) }));
+    }
+
+    if (status === 'error') {
+      setStatus('idle');
+    }
   };
   const envelopeWrapperRef = useRef<HTMLDivElement>(null);
+  const envelopeShellRef = useRef<HTMLDivElement>(null);
 
   // Front-face layer refs
   const envelopeInteriorRef = useRef<HTMLDivElement>(null);
@@ -256,8 +276,10 @@ export default function EnvelopeFooter() {
     if (
       !section || !pinContainer || !envelopeWrapper ||
       !envelopeInterior || !brownCard || !envelopePocket ||
-      !insideFlap || !outsideFlap
+      !insideFlap || !outsideFlap || !envelopeShellRef.current
     ) return;
+
+    const envelopeShell = envelopeShellRef.current;
 
     const ctx = gsap.context(() => {
       // ---- Responsive value scaling ----
@@ -277,21 +299,42 @@ export default function EnvelopeFooter() {
         rotateX: 0,
         rotateZ: 0,
         x: 10 * r,
+        z: 1.05,
       });
 
-      // Envelope layers: hidden initially
-      gsap.set(envelopeInterior, { opacity: 0 });
-      gsap.set(envelopePocket, { opacity: 0 });
+      // ---- Envelope shell: hidden off-screen below ----
+      // The shell wraps interior, pocket, and flap. All layers are
+      // pre-positioned at their final resting transforms inside the
+      // shell. The shell itself handles visibility — when it slides
+      // up, everything appears together as one cohesive unit.
+      gsap.set(envelopeShell, { y: '100%', visibility: 'hidden' });
 
-      // Inside flap: visible at upright position (rotateX: 0), but hidden
-      // initially — will fade in with the envelope layers.
+      // Envelope layers: pre-positioned at resting layout.
+      // No individual opacity:0 needed — the shell hides them.
+      gsap.set(envelopeInterior, {
+        scale: 0.80,
+        y: 40 * r,
+        z: 1,
+      });
+      gsap.set(envelopePocket, {
+        scale: 1.6,
+        z: 1.2,
+      });
+
+      // Inside flap: pre-positioned at resting state.
       // Hinge is at bottom center (CSS: transform-origin: bottom center).
       gsap.set(insideFlap, { transformOrigin: '50% 100%' });
-      gsap.set(insideFlap, { opacity: 0, rotateX: 0 });
+      gsap.set(insideFlap, {
+        rotateX: 0,
+        y: -185 * r,
+        scale: 0.80,
+        z: 1,
+      });
 
       // Outside flap: set pivot at base, then match insideFlap's
       // position so the handoff is seamless. Must have IDENTICAL
       // y, scale, z as insideFlap at the moment of the swap.
+      // Keeps its own opacity: 0 — only revealed during flap relay.
       gsap.set(outsideFlap, { transformOrigin: '50% 100%' });
       gsap.set(outsideFlap, {
         opacity: 0,
@@ -364,45 +407,23 @@ export default function EnvelopeFooter() {
       );
 
       // ======================================================
-      // Step 4: Envelope appears — fade in layers (5 → 6.5)
-      // Interior fades in first, then pocket, then inside flap
+      // Step 4: Envelope appears — SYNCHRONIZED SLIDE-IN (5 → 6.5)
+      // The envelope shell slides up from off-screen as a single
+      // cohesive unit. All layers (interior, pocket, flap) are
+      // pre-positioned inside — no staggered individual tweens.
+      // The brown card is NOT inside the shell, so it is unaffected.
+      //
+      // NOTE: We use visibility (not opacity) to hide the shell.
+      // opacity < 1 breaks preserve-3d, flattening all children
+      // to z=0 and destroying the card's z-sandwich layering.
       // ======================================================
+      tl.set(envelopeShell, { visibility: 'visible' }, 5);
       tl.to(
-        envelopeInterior,
+        envelopeShell,
         {
-          opacity: 1,
-          duration: 1.2,
+          y: 0,
+          duration: 1.5,
           ease: 'power2.out',
-          scale: 0.80,
-          y: 40 * r,
-          z: 1,
-        },
-        5
-      );
-
-      tl.to(
-        envelopePocket,
-        {
-          opacity: 1,
-          duration: 1.2,
-          ease: 'power2.out',
-          scale: 1.6,
-          z: 1.2,
-        },
-        5.2
-      );
-
-      // Inside flap fades in at the same time as envelope layers
-      tl.to(
-        insideFlap,
-        {
-          opacity: 1,
-          duration: 0.8,
-          ease: 'power2.out',
-          y: -185 * r,
-          scale: 0.80,
-          z: 1,
-
         },
         5
       );
@@ -520,50 +541,61 @@ export default function EnvelopeFooter() {
             {/* ========== FRONT FACE ========== */}
             <div className="front-face">
 
-              {/* Z-2: Tan interior back wall */}
-              <div ref={envelopeInteriorRef} className="envelope-interior">
-                <img src={envelopeInteriorImg} alt="Envelope interior" draggable={false} />
-              </div>
-
-              {/* Z-3: Brown contact card */}
+              {/* Z-3: Brown contact card — lives directly in front-face,
+                  NOT inside the envelope-shell, so its animations
+                  (shrink, zoom, tilt) are completely independent. */}
               <div ref={brownCardRef} className="brown-card">
                 <img src={brownCardImg} alt="Contact card" className="brown-card__bg" draggable={false} />
                 <form className="brown-card__form" onSubmit={handleSubmit}>
                   <h2 className="brown-card__heading">CONTACT US</h2>
 
                   <div className="brown-card__field">
-                    <label className="brown-card__label" htmlFor="contact-name">Name:</label>
-                    <input
-                      id="contact-name"
-                      className="brown-card__input"
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => handleChange('name', e.target.value)}
-                      required
-                    />
+                    <div className="brown-card__field-row">
+                      <label className="brown-card__label" htmlFor="contact-name">Name:</label>
+                      <input
+                        id="contact-name"
+                        className="brown-card__input"
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => handleChange('name', e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className="brown-card__field">
-                    <label className="brown-card__label" htmlFor="contact-email">E-mail:</label>
-                    <input
-                      id="contact-email"
-                      className="brown-card__input"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      required
-                    />
+                    <div className="brown-card__field-row">
+                      <label className="brown-card__label" htmlFor="contact-email">E-mail:</label>
+                      <input
+                        id="contact-email"
+                        className="brown-card__input"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleChange('email', e.target.value)}
+                        required
+                      />
+                    </div>
+                    {fieldErrors.email && (
+                      <p className="brown-card__field-error">{fieldErrors.email}</p>
+                    )}
                   </div>
 
                   <div className="brown-card__field">
-                    <label className="brown-card__label" htmlFor="contact-phone">Phone:</label>
-                    <input
-                      id="contact-phone"
-                      className="brown-card__input"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleChange('phone', e.target.value)}
-                    />
+                    <div className="brown-card__field-row">
+                      <label className="brown-card__label" htmlFor="contact-phone">Phone:</label>
+                      <input
+                        id="contact-phone"
+                        className="brown-card__input"
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9+]*"
+                        value={formData.phone}
+                        onChange={(e) => handleChange('phone', e.target.value)}
+                      />
+                    </div>
+                    {fieldErrors.phone && (
+                      <p className="brown-card__field-error">{fieldErrors.phone}</p>
+                    )}
                   </div>
 
                   <div className="brown-card__field">
@@ -592,21 +624,33 @@ export default function EnvelopeFooter() {
                 </form>
               </div>
 
-              {/* Z-4: Front red pocket */}
-              <div ref={envelopePocketRef} className="envelope-pocket">
-                <img src={envelopePocketImg} alt="Envelope pocket" draggable={false} />
-              </div>
+              {/* Envelope shell — wraps all visual envelope layers.
+                  Animated as a single unit via translateY for the
+                  synchronized slide-in. Brown card is NOT inside. */}
+              <div ref={envelopeShellRef} className="envelope-shell">
 
-              {/* Z-5: Two-part flap — both sit in same 3D space,
-                  stacked on top of each other. insideFlap shows first,
-                  outsideFlap takes over at the 90° handoff. */}
-              <div className="flap-container">
-                <div ref={insideFlapRef} className="inside-flap">
-                  <img src={insideFlapImg} alt="Envelope flap inside" draggable={false} />
+                {/* Z-2: Tan interior back wall */}
+                <div ref={envelopeInteriorRef} className="envelope-interior">
+                  <img src={envelopeInteriorImg} alt="Envelope interior" draggable={false} />
                 </div>
-                <div ref={outsideFlapRef} className="outside-flap">
-                  <img src={outsideFlapImg} alt="Envelope flap outside" draggable={false} />
+
+                {/* Z-4: Front red pocket */}
+                <div ref={envelopePocketRef} className="envelope-pocket">
+                  <img src={envelopePocketImg} alt="Envelope pocket" draggable={false} />
                 </div>
+
+                {/* Z-5: Two-part flap — both sit in same 3D space,
+                    stacked on top of each other. insideFlap shows first,
+                    outsideFlap takes over at the 90° handoff. */}
+                <div className="flap-container">
+                  <div ref={insideFlapRef} className="inside-flap">
+                    <img src={insideFlapImg} alt="Envelope flap inside" draggable={false} />
+                  </div>
+                  <div ref={outsideFlapRef} className="outside-flap">
+                    <img src={outsideFlapImg} alt="Envelope flap outside" draggable={false} />
+                  </div>
+                </div>
+
               </div>
 
             </div>
