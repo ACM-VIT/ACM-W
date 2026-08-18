@@ -70,40 +70,34 @@ Provide examples and code snippets showing how to use the project. Add screensho
 
 ## Cloudflare Deployment
 
-This Vite app deploys to Cloudflare as prebuilt static assets from `dist`.
+The production site has two Cloudflare components behind
+`https://acmw.acmvit.in`:
+
+- Cloudflare Pages serves the Vite build from `dist`.
+- The `acm-w-contact` Worker handles `/api/contact` and sends contact messages
+  through the native Cloudflare Email Service binding.
 
 ```bash
-# Local Worker preview
-npm run cf:worker:dev
+# Build and preview the Pages site locally
+npm run dev:cloudflare
 
-# Deploy to the linked Cloudflare Worker
-npm run cf:worker:deploy
+# Run the contact Worker locally with its remote email binding
+npm run cf:contact:dev
 
-# Local Pages preview
-npm run cf:pages:dev
-
-# Direct deploy to Cloudflare Pages
-npm run cf:pages:deploy
+# Deploy both production components
+npm run cf:deploy
 ```
 
-The default Worker config is `wrangler.jsonc`. The Pages config is kept in `wrangler.pages.jsonc` so the Git-linked Worker project can keep using the root Wrangler file. If the Cloudflare dashboard project name is different, update the `name` fields and the `--project-name` value in `package.json`.
+`wrangler.jsonc` configures Pages and `wrangler.contact.jsonc` configures the
+contact Worker. No third-party mail API key is required. Before deploying the
+contact Worker, onboard `acmw.acmvit.in` in Cloudflare Email Sending so that
+`contact@acmw.acmvit.in` is an authorized sender. The Worker binding restricts
+delivery to `acm@vit.ac.in` and restricts the sender to that contact address.
 
 For Cloudflare Pages Git integration, use:
 
 - Build command: `npm run build`
 - Build output directory: `dist`
-
-The contact form uses the `/api/contact` Cloudflare Pages Function to send
-through Resend. Use `npm run dev:pages` for local testing; plain `npm run dev`
-only runs Vite and will return 404 for `/api/contact`. Store local secrets in
-`.dev.vars`:
-
-```text
-RESEND_API_KEY=re_...
-RESEND_FROM=ACM-W VIT <verified-sender@your-domain.com>
-```
-
-Configure the same values as secrets in the Cloudflare Pages project.
 
 ## Contributing
 We welcome contributions of all kinds! Please read our [Contributing Guidelines](contributing.md) to get started quickly and make your PRs count.

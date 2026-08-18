@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "acm-w-contact",
+  "main": "./worker/contact.ts",
+  "compatibility_date": "2026-08-18",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "acmw.acmvit.in/api/*",
+      "zone_id": "8e6e67e2f97951b41fa96cdbd40a0f50"
+    }
+  ],
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "remote": true,
+      "destination_address": "acm@vit.ac.in",
+      "allowed_sender_addresses": ["contact@acmw.acmvit.in"]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

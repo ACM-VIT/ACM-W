@@ -10,11 +10,11 @@
     "build": "tsc -b && node --experimental-strip-types node_modules/vite/bin/vite.js build --config vite.config.ts --configLoader native",
     "lint": "eslint .",
     "preview": "vite preview",
-    "dev:pages": "npm run cf:pages:dev",
-    "cf:worker:dev": "npm run build && wrangler --config=wrangler.jsonc dev",
-    "cf:worker:deploy": "npm run build && wrangler --config=wrangler.jsonc deploy",
-    "cf:pages:dev": "npm run build && wrangler --config=wrangler.pages.jsonc pages dev dist",
-    "cf:pages:deploy": "npm run build && wrangler --config=wrangler.pages.jsonc pages deploy dist --project-name acm-w"
+    "dev:cloudflare": "npm run build && wrangler pages dev dist",
+    "cf:contact:dev": "wrangler --config=wrangler.contact.jsonc dev",
+    "cf:contact:deploy": "wrangler --config=wrangler.contact.jsonc deploy",
+    "cf:pages:deploy": "npm run build && wrangler pages deploy dist --project-name acm-w",
+    "cf:deploy": "npm run cf:pages:deploy && npm run cf:contact:deploy"
   },
   "dependencies": {
     "@types/three": "^0.184.1",
@@ -43,6 +43,6 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12",
-    "wrangler": "^4.103.0"
+    "wrangler": "^4.124.0"
   }
 }

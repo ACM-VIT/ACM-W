@@ -111,7 +111,7 @@ export default function EnvelopeFooter() {
 
     setStatus('loading');
     try {
-      const response = await fetch('https://sweet-union-7b5e.jahnavisingh512.workers.dev', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
