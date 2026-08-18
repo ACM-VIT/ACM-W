@@ -26,9 +26,11 @@ const LINES = [
   { text: "acm-w", x: 266, baseline: 206.2 },
 ];
 
-const REVEAL_WIDTH = 190;
+const REVEAL_PADDING = 8;
 /** Left-to-right reveal speed, in postcard units per second. */
-const WRITE_SPEED = 90;
+const WRITE_SPEED = 105;
+const LINE_GAP_SECONDS = 0.08;
+const HEART_GAP_SECONDS = 0.04;
 
 /** Little heart outline (~10 wide, ~10 tall, dip at 0,0, point at 0,3). */
 const HEART_D =
@@ -106,22 +108,30 @@ export default function PostcardLoader() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let timeline: gsap.core.Timeline | null = null;
+    const getRevealWidths = () =>
+      textEls.map((textEl) =>
+        Math.ceil(textEl.getComputedTextLength()) + REVEAL_PADDING,
+      );
+
     if (reduceMotion) {
-      clipRects.forEach((rect) =>
-        rect.setAttribute("width", String(REVEAL_WIDTH)),
+      const revealWidths = getRevealWidths();
+      clipRects.forEach((rect, i) =>
+        rect.setAttribute("width", String(revealWidths[i])),
       );
       positionHeart();
     } else {
       timeline = gsap.timeline({ delay: LOADER_INTRO_SECONDS });
-      clipRects.forEach((rect) => {
+      const revealWidths = getRevealWidths();
+      clipRects.forEach((rect, i) => {
+        const revealWidth = revealWidths[i];
         timeline!.to(
           rect,
           {
-            attr: { width: REVEAL_WIDTH },
-            duration: REVEAL_WIDTH / WRITE_SPEED,
+            attr: { width: revealWidth },
+            duration: revealWidth / WRITE_SPEED,
             ease: "power1.inOut",
           },
-          ">0.25",
+          `>${LINE_GAP_SECONDS}`,
         );
       });
       // Draw the heart's outline once the text has finished writing.
@@ -131,10 +141,10 @@ export default function PostcardLoader() {
         gsap.set(heart, { strokeDasharray: length, strokeDashoffset: length });
         gsap.to(heart, {
           strokeDashoffset: 0,
-          duration: 0.5,
+          duration: 0.35,
           ease: "power1.out",
         });
-      }, undefined, ">0.15");
+      }, undefined, `>${HEART_GAP_SECONDS}`);
     }
 
     return () => {

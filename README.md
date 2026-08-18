@@ -93,7 +93,17 @@ For Cloudflare Pages Git integration, use:
 - Build command: `npm run build`
 - Build output directory: `dist`
 
----
+The contact form uses the `/api/contact` Cloudflare Pages Function to send
+through Resend. Use `npm run dev:pages` for local testing; plain `npm run dev`
+only runs Vite and will return 404 for `/api/contact`. Store local secrets in
+`.dev.vars`:
+
+```text
+RESEND_API_KEY=re_...
+RESEND_FROM=ACM-W VIT <verified-sender@your-domain.com>
+```
+
+Configure the same values as secrets in the Cloudflare Pages project.
 
 ## Contributing
 We welcome contributions of all kinds! Please read our [Contributing Guidelines](contributing.md) to get started quickly and make your PRs count.

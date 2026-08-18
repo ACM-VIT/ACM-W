@@ -127,6 +127,9 @@ const scientists: ScientistData[] = [
 const CAM_DEFAULT_Z = 3.0;
 /** Full zoom-in (close-up of a country region) */
 const CAM_ZOOM_Z = 1.3;
+/** Shorter pin distances keep the same animation beats but require less scroll. */
+const SCIENTIST_SCROLL_END = "+=180%";
+const LAST_SCIENTIST_SCROLL_END = "+=167%";
 
 /* ─── Component ─── */
 
@@ -136,6 +139,9 @@ export default function WomenInStem() {
 
   useEffect(() => {
     let matchMedia: gsap.MatchMedia | undefined;
+    /* The scientist timelines live inside `matchMedia`, so revert() disposes
+       them. This one is created outside it and has to be killed by hand. */
+    let visibilityST: ScrollTrigger | undefined;
 
     const timer = setTimeout(() => {
       const globe = globeRef.current;
@@ -144,16 +150,20 @@ export default function WomenInStem() {
       const group = globe.group;
       const camera = globe.camera;
       const globeEl = globeContainerRef.current;
-      const globeSoftEdgeEl = globeEl?.querySelector(
-        ".globe-soft-edge",
+      const globeEdgeFadeEl = globeEl?.querySelector(
+        ".globe-edge-fade",
       ) as HTMLElement | null;
-      if (!globeEl || !globeSoftEdgeEl) return;
+      if (!globeEl || !globeEdgeFadeEl) return;
+
+      /* The feathered rim is a static gradient overlay; only its opacity moves,
+         so a scroll frame costs one compositor-level property write. (It used to
+         re-generate a mask-image on the canvas from four CSS variables per
+         frame, which re-rastered the whole globe layer every time.) */
+      let lastEdgeStrength = -1;
       const clearGlobeSoftEdge = () => {
-        globeSoftEdgeEl.classList.remove("is-globe-zooming");
-        globeSoftEdgeEl.style.removeProperty("--globe-edge-alpha-62");
-        globeSoftEdgeEl.style.removeProperty("--globe-edge-alpha-78");
-        globeSoftEdgeEl.style.removeProperty("--globe-edge-alpha-91");
-        globeSoftEdgeEl.style.removeProperty("--globe-edge-alpha-100");
+        if (lastEdgeStrength === 0) return;
+        lastEdgeStrength = 0;
+        globeEdgeFadeEl.style.opacity = "0";
       };
       const setGlobeSoftEdge = (progress: number) => {
         const fadeIn = gsap.utils.clamp(0, 1, (progress - 0.04) / 0.08);
@@ -166,23 +176,10 @@ export default function WomenInStem() {
           return;
         }
 
-        globeSoftEdgeEl.classList.add("is-globe-zooming");
-        globeSoftEdgeEl.style.setProperty(
-          "--globe-edge-alpha-62",
-          (1 - strength * 0.18).toFixed(3),
-        );
-        globeSoftEdgeEl.style.setProperty(
-          "--globe-edge-alpha-78",
-          (1 - strength * 0.52).toFixed(3),
-        );
-        globeSoftEdgeEl.style.setProperty(
-          "--globe-edge-alpha-91",
-          (1 - strength * 0.84).toFixed(3),
-        );
-        globeSoftEdgeEl.style.setProperty(
-          "--globe-edge-alpha-100",
-          (1 - strength).toFixed(3),
-        );
+        // Skip sub-perceptual writes so a stalled scrub doesn't churn styles.
+        if (Math.abs(strength - lastEdgeStrength) < 0.002) return;
+        lastEdgeStrength = strength;
+        globeEdgeFadeEl.style.opacity = strength.toFixed(3);
       };
 
       /* The globe is fully scroll-driven — no idle auto-rotate phase. */
@@ -192,11 +189,22 @@ export default function WomenInStem() {
       /* ─── Globe visibility: show while women-in-stem is active ───
          Starts at "top bottom" so the big globe is revealed as the
          TitleCard scrolls away, with no idle scroll span before the
-         first scientist section pins and drives the rotation. */
-      ScrollTrigger.create({
+         first scientist section pins and drives the rotation.
+
+         refreshPriority: -1 is load-bearing. On refresh ScrollTrigger strips
+         all pin-spacing, then re-measures each trigger in start order and
+         re-applies the spacing as it goes. This trigger starts earliest, so by
+         default it measured #women-in-stem BEFORE any of the five scientist
+         pins had put their spacers back — 500vh instead of ~2140vh. "bottom
+         top" then resolved roughly a fifth of the way in, the trigger went
+         inactive partway through Marie Curie, and visibility was pinned to
+         hidden for every scientist after her. A negative priority refreshes
+         this last, once the pinned height is real. */
+      visibilityST = ScrollTrigger.create({
         trigger: "#women-in-stem",
         start: "top bottom",
         end: "bottom top",
+        refreshPriority: -1,
         onToggle: ({ isActive }) => {
           globeEl.style.visibility = isActive ? "visible" : "hidden";
         },
@@ -260,7 +268,7 @@ export default function WomenInStem() {
             scrollTrigger: {
               trigger: section,
               start: "top top",
-              end: isLast ? "+=280%" : "+=340%",
+              end: isLast ? LAST_SCIENTIST_SCROLL_END : SCIENTIST_SCROLL_END,
               scrub: 1,
               pin: true,
               anticipatePin: 1,
@@ -366,7 +374,7 @@ export default function WomenInStem() {
     return () => {
       clearTimeout(timer);
       matchMedia?.revert();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      visibilityST?.kill();
     };
   }, []);
 
@@ -375,7 +383,10 @@ export default function WomenInStem() {
   return (
     <div className="bg-[#fff9e9] text-[#580A0A] overflow-x-hidden">
       {/* ── Fixed globe ── */}
-      <div ref={globeContainerRef} className="globe-fixed-container">
+      <div
+        ref={globeContainerRef}
+        className="globe-fixed-container women-in-stem-globe-container"
+      >
         <Globe3D
           ref={globeRef}
           className="globe-soft-edge"
@@ -387,6 +398,8 @@ export default function WomenInStem() {
           initialRotY={0}
           enableDrag={false}
         />
+        {/* Feathers the globe's rim into the page background — see .globe-edge-fade */}
+        <div className="globe-edge-fade" aria-hidden="true" />
       </div>
 
       {/* ── Scientists ── */}
