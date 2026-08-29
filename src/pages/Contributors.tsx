@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import cardBg from "../assets/contributors/ContributorsPostcard.png";
 
 import githubIcon from "../assets/teams/github.png";
@@ -14,6 +16,8 @@ import sudiksha from "../assets/contributors/sudiksha.png";
 import chinmayee from "../assets/contributors/chinmayee.png";
 import ananya from "../assets/contributors/ananya.png";
 import nimesha from "../assets/contributors/nimesha.png";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const imageMap = {
   ananya, chinmayee, jahnavi, nimesha, nitu, sudiksha, maitri, tamanna, ishita,
@@ -346,63 +350,53 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
 
 /** One card (200px) plus the 24px gap. */
 const CARD_STRIDE = 224;
-/** Debounce between backward frame steps so a trackpad flick moves one card. */
-const REVERSE_STEP_MS = 180;
+/**
+ * Fraction of the section's viewport journey (top-enters-bottom → bottom-
+ * leaves-top) spent holding still at each end, so the reel is parked while
+ * the section is only half on screen and plays through the middle stretch.
+ */
+const REEL_LEAD = 0.18;
 
 export default function ContributorsSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const offsetRef = useRef(0);
+  const applyRef = useRef<(() => void) | null>(null);
   const [canScroll, setCanScroll] = useState({ left: false, right: true });
 
-  // Vertical wheel drives the reel sideways while it still has somewhere to
-  // go; once it reaches either end the gesture is handed back to the page so
-  // scrolling continues downward (or upward) naturally.
+  // The reel is scroll-linked, not wheel-hijacked. Wheel capture is patchy:
+  // once a gesture is already scrolling the page the browser latches the
+  // rest of that gesture to the page and stops honouring preventDefault, so
+  // the reel only ever caught a gesture that *started* on it. Instead the
+  // reel's scrollLeft is a pure function of where the section sits in the
+  // viewport — scroll down and the cards play rightwards, scroll up and they
+  // play back leftwards, mid-gesture, with nothing to capture.
   //
-  // Playback is direction-aware, like the intro: scrolling down "plays" the
-  // reel rightwards as a continuous, pixel-for-pixel motion. Scrolling up
-  // moves it leftwards frame by frame — one card per gesture, snapped to the
-  // card grid and written instantly, never a smooth reverse.
+  // The arrows nudge an offset on top of that mapping so they still work.
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el) return;
+    const section = sectionRef.current;
+    if (!el || !section) return;
 
-    let stepLock = false;
-    let stepTimer: number | null = null;
-
-    const onWheel = (e: WheelEvent) => {
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return;
-
-      const raw = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (raw === 0) return;
-      // deltaMode 1 = lines, 2 = pages — normalise to pixels.
-      const delta = e.deltaMode === 1 ? raw * 16 : e.deltaMode === 2 ? raw * el.clientWidth : raw;
-
-      const atStart = el.scrollLeft <= 0 && delta < 0;
-      const atEnd = el.scrollLeft >= maxScroll - 1 && delta > 0;
-      if (atStart || atEnd) return;
-
-      e.preventDefault();
-
-      if (delta > 0) {
-        /* Scrolling down → play forward, continuously. */
-        el.scrollLeft = Math.min(maxScroll, el.scrollLeft + delta);
-        return;
-      }
-
-      /* Scrolling up → one frame (card) leftwards per gesture. */
-      if (stepLock) return;
-      stepLock = true;
-      const prevCard = Math.ceil(el.scrollLeft / CARD_STRIDE) - 1;
-      el.scrollLeft = Math.max(0, prevCard * CARD_STRIDE);
-      stepTimer = window.setTimeout(() => {
-        stepLock = false;
-      }, REVERSE_STEP_MS);
+    const apply = (progress: number) => {
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 0) return;
+      const eased = Math.min(1, Math.max(0, (progress - REEL_LEAD) / (1 - REEL_LEAD * 2)));
+      el.scrollLeft = Math.max(0, Math.min(max, eased * max + offsetRef.current));
     };
 
-    el.addEventListener("wheel", onWheel, { passive: false });
+    const trigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: (self) => apply(self.progress),
+      onRefresh: (self) => apply(self.progress),
+    });
+    applyRef.current = () => apply(trigger.progress);
+
     return () => {
-      el.removeEventListener("wheel", onWheel);
-      if (stepTimer !== null) window.clearTimeout(stepTimer);
+      applyRef.current = null;
+      trigger.kill();
     };
   }, []);
 
@@ -433,12 +427,15 @@ export default function ContributorsSection() {
   const scrollByCards = (dir: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    // Two cards at a time.
-    el.scrollBy({ left: dir * CARD_STRIDE * 2, behavior: "smooth" });
+    // Two cards at a time, as an offset on the scroll-linked position.
+    const max = el.scrollWidth - el.clientWidth;
+    const target = Math.max(0, Math.min(max, el.scrollLeft + dir * CARD_STRIDE * 2));
+    offsetRef.current += target - el.scrollLeft;
+    gsap.to(el, { scrollLeft: target, duration: 0.45, ease: "power2.out", overwrite: true });
   };
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#B49880] py-16 sm:py-20">
+    <section ref={sectionRef} className="relative w-full overflow-hidden bg-[#B49880] py-16 sm:py-20">
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-25 mix-blend-multiply"
         style={{
