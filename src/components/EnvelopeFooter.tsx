@@ -624,16 +624,14 @@ export default function EnvelopeFooter() {
               <div className="back-face__content">
                 <div className="back-face__text-block">
                   <div className="back-face__text-row">
-                    <span className="back-face__text">Made with</span>
+                    <span className="back-face__text">crafted with love by ACM-VIT</span>
                     <img
                       src={heartImg}
                       alt="heart"
                       className="back-face__heart"
                       draggable={false}
                     />
-                    <span className="back-face__text">by</span>
                   </div>
-                  <span className="back-face__text back-face__text--org">ACM-W VIT</span>
                 </div>
 
                 <div className="back-face__social-row">

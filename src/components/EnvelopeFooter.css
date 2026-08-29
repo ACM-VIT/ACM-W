@@ -450,13 +450,13 @@
   gap: 4px;
 }
 
-/* "Made with ♥ by" inline row */
+/* "crafted with love by ACM-VIT ♥" inline row */
 .back-face__text-row {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .back-face__text {
