@@ -322,7 +322,7 @@ function BlogStampsDesktop() {
       <style>{`
         @keyframes blog-hint-in {
           from { opacity: 0; transform: translateY(0.25rem); }
-          to { opacity: 0.8; transform: none; }
+          to { opacity: 1; transform: none; }
         }
       `}</style>
 
@@ -355,27 +355,34 @@ function BlogStampsDesktop() {
           Blogs
         </h2>
         <p
-          key={hint}
+          key={activeIdx === null ? hint : "zoomed"}
           style={{
-            margin: "0.55rem 0 0",
-            fontStyle: "italic",
-            fontSize: "clamp(0.72rem, 0.95vw, 0.85rem)",
+            margin: "-0.6rem 0 0",
+            fontFamily: "Kovanov, serif",
+            fontStyle: "normal",
+            fontWeight: "bold",
+            fontSize: "clamp(1.05rem, 1.5vw, 1.35rem)",
             letterSpacing: "0.05em",
-            color: "#8b4040",
+            color: "#580a0a",
             opacity: 0,
-            animation: hint ? "blog-hint-in 0.7s ease 0.5s both" : "none",
+            animation:
+              activeIdx === null && hint
+                ? "blog-hint-in 0.7s ease 0.5s both"
+                : "none",
           }}
         >
-          {hint || " "}
+          {activeIdx === null && hint ? hint : " "}
         </p>
         {PAGE_COUNT > 1 && (
           <p
             style={{
-              margin: "0.3rem 0 0",
-              fontSize: "clamp(0.66rem, 0.85vw, 0.75rem)",
+              margin: "-0.35rem 0 0",
+              fontFamily: "Kovanov, serif",
+              fontWeight: "bold",
+              fontSize: "clamp(0.85rem, 1.1vw, 1rem)",
               letterSpacing: "0.16em",
-              color: "#a06565",
-              opacity: activeIdx !== null ? 0 : 0.9,
+              color: "#580a0a",
+              opacity: activeIdx !== null ? 0 : 1,
               transition: "opacity 0.25s ease",
             }}
           >
@@ -438,6 +445,32 @@ function BlogStampsDesktop() {
           style={{ width: "clamp(1.35rem, 2.2vw, 1.625rem)", aspectRatio: "1 / 1", display: "block" }}
         />
       </button>
+
+      {activeIdx !== null && hint && (
+        <p
+          key={hint}
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: "clamp(1rem, 3vh, 2rem)",
+            textAlign: "center",
+            margin: 0,
+            fontFamily: "Kovanov, serif",
+            fontStyle: "normal",
+            fontWeight: "bold",
+            fontSize: "clamp(1.1rem, 1.6vw, 1.5rem)",
+            letterSpacing: "0.08em",
+            color: "#580a0a",
+            opacity: 0,
+            animation: "blog-hint-in 0.7s ease 0.5s both",
+            zIndex: 30,
+            pointerEvents: "none",
+          }}
+        >
+          {hint}
+        </p>
+      )}
 
       {activeIdx !== null && (
         <div
