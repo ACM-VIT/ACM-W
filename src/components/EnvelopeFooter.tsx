@@ -219,6 +219,26 @@ export default function EnvelopeFooter() {
     };
   }, []);
 
+  // The timeline's pixel values are scaled by the wrapper's width, so the
+  // whole GSAP context is torn down and rebuilt whenever that width changes
+  // (e.g. a desktop -> mobile resize or an orientation change). Width is
+  // tracked in state so the effect below simply re-runs.
+  const [wrapperWidth, setWrapperWidth] = useState(0);
+  useEffect(() => {
+    const envelopeWrapper = envelopeWrapperRef.current;
+    if (!envelopeWrapper) return;
+    const measure = () =>
+      setWrapperWidth(Math.round(envelopeWrapper.getBoundingClientRect().width));
+    measure();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', measure);
+      return () => window.removeEventListener('resize', measure);
+    }
+    const ro = new ResizeObserver(measure);
+    ro.observe(envelopeWrapper);
+    return () => ro.disconnect();
+  }, []);
+
   // Build the scroll-driven timeline on mount. The envelope's in-flow image
   // (.envelope-interior) and the contact card reserve their aspect-ratio in
   // CSS, so the wrapper has its true height before any image has loaded and
@@ -246,9 +266,9 @@ export default function EnvelopeFooter() {
       // ---- Responsive value scaling ----
       // The animation was designed for a 600px-wide envelope. On mobile
       // the wrapper is ~300px, so all pixel-based GSAP values must scale
-      // proportionally. We compute a ratio once at init time.
-      const wrapperWidth = envelopeWrapper.getBoundingClientRect().width || 600;
-      const r = wrapperWidth / 600; // 1.0 on desktop, ~0.5 on mobile
+      // proportionally. The ratio is rebuilt whenever the wrapper resizes.
+      const width = wrapperWidth || envelopeWrapper.getBoundingClientRect().width || 600;
+      const r = width / 600; // 1.0 on desktop, ~0.5 on mobile
 
       // ---- Initial state setup ----
 
@@ -483,10 +503,14 @@ export default function EnvelopeFooter() {
       );
     }, section);
 
+    // Rebuilding mid-page: make ScrollTrigger re-measure so the fresh
+    // timeline is scrubbed to the current scroll position immediately.
+    ScrollTrigger.refresh();
+
     return () => {
       ctx.revert();
     };
-  }, []);
+  }, [wrapperWidth]);
 
   return (
     <section ref={sectionRef} className="scroll-section" id="contact">

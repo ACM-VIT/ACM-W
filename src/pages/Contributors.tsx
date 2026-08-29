@@ -378,12 +378,28 @@ export default function ContributorsSection() {
     const section = sectionRef.current;
     if (!el || !section) return;
 
+    // scrollLeft we last wrote ourselves. Any other movement (trackpad
+    // swipe, touch drag, shift+wheel, keyboard) is the user's own horizontal
+    // input and is folded into the offset so the vertical mapping doesn't
+    // snap it back on the next scroll tick.
+    let lastSet = el.scrollLeft;
+
     const apply = (progress: number) => {
       const max = el.scrollWidth - el.clientWidth;
       if (max <= 0) return;
       const eased = Math.min(1, Math.max(0, (progress - REEL_LEAD) / (1 - REEL_LEAD * 2)));
-      el.scrollLeft = Math.max(0, Math.min(max, eased * max + offsetRef.current));
+      lastSet = Math.max(0, Math.min(max, eased * max + offsetRef.current));
+      el.scrollLeft = lastSet;
     };
+
+    const onNativeScroll = () => {
+      const delta = el.scrollLeft - lastSet;
+      if (delta !== 0) {
+        offsetRef.current += delta;
+        lastSet = el.scrollLeft;
+      }
+    };
+    el.addEventListener("scroll", onNativeScroll, { passive: true });
 
     const trigger = ScrollTrigger.create({
       trigger: section,
@@ -396,6 +412,7 @@ export default function ContributorsSection() {
 
     return () => {
       applyRef.current = null;
+      el.removeEventListener("scroll", onNativeScroll);
       trigger.kill();
     };
   }, []);
@@ -430,7 +447,8 @@ export default function ContributorsSection() {
     // Two cards at a time, as an offset on the scroll-linked position.
     const max = el.scrollWidth - el.clientWidth;
     const target = Math.max(0, Math.min(max, el.scrollLeft + dir * CARD_STRIDE * 2));
-    offsetRef.current += target - el.scrollLeft;
+    // The tween's scroll events are picked up by the native-scroll listener,
+    // which credits the movement to the offset as it happens.
     gsap.to(el, { scrollLeft: target, duration: 0.45, ease: "power2.out", overwrite: true });
   };
 
