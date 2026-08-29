@@ -72,6 +72,7 @@ const CARDS_PER_PAGE = 3;
 export default function Footer() {
   const [currentPage, setCurrentPage] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const wheelLockRef = useRef(false);
   const totalPages = Math.ceil(galleryPhotos.length / CARDS_PER_PAGE);
 
   const scrollToPage = useCallback(
@@ -130,9 +131,34 @@ export default function Footer() {
     };
   }, [totalPages]);
 
-  // The vertical wheel is deliberately NOT captured here: the gallery pages
-  // via the dots, the arrows, swipe, or a horizontal trackpad gesture, so the
-  // page keeps scrolling as one continuous surface.
+  // Vertical wheel turns three-card pages (1-3, 4-6, 7-9). At either end the
+  // gesture is handed back to the page so it keeps scrolling past the gallery.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      const raw = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      // deltaMode 1 = lines, 2 = pages — normalise to pixels.
+      const delta = e.deltaMode === 1 ? raw * 16 : e.deltaMode === 2 ? raw * el.clientWidth : raw;
+      // Ignore trackpad drift so a stray pixel can't flip a page.
+      if (Math.abs(delta) < 8) return;
+
+      const nextPage = currentPage + (delta > 0 ? 1 : -1);
+      if (nextPage < 0 || nextPage >= totalPages) return;
+
+      e.preventDefault();
+      if (wheelLockRef.current) return;
+      wheelLockRef.current = true;
+      scrollToPage(nextPage);
+      window.setTimeout(() => {
+        wheelLockRef.current = false;
+      }, 650);
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [currentPage, scrollToPage, totalPages]);
 
   return (
     <footer

@@ -22,24 +22,24 @@ function useParallax(driftVh = 5) {
     const el = ref.current;
     if (!el) return;
 
-    const tween = gsap.fromTo(
-      el,
-      { y: `${driftVh}vh` },
-      {
-        y: `${-driftVh}vh`,
-        ease: "none",
-        scrollTrigger: {
-          trigger: el,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true,
-        },
+    // Drift up the whole way; pop to ~1.07× as the stamp crosses the middle
+    // of the viewport, then settle back to 1 as it leaves.
+    const tl = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: {
+        trigger: el,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 0.4,
       },
-    );
+    });
+    tl.fromTo(el, { y: `${driftVh}vh` }, { y: `${-driftVh}vh`, duration: 1 }, 0)
+      .fromTo(el, { scale: 1 }, { scale: 1.07, duration: 0.5, ease: "power1.out" }, 0)
+      .to(el, { scale: 1, duration: 0.5, ease: "power1.in" }, 0.5);
 
     return () => {
-      tween.scrollTrigger?.kill();
-      tween.kill();
+      tl.scrollTrigger?.kill();
+      tl.kill();
     };
   }, [driftVh]);
 

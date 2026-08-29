@@ -348,9 +348,34 @@ export default function ContributorsSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScroll, setCanScroll] = useState({ left: false, right: true });
 
-  // The vertical wheel is deliberately NOT captured: the reel moves with the
-  // arrows, swipe, or a horizontal trackpad gesture, so the page itself keeps
-  // scrolling as one continuous surface.
+  // Vertical wheel drives the reel sideways while it still has somewhere to
+  // go; once it reaches either end the gesture is handed back to the page so
+  // scrolling continues downward (or upward) naturally.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+
+      const raw = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (raw === 0) return;
+      // deltaMode 1 = lines, 2 = pages — normalise to pixels.
+      const delta = e.deltaMode === 1 ? raw * 16 : e.deltaMode === 2 ? raw * el.clientWidth : raw;
+
+      const atStart = el.scrollLeft <= 0 && delta < 0;
+      const atEnd = el.scrollLeft >= maxScroll - 1 && delta > 0;
+      if (atStart || atEnd) return;
+
+      e.preventDefault();
+      el.scrollLeft = Math.max(0, Math.min(maxScroll, el.scrollLeft + delta));
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
