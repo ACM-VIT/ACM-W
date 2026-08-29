@@ -75,8 +75,11 @@ export default function Footer() {
   const wheelLockRef = useRef(false);
   const totalPages = Math.ceil(galleryPhotos.length / CARDS_PER_PAGE);
 
+  // Direction-aware, like the intro: paging forward (scroll down) glides
+  // smoothly; paging backward (scroll up) jumps to the previous page as a
+  // single instant frame instead of animating in reverse.
   const scrollToPage = useCallback(
-    (page: number) => {
+    (page: number, behavior: ScrollBehavior = "smooth") => {
       const container = containerRef.current;
       if (!container) return;
       const boundedPage = Math.min(Math.max(page, 0), totalPages - 1);
@@ -92,7 +95,7 @@ export default function Footer() {
       const targetScroll = boundedPage * (cardWidth * CARDS_PER_PAGE + gap * (CARDS_PER_PAGE - 1));
       container.scrollTo({
         left: targetScroll,
-        behavior: "smooth",
+        behavior,
       });
       setCurrentPage(boundedPage);
     },
@@ -133,6 +136,8 @@ export default function Footer() {
 
   // Vertical wheel turns three-card pages (1-3, 4-6, 7-9). At either end the
   // gesture is handed back to the page so it keeps scrolling past the gallery.
+  // Scrolling down plays the next page in smoothly; scrolling up steps one
+  // page leftwards as an instant frame.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -144,16 +149,17 @@ export default function Footer() {
       // Ignore trackpad drift so a stray pixel can't flip a page.
       if (Math.abs(delta) < 8) return;
 
-      const nextPage = currentPage + (delta > 0 ? 1 : -1);
+      const forward = delta > 0;
+      const nextPage = currentPage + (forward ? 1 : -1);
       if (nextPage < 0 || nextPage >= totalPages) return;
 
       e.preventDefault();
       if (wheelLockRef.current) return;
       wheelLockRef.current = true;
-      scrollToPage(nextPage);
+      scrollToPage(nextPage, forward ? "smooth" : "auto");
       window.setTimeout(() => {
         wheelLockRef.current = false;
-      }, 650);
+      }, forward ? 650 : 250);
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });

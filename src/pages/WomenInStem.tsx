@@ -147,6 +147,21 @@ const CAM_ZOOM_Z = 1.3;
  * scientist N zooms back out by 0.72, and scientist N+1 only starts rotating
  * at its own 0.16 — which is N's 0.775.
  */
+/*
+ * ─── Direction-aware playback ───
+ *
+ * Same trick as the intro: scrolling down "plays the video" — the timeline is
+ * eased smoothly toward the scroll position, so the globe glides. Scrolling
+ * up never plays the timeline in reverse; instead the progress is snapped to
+ * a fixed frame grid and written directly, frame after frame, with no easing
+ * lag. Reverse playback is the case that gets expensive, and discrete frames
+ * are cheap and never fall behind the scroll.
+ */
+/** Smoothing window (seconds) while playing forward. */
+const FORWARD_SMOOTHING = 0.6;
+/** Frame grid for backward stepping — 120 frames per scene. */
+const REVERSE_FRAME_STEP = 1 / 120;
+
 const T = {
   rotateStart: 0.16,
   rotateDur: 0.22,
@@ -189,6 +204,8 @@ export default function WomenInStem() {
 
     const matchMedia = gsap.matchMedia();
 
+    const cleanups: Array<() => void> = [];
+
     const setupScientistTimelines = (mobile: boolean) => {
       const sections = gsap.utils.toArray<HTMLElement>(".scientist-section", root);
 
@@ -229,15 +246,9 @@ export default function WomenInStem() {
           y: 0,
         });
 
-        const tl = gsap.timeline({
-          defaults: { ease: "none" },
-          scrollTrigger: {
-            trigger: section,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.6,
-          },
-        });
+        // Paused and driven by hand from the ScrollTrigger below, rather than
+        // via `scrub`, so forward and backward can use different playback.
+        const tl = gsap.timeline({ defaults: { ease: "none" }, paused: true });
 
         /* Spin + tilt the globe onto the country, and push the camera in. */
         tl.to(
@@ -319,16 +330,60 @@ export default function WomenInStem() {
         }
 
         // Every scene must be exactly one progress unit long, otherwise the
-        // scrub maps the section's scroll range to the wrong span.
+        // scroll range maps to the wrong span.
         tl.set({}, {}, 1);
+
+        let forwardTween: gsap.core.Tween | null = null;
+        const snapFrame = (p: number) =>
+          Math.round(p / REVERSE_FRAME_STEP) * REVERSE_FRAME_STEP;
+
+        const trigger = ScrollTrigger.create({
+          trigger: section,
+          start: "top bottom",
+          end: "bottom top",
+          onUpdate(self) {
+            const target = self.progress;
+            if (self.direction === 1) {
+              /* Scrolling down → play forward, smoothly. */
+              forwardTween = gsap.to(tl, {
+                progress: target,
+                duration: FORWARD_SMOOTHING,
+                ease: "power1.out",
+                overwrite: true,
+              });
+            } else {
+              /* Scrolling up → step back frame by frame, no easing. */
+              forwardTween?.kill();
+              forwardTween = null;
+              tl.progress(snapFrame(target));
+            }
+          },
+          onRefresh(self) {
+            forwardTween?.kill();
+            forwardTween = null;
+            tl.progress(self.progress);
+          },
+        });
+
+        cleanups.push(() => {
+          forwardTween?.kill();
+          trigger.kill();
+          tl.kill();
+        });
       });
+    };
+
+    const runCleanups = () => {
+      cleanups.splice(0).forEach((fn) => fn());
     };
 
     matchMedia.add("(min-width: 48.0625rem)", () => {
       setupScientistTimelines(false);
+      return runCleanups;
     });
     matchMedia.add("(max-width: 48rem)", () => {
       setupScientistTimelines(true);
+      return runCleanups;
     });
 
     return () => {

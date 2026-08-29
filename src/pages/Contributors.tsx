@@ -344,6 +344,11 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
   );
 }
 
+/** One card (200px) plus the 24px gap. */
+const CARD_STRIDE = 224;
+/** Debounce between backward frame steps so a trackpad flick moves one card. */
+const REVERSE_STEP_MS = 180;
+
 export default function ContributorsSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScroll, setCanScroll] = useState({ left: false, right: true });
@@ -351,9 +356,17 @@ export default function ContributorsSection() {
   // Vertical wheel drives the reel sideways while it still has somewhere to
   // go; once it reaches either end the gesture is handed back to the page so
   // scrolling continues downward (or upward) naturally.
+  //
+  // Playback is direction-aware, like the intro: scrolling down "plays" the
+  // reel rightwards as a continuous, pixel-for-pixel motion. Scrolling up
+  // moves it leftwards frame by frame — one card per gesture, snapped to the
+  // card grid and written instantly, never a smooth reverse.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+
+    let stepLock = false;
+    let stepTimer: number | null = null;
 
     const onWheel = (e: WheelEvent) => {
       const maxScroll = el.scrollWidth - el.clientWidth;
@@ -369,11 +382,28 @@ export default function ContributorsSection() {
       if (atStart || atEnd) return;
 
       e.preventDefault();
-      el.scrollLeft = Math.max(0, Math.min(maxScroll, el.scrollLeft + delta));
+
+      if (delta > 0) {
+        /* Scrolling down → play forward, continuously. */
+        el.scrollLeft = Math.min(maxScroll, el.scrollLeft + delta);
+        return;
+      }
+
+      /* Scrolling up → one frame (card) leftwards per gesture. */
+      if (stepLock) return;
+      stepLock = true;
+      const prevCard = Math.ceil(el.scrollLeft / CARD_STRIDE) - 1;
+      el.scrollLeft = Math.max(0, prevCard * CARD_STRIDE);
+      stepTimer = window.setTimeout(() => {
+        stepLock = false;
+      }, REVERSE_STEP_MS);
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      if (stepTimer !== null) window.clearTimeout(stepTimer);
+    };
   }, []);
 
   useEffect(() => {
@@ -403,8 +433,8 @@ export default function ContributorsSection() {
   const scrollByCards = (dir: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    // One card (200px) plus the 24px gap, two at a time.
-    el.scrollBy({ left: dir * 224 * 2, behavior: "smooth" });
+    // Two cards at a time.
+    el.scrollBy({ left: dir * CARD_STRIDE * 2, behavior: "smooth" });
   };
 
   return (
