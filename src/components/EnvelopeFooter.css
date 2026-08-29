@@ -12,10 +12,13 @@
   overflow: visible;
 }
 
-/* The pinned inner container — stays on screen during scroll */
+/* The inner container sticks to the top of the viewport for the whole
+   600vh section natively — no GSAP pin, no pin-spacer, no refresh reflow. */
 .scroll-section__pin-container {
+  position: sticky;
+  top: 0;
   width: 100%;
-  height: 100vh;
+  height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -112,6 +115,9 @@
   display: block;
   width: 100%;
   height: auto;
+  /* Native size of envelopeInterior.png — reserves the wrapper's height
+     before the image arrives so nothing measures 0px on a cold load. */
+  aspect-ratio: 531 / 271;
   z-index: 2;
   transform: translateZ(-10px);
   backface-visibility: hidden;
@@ -149,6 +155,9 @@
   display: block;
   width: 100%;
   height: auto;
+  /* Native size of brownCard.png — keeps the form overlay's box stable
+     before the image has loaded. */
+  aspect-ratio: 1400 / 995;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(74, 16, 16, 0.2);

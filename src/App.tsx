@@ -57,9 +57,19 @@ function GlobalNavbar() {
   );
 }
 
+/*
+ * One continuous document. Every section sits in normal flow with no
+ * z-index stacking and no GSAP pinning, so the page height is final on
+ * first paint and nothing slides over anything else. The two scroll-driven
+ * scenes (the globe and the envelope) use native `position: sticky`
+ * inside their own sections instead of pin-spacers.
+ *
+ * `overflow-x: clip` (not `hidden`) is load-bearing: `hidden` would turn
+ * <main> into a scroll container and break every sticky descendant.
+ */
 export default function App() {
   return (
-    <main className="relative overflow-x-hidden bg-[#fff9e9]">
+    <main className="site-main relative bg-[#fff9e9]">
       <GlobalNavbar />
       <MobileEnvelopeNavbar />
 
@@ -67,57 +77,41 @@ export default function App() {
         <PostcardLoader />
       </section>
 
-      <section id="about" style={{ position: "relative", zIndex: 20 }}>
+      <section id="about">
         <About />
       </section>
 
-      <section id="events" style={{ position: "relative", zIndex: 20 }}>
+      <section id="events">
         <Events />
       </section>
 
-      <section id="best-chapter" style={{ position: "relative", zIndex: 20, overflow: "visible" }}>
+      <section id="best-chapter">
         <BestChapter />
       </section>
 
-      <section id="blogs" style={{ position: "relative", zIndex: 20 }}>
+      <section id="blogs">
         <BlogStamps />
       </section>
 
-      <section id="title-card-section" style={{ position: "relative", zIndex: 15 }}>
+      <section id="title-card-section">
         <TitleCard />
       </section>
 
-      <section
-        id="women-in-stem"
-        style={{ position: "relative", zIndex: 10, background: "#fff9e9" }}
-      >
+      <section id="women-in-stem">
         <WomenInStem />
       </section>
 
-      {/* Higher z-index than women-in-stem so TeamPage always renders on top */}
-      <section id="team" style={{ position: "relative", zIndex: 20 }}>
+      <section id="team">
         <TeamPage />
       </section>
 
-      <section
-        id="contributors"
-        style={{
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
+      <section id="contributors">
         <ContributorsSection />
       </section>
 
-        <Footer />
-        
-      <section
-        id="envelope-footer"
-        style={{
-          position: "relative",
-          zIndex: 0,
-        }}
-      >
+      <Footer />
+
+      <section id="envelope-footer">
         <EnvelopeFooter />
       </section>
     </main>

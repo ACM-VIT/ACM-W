@@ -19,7 +19,13 @@ const pageStart = (page: number) =>
   Math.min(page * PAGE_SIZE, Math.max(0, blogs.length - PAGE_SIZE));
 
 function BlogStampsDesktop() {
-  const [viewport, setViewport] = useState({ w: 1200, h: 800 });
+  // Seeded from the real viewport so the first layout pass is already
+  // correct instead of laying out for 1200×800 and jumping a frame later.
+  const [viewport, setViewport] = useState(() =>
+    typeof window === "undefined"
+      ? { w: 1200, h: 800 }
+      : { w: window.innerWidth, h: window.innerHeight }
+  );
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
   const [page, setPage] = useState(0);
@@ -301,8 +307,8 @@ function BlogStampsDesktop() {
     <div
       style={{
         width: "100%",
-        minHeight: "100vh",
-        height: "100vh",
+        minHeight: "100svh",
+        height: "100svh",
         background: "#FFF9E9",
         fontFamily: "'Georgia', serif",
         position: "relative",

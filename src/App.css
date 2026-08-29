@@ -118,11 +118,6 @@
   background: #580a0a;
 }
 
-.globe-fixed-container {
-  visibility: hidden;
-  pointer-events: none;
-}
-
 .desktop-envelope-menu-shell {
   width: clamp(10.75rem, 20vw, 14rem);
 }

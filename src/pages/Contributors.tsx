@@ -3,6 +3,8 @@ import cardBg from "../assets/contributors/ContributorsPostcard.png";
 
 import githubIcon from "../assets/teams/github.png";
 import linkedinIcon from "../assets/teams/linkedin.png";
+import leftArr from "../assets/leftArr.png";
+import rightArr from "../assets/rightArr.png";
 import tamanna from "../assets/contributors/tamanna.png";
 import maitri from "../assets/contributors/maitri.png";
 import ishita from "../assets/contributors/ishita.png";
@@ -215,6 +217,8 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
               <img
                 src={imageMap[contributor.imageSrc]}
                 alt={contributor.name}
+                loading="lazy"
+                decoding="async"
                 style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
               />
             </div>
@@ -342,33 +346,41 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
 
 export default function ContributorsSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScroll, setCanScroll] = useState({ left: false, right: true });
 
+  // The vertical wheel is deliberately NOT captured: the reel moves with the
+  // arrows, swipe, or a horizontal trackpad gesture, so the page itself keeps
+  // scrolling as one continuous surface.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const onWheel = (e: WheelEvent) => {
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return;
-
-      // Vertical wheel drives the horizontal reel; horizontal input still works.
-      const raw = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (raw === 0) return;
-      // deltaMode 1 = lines, 2 = pages — normalise to pixels.
-      const delta = e.deltaMode === 1 ? raw * 16 : e.deltaMode === 2 ? raw * el.clientWidth : raw;
-
-      // Hand the gesture back to the page once the reel bottoms out.
-      const atStart = el.scrollLeft <= 0 && delta < 0;
-      const atEnd = el.scrollLeft >= maxScroll - 1 && delta > 0;
-      if (atStart || atEnd) return;
-
-      e.preventDefault();
-      el.scrollLeft = Math.max(0, Math.min(maxScroll, el.scrollLeft + delta));
+    let frame: number | null = null;
+    const update = () => {
+      frame = null;
+      const max = el.scrollWidth - el.clientWidth;
+      setCanScroll({ left: el.scrollLeft > 1, right: el.scrollLeft < max - 1 });
+    };
+    const schedule = () => {
+      if (frame === null) frame = requestAnimationFrame(update);
     };
 
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    update();
+    el.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      el.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
   }, []);
+
+  const scrollByCards = (dir: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    // One card (200px) plus the 24px gap, two at a time.
+    el.scrollBy({ left: dir * 224 * 2, behavior: "smooth" });
+  };
 
   return (
     <section className="relative w-full overflow-hidden bg-[#B49880] py-16 sm:py-20">
@@ -406,10 +418,41 @@ export default function ContributorsSection() {
             ))}
           </div>
         </div>
+
+        <div style={{ display: "flex", gap: 16, marginTop: 8, alignItems: "center" }}>
+          <button
+            type="button"
+            onClick={() => scrollByCards(-1)}
+            disabled={!canScroll.left}
+            aria-label="Previous contributors"
+            style={{ ...reelArrowStyle, opacity: canScroll.left ? 1 : 0.3 }}
+          >
+            <img src={leftArr} alt="" style={{ width: "1.25rem", aspectRatio: "1 / 1", display: "block" }} />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollByCards(1)}
+            disabled={!canScroll.right}
+            aria-label="Next contributors"
+            style={{ ...reelArrowStyle, opacity: canScroll.right ? 1 : 0.3 }}
+          >
+            <img src={rightArr} alt="" style={{ width: "1.25rem", aspectRatio: "1 / 1", display: "block" }} />
+          </button>
+        </div>
       </div>
     </section>
   );
 }
+
+const reelArrowStyle: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  padding: "0.5rem",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "opacity 0.2s ease",
+};
 
 const faceBase: React.CSSProperties = {
   position: "absolute",

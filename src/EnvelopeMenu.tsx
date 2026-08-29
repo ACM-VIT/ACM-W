@@ -157,51 +157,11 @@ export default function EnvelopeMenu() {
                   const target = document.querySelector(card.link);
                   if (target) {
                     e.preventDefault();
-
-                    // For women-in-stem: pre-show the globe BEFORE scrolling so
-                    // Three.js renders frames during the animation instead of
-                    // only appearing after landing (which caused the load delay).
-                    if (card.link === '#women-in-stem') {
-                      const globeEl = document.querySelector('.globe-fixed-container') as HTMLElement | null;
-                      if (globeEl) {
-                        globeEl.style.visibility = 'visible';
-                        globeEl.style.pointerEvents = 'none';
-                      }
-                    }
-
-                    // TitleCard reveals via a ScrollTrigger onEnter that only
-                    // fires once the scroll crosses PAST its pin start; landing
-                    // exactly on the start leaves its content at opacity 0 (a
-                    // blank screen). Land a hair past it so the reveal plays.
-                    const pastPinStart = card.link === '#title-card-section' ? 24 : 0;
-                    const top =
-                      target.getBoundingClientRect().top + window.scrollY + pastPinStart;
+                    // Nothing on the page is pinned any more, so a plain
+                    // smooth scroll lands exactly on the section — every
+                    // scroll-driven animation is a scrub and catches up on its own.
+                    const top = target.getBoundingClientRect().top + window.scrollY;
                     window.scrollTo({ top, behavior: 'smooth' });
-
-                    // After the smooth scroll settles, force ScrollTrigger to
-                    // re-evaluate all scroll-position callbacks (e.g. globe hide/show).
-                    const refreshAfterScroll = () => {
-                      ScrollTrigger.refresh();
-
-                      // ScrollTrigger's onRefresh uses end:"max" so it reports
-                      // isActive=true for any scroll position past women-in-stem,
-                      // which would wrongly show the globe on Team/Contributors.
-                      // Override it immediately after refresh (synchronous, so this
-                      // runs after all onRefresh callbacks have fired).
-                      const globeEl = document.querySelector('.globe-fixed-container') as HTMLElement | null;
-                      if (globeEl && card.link !== '#women-in-stem') {
-                        globeEl.style.visibility = 'hidden';
-                        globeEl.style.pointerEvents = 'none';
-                      }
-                    };
-
-                    if ('onscrollend' in window) {
-                      // Modern browsers: wait for scroll to fully stop
-                      window.addEventListener('scrollend', refreshAfterScroll, { once: true });
-                    } else {
-                      // Fallback: give the smooth scroll ~600ms to land
-                      setTimeout(refreshAfterScroll, 600);
-                    }
                   }
                 }}
                 // No transition-* here: GSAP writes `transform` every frame, and a

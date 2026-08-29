@@ -57,7 +57,7 @@ function TextBlock({ flip = false }: { flip?: boolean }) {
 }
 
 /**
- * TitleCard — Scroll-pinned full-screen reveal between Blogs and WomenInStem.
+ * TitleCard — full-screen title between Blogs and WomenInStem.
  *
  * Composition (top-left AND bottom-right):
  *   ┌─────────┬────┐
@@ -66,8 +66,12 @@ function TextBlock({ flip = false }: { flip?: boolean }) {
  *   │ STEM    │    │
  *   └─────────┴────┘
  *
- * Both blocks drift slowly leftward.
- * Globe stays fixed centre (z:10).
+ * It is a plain 100svh section in document flow — nothing is pinned. One
+ * scrubbed timeline runs while the section crosses the viewport: the text
+ * and globe fade up as it enters, and the two text blocks drift apart for
+ * the whole pass. Because it's a scrub there is no "onEnter" moment to miss:
+ * land anywhere on it (nav, reload, back button) and it's already in the
+ * right state.
  */
 export default function TitleCard() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -77,57 +81,39 @@ export default function TitleCard() {
   const globeRef = useRef<Globe3DHandle>(null);
 
   useEffect(() => {
-    const section = sectionRef.current!;
-    const topBlock = topBlockRef.current!;
-    const botBlock = botBlockRef.current!;
-    const globeWrap = globeWrapRef.current!;
+    const section = sectionRef.current;
+    const topBlock = topBlockRef.current;
+    const botBlock = botBlockRef.current;
+    const globeWrap = globeWrapRef.current;
+    if (!section || !topBlock || !botBlock || !globeWrap) return;
 
-    /* ── Initial hidden states ── */
-    gsap.set(topBlock, { opacity: 0 });
-    gsap.set(botBlock, { opacity: 0 });
-    gsap.set(globeWrap, { opacity: 0, scale: 0.80 });
-
-    /* ── Reveal timeline ── */
-    const revealTl = gsap.timeline({ paused: true });
-    revealTl
-      .to(topBlock, { opacity: 1, duration: 1.0, ease: "power3.out" }, 0.1)
-      .to(botBlock, { opacity: 1, duration: 1.0, ease: "power3.out" }, 0.35)
-      .to(globeWrap, { opacity: 1, scale: 1, duration: 1.3, ease: "back.out(1.5)" }, 0.65);
-
-    /* ── ScrollTrigger pin & scrubbed drift ── */
-    const pinDuration = window.innerHeight * 2.0;
-
-    const scrubTl = gsap.timeline({
+    // Progress 0 → section top at viewport bottom; 1 → section bottom at
+    // viewport top; 0.5 → section exactly filling the viewport.
+    const tl = gsap.timeline({
+      defaults: { ease: "none" },
       scrollTrigger: {
         trigger: section,
-        start: "top top",
-        end: `+=${pinDuration}`,
-        pin: true,
-        pinSpacing: true,
-        anticipatePin: 1,
-        scrub: 1.5,
-        onEnter: () => {
-          revealTl.play(0);
-        },
-        onLeaveBack: () => {
-          revealTl.pause(0);
-          gsap.set(topBlock, { opacity: 0 });
-          gsap.set(botBlock, { opacity: 0 });
-          gsap.set(globeWrap, { opacity: 0, scale: 0.80 });
-        },
-      }
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 0.6,
+      },
     });
 
-    // Animate text drifting outwards as user scrolls through the pin
-    scrubTl.to(topBlock, { x: "18vw", ease: "none" }, 0);
-    scrubTl.to(botBlock, { x: "-18vw", ease: "none" }, 0);
+    tl.fromTo(topBlock, { opacity: 0 }, { opacity: 1, duration: 0.22, ease: "power2.out" }, 0.08)
+      .fromTo(botBlock, { opacity: 0 }, { opacity: 1, duration: 0.22, ease: "power2.out" }, 0.14)
+      .fromTo(
+        globeWrap,
+        { opacity: 0, scale: 0.8 },
+        { opacity: 1, scale: 1, duration: 0.26, ease: "power2.out" },
+        0.16,
+      )
+      // Slow drift apart across the entire pass.
+      .fromTo(topBlock, { x: "-6vw" }, { x: "12vw", duration: 1 }, 0)
+      .fromTo(botBlock, { x: "6vw" }, { x: "-12vw", duration: 1 }, 0);
 
     return () => {
-      revealTl.kill();
-      scrubTl.kill();
-      ScrollTrigger.getAll()
-        .filter((t) => t.vars.trigger === section)
-        .forEach((t) => t.kill());
+      tl.scrollTrigger?.kill();
+      tl.kill();
     };
   }, []);
 
@@ -138,7 +124,7 @@ export default function TitleCard() {
       style={{
         position: "relative",
         width: "100%",
-        height: "100vh",
+        height: "100svh",
         overflow: "hidden",
         background: "#FFF9E9",
       }}
@@ -183,6 +169,8 @@ export default function TitleCard() {
           pointerEvents: "none",
           /* bleed left slightly so the composition touches the edge */
           marginLeft: "-1vw",
+          opacity: 0,
+          willChange: "transform, opacity",
         }}
       >
         <TextBlock flip={false} />
@@ -199,34 +187,43 @@ export default function TitleCard() {
           userSelect: "none",
           pointerEvents: "none",
           marginRight: "-1vw",
+          opacity: 0,
+          willChange: "transform, opacity",
         }}
       >
         <TextBlock flip={false} />
       </div>
 
-      {/* ── Globe — centred, in front of both blocks (z:10) ── */}
+      {/* ── Globe — centred, in front of both blocks ── */}
       <div
-        ref={globeWrapRef}
         style={{
           position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
+          inset: 0,
+          display: "grid",
+          placeItems: "center",
           zIndex: 10,
           pointerEvents: "none",
-          filter: "drop-shadow(0 10px 52px rgba(90,10,16,0.22))",
         }}
       >
-        <Globe3D
-          ref={globeRef}
-          size={GLOBE_SIZE}
-          lineColor="#5d0f14"
-          sphereColor="#fdf6e3"
-          rotationSpeed={0.003}
-          initialRotX={0.2}
-          initialRotY={0.6}
-          enableDrag={false}
-        />
+        <div
+          ref={globeWrapRef}
+          style={{
+            opacity: 0,
+            filter: "drop-shadow(0 10px 52px rgba(90,10,16,0.22))",
+            willChange: "transform, opacity",
+          }}
+        >
+          <Globe3D
+            ref={globeRef}
+            size={GLOBE_SIZE}
+            lineColor="#5d0f14"
+            sphereColor="#fdf6e3"
+            rotationSpeed={0.003}
+            initialRotX={0.2}
+            initialRotY={0.6}
+            enableDrag={false}
+          />
+        </div>
       </div>
     </div>
   );

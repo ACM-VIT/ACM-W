@@ -9,6 +9,8 @@ import framePinkClean from "../assets/footer/frame-pink-clean.png";
 import frameNavyClean from "../assets/footer/frame-navy-clean.png";
 import doodleLighthouse from "../assets/footer/doodle-lighthouse.png";
 import doodleBalloon from "../assets/footer/doodle-balloon.png";
+import leftArr from "../assets/leftArr.png";
+import rightArr from "../assets/rightArr.png";
 
 // Gallery photos — dynamically import the first 9 photos from the gallery folder.
 const photoModules = import.meta.glob<{ default: string }>(
@@ -70,7 +72,6 @@ const CARDS_PER_PAGE = 3;
 export default function Footer() {
   const [currentPage, setCurrentPage] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const wheelLockRef = useRef(false);
   const totalPages = Math.ceil(galleryPhotos.length / CARDS_PER_PAGE);
 
   const scrollToPage = useCallback(
@@ -129,35 +130,9 @@ export default function Footer() {
     };
   }, [totalPages]);
 
-  // Wheel moves through three-card pages: 1-3, then 4-6, then 7-9.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const onWheel = (e: WheelEvent) => {
-      // Vertical wheel turns the pages; horizontal input still works.
-      const raw = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      // deltaMode 1 = lines, 2 = pages — normalise to pixels.
-      const delta = e.deltaMode === 1 ? raw * 16 : e.deltaMode === 2 ? raw * el.clientWidth : raw;
-      // Ignore trackpad drift so a stray pixel can't flip a page.
-      if (Math.abs(delta) < 8) return;
-
-      // Hand the gesture back to the page at either end of the gallery.
-      const nextPage = currentPage + (delta > 0 ? 1 : -1);
-      if (nextPage < 0 || nextPage >= totalPages) return;
-
-      e.preventDefault();
-      if (wheelLockRef.current) return;
-      wheelLockRef.current = true;
-      scrollToPage(nextPage);
-      window.setTimeout(() => {
-        wheelLockRef.current = false;
-      }, 650);
-    };
-
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [currentPage, scrollToPage, totalPages]);
+  // The vertical wheel is deliberately NOT captured here: the gallery pages
+  // via the dots, the arrows, swipe, or a horizontal trackpad gesture, so the
+  // page keeps scrolling as one continuous surface.
 
   return (
     <footer
@@ -346,8 +321,18 @@ export default function Footer() {
                flow, so the rule below the footer keeps its original position. */
             transform: "translateY(-0.75rem)",
             justifyContent: "center",
+            alignItems: "center",
           }}
         >
+          <button
+            type="button"
+            onClick={() => scrollToPage(currentPage - 1)}
+            disabled={currentPage === 0}
+            aria-label="Previous photos"
+            style={{ ...galleryArrowStyle, opacity: currentPage === 0 ? 0.3 : 1 }}
+          >
+            <img src={leftArr} alt="" style={{ width: "1.1rem", aspectRatio: "1 / 1", display: "block" }} />
+          </button>
           {Array.from({ length: totalPages }).map((_, i) => (
             <button
               key={i}
@@ -366,8 +351,31 @@ export default function Footer() {
               }}
             />
           ))}
+          <button
+            type="button"
+            onClick={() => scrollToPage(currentPage + 1)}
+            disabled={currentPage >= totalPages - 1}
+            aria-label="Next photos"
+            style={{
+              ...galleryArrowStyle,
+              opacity: currentPage >= totalPages - 1 ? 0.3 : 1,
+            }}
+          >
+            <img src={rightArr} alt="" style={{ width: "1.1rem", aspectRatio: "1 / 1", display: "block" }} />
+          </button>
         </div>
       </div>
     </footer>
   );
 }
+
+const galleryArrowStyle: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  padding: "0.5rem",
+  margin: "0 0.25rem",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "opacity 0.2s ease",
+};

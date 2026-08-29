@@ -31,12 +31,16 @@ export default function ProfileCard({
       style={{ backgroundImage: `url(${cardBg})` }}
     >
       <div className="relative flex h-full w-full items-stretch">
-        <div className="flex w-1/2 items-center justify-center pr-3">
-          <div className="h-full w-full">
+        <div className="flex w-1/2 items-stretch justify-center pr-3">
+          {/* The photo is absolutely positioned so its intrinsic size can never
+              push the card taller than its aspect-ratio box once it decodes. */}
+          <div className="relative w-full overflow-hidden">
             <img
-              className="h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
               src={imageSrc}
               alt={name}
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
