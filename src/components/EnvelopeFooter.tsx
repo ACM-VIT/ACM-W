@@ -219,51 +219,32 @@ export default function EnvelopeFooter() {
     };
   }, []);
 
-  // ---- Scroll-tracking ref: defer GSAP init until the section is near ----
-  // On a cold page load, images haven't loaded yet so the envelope wrapper
-  // has ~0px height and ScrollTrigger calculates wrong positions. By waiting
-  // until the user scrolls near the section, images are decoded and the DOM
-  // has its true height. On HMR the images are cached so everything works
-  // instantly — that's why a file-save "fixes" it.
-  const [hasReachedSection, setHasReachedSection] = useState(false);
-  const scrollCheckRef = useRef<number | null>(null);
-
-  // Effect 1: Scroll listener — checks if the section is approaching
+  // The timeline's pixel values are scaled by the wrapper's width, so the
+  // whole GSAP context is torn down and rebuilt whenever that width changes
+  // (e.g. a desktop -> mobile resize or an orientation change). Width is
+  // tracked in state so the effect below simply re-runs.
+  const [wrapperWidth, setWrapperWidth] = useState(0);
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const checkScroll = () => {
-      scrollCheckRef.current = null;
-      const rect = section.getBoundingClientRect();
-      // Fire when the section top is within 2 viewport heights of view
-      if (rect.top < window.innerHeight * 2) {
-        setHasReachedSection(true);
-      }
-    };
-
-    const onScroll = () => {
-      if (scrollCheckRef.current === null) {
-        scrollCheckRef.current = requestAnimationFrame(checkScroll);
-      }
-    };
-
-    // Check immediately in case the page loaded scrolled down
-    checkScroll();
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      if (scrollCheckRef.current !== null) {
-        cancelAnimationFrame(scrollCheckRef.current);
-      }
-    };
+    const envelopeWrapper = envelopeWrapperRef.current;
+    if (!envelopeWrapper) return;
+    const measure = () =>
+      setWrapperWidth(Math.round(envelopeWrapper.getBoundingClientRect().width));
+    measure();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', measure);
+      return () => window.removeEventListener('resize', measure);
+    }
+    const ro = new ResizeObserver(measure);
+    ro.observe(envelopeWrapper);
+    return () => ro.disconnect();
   }, []);
 
-  // Effect 2: Build GSAP timeline once the section is in scroll range
+  // Build the scroll-driven timeline on mount. The envelope's in-flow image
+  // (.envelope-interior) and the contact card reserve their aspect-ratio in
+  // CSS, so the wrapper has its true height before any image has loaded and
+  // ScrollTrigger measures the right thing straight away — no deferred init,
+  // no mid-scroll ScrollTrigger.refresh() reflowing the page.
   useEffect(() => {
-    if (!hasReachedSection) return;
-
     const section = sectionRef.current;
     const pinContainer = pinContainerRef.current;
     const envelopeWrapper = envelopeWrapperRef.current;
@@ -285,9 +266,9 @@ export default function EnvelopeFooter() {
       // ---- Responsive value scaling ----
       // The animation was designed for a 600px-wide envelope. On mobile
       // the wrapper is ~300px, so all pixel-based GSAP values must scale
-      // proportionally. We compute a ratio once at init time.
-      const wrapperWidth = envelopeWrapper.getBoundingClientRect().width || 600;
-      const r = wrapperWidth / 600; // 1.0 on desktop, ~0.5 on mobile
+      // proportionally. The ratio is rebuilt whenever the wrapper resizes.
+      const width = wrapperWidth || envelopeWrapper.getBoundingClientRect().width || 600;
+      const r = width / 600; // 1.0 on desktop, ~0.5 on mobile
 
       // ---- Initial state setup ----
 
@@ -348,16 +329,15 @@ export default function EnvelopeFooter() {
       gsap.set(envelopeWrapper, { rotateY: 0 });
 
       // ---- Master ScrollTrigger timeline ----
+      // The container is `position: sticky` (see .scroll-section__pin-container)
+      // so it stays on screen natively for the 600vh of the section; this
+      // trigger only scrubs the timeline against that scroll range.
       const tl = gsap.timeline({
-
         scrollTrigger: {
           trigger: section,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1.5,
-          pin: pinContainer,
-          pinSpacing: false,
-          anticipatePin: 1,
+          scrub: 0.8,
         },
       });
 
@@ -523,14 +503,14 @@ export default function EnvelopeFooter() {
       );
     }, section);
 
-    // Deferred refresh so ScrollTrigger recalculates with final layout
-    const rafId = requestAnimationFrame(() => ScrollTrigger.refresh());
+    // Rebuilding mid-page: make ScrollTrigger re-measure so the fresh
+    // timeline is scrubbed to the current scroll position immediately.
+    ScrollTrigger.refresh();
 
     return () => {
-      cancelAnimationFrame(rafId);
       ctx.revert();
     };
-  }, [hasReachedSection]);
+  }, [wrapperWidth]);
 
   return (
     <section ref={sectionRef} className="scroll-section" id="contact">
@@ -668,16 +648,14 @@ export default function EnvelopeFooter() {
               <div className="back-face__content">
                 <div className="back-face__text-block">
                   <div className="back-face__text-row">
-                    <span className="back-face__text">Made with</span>
+                    <span className="back-face__text">crafted with love by ACM-VIT</span>
                     <img
                       src={heartImg}
                       alt="heart"
                       className="back-face__heart"
                       draggable={false}
                     />
-                    <span className="back-face__text">by</span>
                   </div>
-                  <span className="back-face__text back-face__text--org">ACM-W VIT</span>
                 </div>
 
                 <div className="back-face__social-row">

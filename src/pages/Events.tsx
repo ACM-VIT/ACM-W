@@ -1,70 +1,49 @@
-import {
-  useId,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useId, useEffect, useRef, type ReactNode } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import neuralHack from "../assets/NeuralHack.png";
 import insipher from "../assets/Inspiher.svg";
 import C2C from "../assets/C2C.png";
 
-interface ParallaxState {
-  ref: React.RefObject<HTMLDivElement | null>;
-  offsetY: number;
-  opacity: number;
-  scale: number;
-}
+gsap.registerPlugin(ScrollTrigger);
 
-function useParallax(speed = 0.15): ParallaxState {
+/**
+ * Gentle scroll parallax on the stamp. Writes `transform` straight to the
+ * element from a scrubbed ScrollTrigger — no React state per scroll frame
+ * (which re-rendered the whole section) and no CSS transition on transform
+ * (which made the stamp lag a beat behind the page). `scrub: true` means it
+ * tracks the scrollbar exactly; the drift is only ever a few vh.
+ */
+function useParallax(driftVh = 5) {
   const ref = useRef<HTMLDivElement>(null);
 
-  const [state, setState] = useState({
-    offsetY: 0,
-    opacity: 1,
-    scale: 1,
-  });
-
   useEffect(() => {
-    let rafId: number | null = null;
+    const el = ref.current;
+    if (!el) return;
 
-    const update = () => {
-      rafId = null;
-      if (!ref.current) return;
-
-      const rect = ref.current.getBoundingClientRect();
-      const viewportCenter = window.innerHeight / 2;
-      const elementCenter = rect.top + rect.height / 2;
-
-      const distance = elementCenter - viewportCenter;
-      const normalized = distance / viewportCenter;
-
-      setState({
-        offsetY: -normalized * 3 * speed,
-        opacity: Math.max(0.65, 1 - Math.abs(normalized) * 0.35),
-        scale: 1 + (1 - Math.abs(normalized)) * 0.04,
-      });
-    };
-
-    const scheduleUpdate = () => {
-      if (rafId !== null) return;
-      rafId = window.requestAnimationFrame(update);
-    };
-
-    update();
-
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate);
+    // Drift up the whole way; pop to ~1.07× as the stamp crosses the middle
+    // of the viewport, then settle back to 1 as it leaves.
+    const tl = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: {
+        trigger: el,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 0.4,
+      },
+    });
+    tl.fromTo(el, { y: `${driftVh}vh` }, { y: `${-driftVh}vh`, duration: 1 }, 0)
+      .fromTo(el, { scale: 1 }, { scale: 1.07, duration: 0.5, ease: "power1.out" }, 0)
+      .to(el, { scale: 1, duration: 0.5, ease: "power1.in" }, 0.5);
 
     return () => {
-      window.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
-      if (rafId !== null) window.cancelAnimationFrame(rafId);
+      tl.scrollTrigger?.kill();
+      tl.kill();
     };
-  }, [speed]);
+  }, [driftVh]);
 
-  return { ref, ...state };
+  return ref;
 }
 
 function StampBorder({ children }: { children: ReactNode }) {
@@ -157,20 +136,12 @@ function StampBorder({ children }: { children: ReactNode }) {
 function EventStamp({
   logo,
   imageRotation = 0,
-  parallax,
 }: {
   logo: string;
   imageRotation?: number;
-  parallax: ParallaxState;
 }) {
   return (
-    <div
-      className="aspect-[820/600] w-full transition-[transform,opacity] duration-300 ease-out max-sm:aspect-[1.25]"
-      style={{
-        transform: `translateY(${parallax.offsetY}vh) scale(${parallax.scale})`,
-        opacity: parallax.opacity,
-      }}
-    >
+    <div className="aspect-[820/600] w-full max-sm:aspect-[1.25]">
       <StampBorder>
         <div className="flex h-full w-full items-center justify-center">
           <img
@@ -211,11 +182,11 @@ const events = [
 ];
 
 export default function EventsPage() {
-  const stamp1 = useParallax(0.12);
-  const stamp2 = useParallax(0.18);
-  const stamp3 = useParallax(0.14);
+  const stamp1 = useParallax(4);
+  const stamp2 = useParallax(6);
+  const stamp3 = useParallax(5);
 
-  const parallaxs = [stamp1, stamp2, stamp3];
+  const parallaxRefs = [stamp1, stamp2, stamp3];
 
   return (
     <div className="min-h-screen bg-[#fff9e9] px-6 py-16 max-sm:px-4 max-sm:py-10">
@@ -227,7 +198,7 @@ export default function EventsPage() {
         <div className="flex flex-col gap-16 max-[56.25rem]:gap-12 max-sm:gap-9">
           {events.map((event, index) => {
             const reverse = index % 2 === 1;
-            const parallax = parallaxs[index];
+            const parallaxRef = parallaxRefs[index];
 
             return (
               <section
@@ -239,21 +210,20 @@ export default function EventsPage() {
                 }`}
               >
                 <div
-                  ref={parallax.ref}
                   className={`flex justify-center ${
                     reverse ? "order-2 max-[56.25rem]:order-none" : ""
                   }`}
                 >
                   <div
+                    ref={parallaxRef}
                     className="w-full max-w-[min(50vw,45rem)] max-[56.25rem]:max-w-[min(86vw,38.75rem)]"
                     style={{
-                      transform: `rotate(${reverse ? 8 : -8}deg)`,
+                      rotate: `${reverse ? 8 : -8}deg`,
                     }}
                   >
                     <EventStamp
                       logo={event.logo}
                       imageRotation={event.rotation}
-                      parallax={parallax}
                     />
                   </div>
                 </div>

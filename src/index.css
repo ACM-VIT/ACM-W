@@ -1,28 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&display=swap');
 @import "tailwindcss";
 
+/* Fonts live in /public/fonts so index.html can preload them by a stable URL.
+   `font-display: block` holds text invisible for up to ~3s rather than
+   painting a fallback and then reflowing every heading when Kovanov lands —
+   with the preload that window is normally a few milliseconds. */
 @font-face {
   font-family: "Kovanov";
-  src: url("./assets/Kovanov-Regular.otf") format("opentype");
+  src: url("/fonts/Kovanov-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: block;
 }
 
 @font-face {
   font-family: "Kovanov";
-  src: url("./assets/Kovanov-Bold.ttf") format("truetype");
+  src: url("/fonts/Kovanov-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
-  font-display: swap;
+  font-display: block;
 }
 
 @font-face {
   font-family: "Quicksand";
-  src: url("./assets/Quicksand-Regular.ttf") format("truetype");
+  src: url("/fonts/Quicksand-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: block;
 }
 
 :root {
@@ -34,11 +37,21 @@
 
 html {
   cursor: url("./assets/feather-cursor.png") 4 4, auto;
+  /* Browser-native smooth scrolling for in-page anchors / nav. */
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
   margin: 0;
   background: #fff9e9;
+  /* On <body> this propagates to the viewport, so it does NOT create a
+     scroll container and sticky descendants keep working. */
   overflow-x: hidden;
   color: #580A0A;
   cursor: url("./assets/feather-cursor.png") 4 4, auto;
@@ -54,26 +67,51 @@ body {
   min-height: 100vh;
 }
 
-/* ─── Globe fixed container ─── */
-.globe-fixed-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
-  visibility: hidden;
-  pointer-events: auto;
+/* `clip` hides horizontal bleed without becoming a scroll container. */
+.site-main {
+  overflow-x: clip;
+}
+
+/* ─── Women in STEM: sticky globe ───
+   The globe is a sticky, full-viewport layer at the top of the section; the
+   negative bottom margin lets the scientist sections stack on top of it in
+   normal flow. No pinning, no fixed positioning, no visibility toggling —
+   it scrolls in with the section and out with it. */
+.women-in-stem {
+  position: relative;
+  overflow-x: clip;
+  background: #fff9e9;
+  color: #580a0a;
+}
+
+.globe-sticky-container {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100svh;
+  margin-bottom: -100svh;
+  pointer-events: none;
   will-change: opacity;
 }
 
+.globe-sticky-container > .globe-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
 @media (max-width: 48rem) {
-  .women-in-stem-globe-container {
-    top: 54%;
+  .globe-sticky-container {
+    /* Nudge the globe a touch lower so it clears the photo on phones. */
+    padding-top: 8svh;
   }
 }
 
-.globe-fixed-container > .globe-soft-edge,
-.globe-fixed-container canvas {
+.globe-sticky-container .globe-soft-edge,
+.globe-sticky-container canvas {
   width: min(58rem, 100vw, 100svh) !important;
   height: min(58rem, 100vw, 100svh) !important;
 }
@@ -83,8 +121,7 @@ body {
    radial gradient, NOT by masking the canvas. A mask on a large WebGL canvas
    pulls it off the compositor and forces a full re-raster on every change;
    this overlay only ever has its `opacity` animated, which stays on the GPU.
-   Alphas are the complement of the old mask's stops, so the result is
-   pixel-identical. Keep the colour in sync with the page background. */
+   Keep the colour in sync with the page background. */
 .globe-edge-fade {
   position: absolute;
   inset: 0;
@@ -100,6 +137,24 @@ body {
     rgba(255, 249, 233, 0.84) 91%,
     rgba(255, 249, 233, 1) 100%
   );
+}
+
+/* Each scientist is a 160svh block in document flow; its 100svh stage sticks
+   to the top of the viewport for the middle ~60svh so the scene holds still
+   while it's centred. Purely CSS — no pin-spacers, no layout shift. */
+.scientist-section {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 160svh;
+}
+
+.scientist-stage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
 }
 
 /* ─── Photo (no frame) ─── */
@@ -175,10 +230,6 @@ body {
     line-height: 1.2;
   }
 
-  .scientist-section {
-    overflow: hidden;
-  }
-
   .country-img {
     width: min(18.75rem, 75vw) !important;
   }
@@ -204,8 +255,8 @@ body {
     line-height: 1.6;
   }
 
-  .globe-fixed-container > .globe-soft-edge,
-  .globe-fixed-container canvas {
+  .globe-sticky-container .globe-soft-edge,
+  .globe-sticky-container canvas {
     width: min(36rem, 88vw, 88svh) !important;
     height: min(36rem, 88vw, 88svh) !important;
   }
@@ -238,8 +289,8 @@ body {
     width: min(15rem, 70vw) !important;
   }
 
-  .globe-fixed-container > .globe-soft-edge,
-  .globe-fixed-container canvas {
+  .globe-sticky-container .globe-soft-edge,
+  .globe-sticky-container canvas {
     width: min(26rem, 82vw, 82svh) !important;
     height: min(26rem, 82vw, 82svh) !important;
   }

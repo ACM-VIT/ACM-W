@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // Postcard frame PNGs — native landscape 276×216 (552×432 at 2×), no rotation needed.
 // The two doodled frames ship as a cleaned frame + a separate transparent doodle,
@@ -9,6 +11,8 @@ import framePinkClean from "../assets/footer/frame-pink-clean.png";
 import frameNavyClean from "../assets/footer/frame-navy-clean.png";
 import doodleLighthouse from "../assets/footer/doodle-lighthouse.png";
 import doodleBalloon from "../assets/footer/doodle-balloon.png";
+import leftArr from "../assets/leftArr.png";
+import rightArr from "../assets/rightArr.png";
 
 // Gallery photos — dynamically import the first 9 photos from the gallery folder.
 const photoModules = import.meta.glob<{ default: string }>(
@@ -67,10 +71,22 @@ const postcards = [
 
 const CARDS_PER_PAGE = 3;
 
+gsap.registerPlugin(ScrollTrigger);
+
+/**
+ * Fraction of the footer's viewport journey held still at each end so the
+ * first page is showing while the gallery scrolls into view, and the last
+ * page is showing while it scrolls out.
+ */
+const PAGE_LEAD = 0.2;
+
 export default function Footer() {
   const [currentPage, setCurrentPage] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const wheelLockRef = useRef(false);
+  const footerRef = useRef<HTMLElement>(null);
+  // Page chosen by the scroll position, and the dot/arrow adjustment on top.
+  const linkedPageRef = useRef(0);
+  const pageOffsetRef = useRef(0);
   const totalPages = Math.ceil(galleryPhotos.length / CARDS_PER_PAGE);
 
   const scrollToPage = useCallback(
@@ -129,38 +145,47 @@ export default function Footer() {
     };
   }, [totalPages]);
 
-  // Wheel moves through three-card pages: 1-3, then 4-6, then 7-9.
+  // Pages are scroll-linked rather than wheel-hijacked (wheel capture is
+  // patchy: a gesture already scrolling the page stays latched to the page).
+  // As the footer travels up the viewport the gallery pages rightwards;
+  // scrolling back pages it leftwards. Dots and arrows adjust an offset on
+  // top of the scroll-linked page so they keep working.
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
+    const footer = footerRef.current;
+    if (!footer) return;
 
-    const onWheel = (e: WheelEvent) => {
-      // Vertical wheel turns the pages; horizontal input still works.
-      const raw = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      // deltaMode 1 = lines, 2 = pages — normalise to pixels.
-      const delta = e.deltaMode === 1 ? raw * 16 : e.deltaMode === 2 ? raw * el.clientWidth : raw;
-      // Ignore trackpad drift so a stray pixel can't flip a page.
-      if (Math.abs(delta) < 8) return;
-
-      // Hand the gesture back to the page at either end of the gallery.
-      const nextPage = currentPage + (delta > 0 ? 1 : -1);
-      if (nextPage < 0 || nextPage >= totalPages) return;
-
-      e.preventDefault();
-      if (wheelLockRef.current) return;
-      wheelLockRef.current = true;
-      scrollToPage(nextPage);
-      window.setTimeout(() => {
-        wheelLockRef.current = false;
-      }, 650);
+    let lastPage = -1;
+    const apply = (progress: number) => {
+      const t = Math.min(1, Math.max(0, (progress - PAGE_LEAD) / (1 - PAGE_LEAD * 2)));
+      const linked = Math.min(totalPages - 1, Math.floor(t * totalPages));
+      linkedPageRef.current = linked;
+      const page = Math.min(Math.max(linked + pageOffsetRef.current, 0), totalPages - 1);
+      if (page !== lastPage) {
+        lastPage = page;
+        scrollToPage(page);
+      }
     };
 
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [currentPage, scrollToPage, totalPages]);
+    const trigger = ScrollTrigger.create({
+      trigger: footer,
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: (self) => apply(self.progress),
+      onRefresh: (self) => apply(self.progress),
+    });
+
+    return () => trigger.kill();
+  }, [scrollToPage, totalPages]);
+
+  const goToPage = (page: number) => {
+    const bounded = Math.min(Math.max(page, 0), totalPages - 1);
+    pageOffsetRef.current = bounded - linkedPageRef.current;
+    scrollToPage(bounded);
+  };
 
   return (
     <footer
+      ref={footerRef}
       style={{
         position: "relative",
         zIndex: 50,
@@ -346,12 +371,22 @@ export default function Footer() {
                flow, so the rule below the footer keeps its original position. */
             transform: "translateY(-0.75rem)",
             justifyContent: "center",
+            alignItems: "center",
           }}
         >
+          <button
+            type="button"
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 0}
+            aria-label="Previous photos"
+            style={{ ...galleryArrowStyle, opacity: currentPage === 0 ? 0.3 : 1 }}
+          >
+            <img src={leftArr} alt="" style={{ width: "1.1rem", aspectRatio: "1 / 1", display: "block" }} />
+          </button>
           {Array.from({ length: totalPages }).map((_, i) => (
             <button
               key={i}
-              onClick={() => scrollToPage(i)}
+              onClick={() => goToPage(i)}
               aria-label={`Go to page ${i + 1}`}
               style={{
                 width: currentPage === i ? "32px" : "10px",
@@ -366,8 +401,31 @@ export default function Footer() {
               }}
             />
           ))}
+          <button
+            type="button"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage >= totalPages - 1}
+            aria-label="Next photos"
+            style={{
+              ...galleryArrowStyle,
+              opacity: currentPage >= totalPages - 1 ? 0.3 : 1,
+            }}
+          >
+            <img src={rightArr} alt="" style={{ width: "1.1rem", aspectRatio: "1 / 1", display: "block" }} />
+          </button>
         </div>
       </div>
     </footer>
   );
 }
+
+const galleryArrowStyle: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  padding: "0.5rem",
+  margin: "0 0.25rem",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "opacity 0.2s ease",
+};

@@ -20,7 +20,7 @@ function AboutCardBody() {
 
 export default function About() {
   return (
-    <main className="about">
+    <div className="about">
       <div className="about_cards">
         <section className="about_section">
           <div className="about_card-wrap">
@@ -46,6 +46,6 @@ export default function About() {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   )
 }

@@ -127,310 +127,322 @@ const scientists: ScientistData[] = [
 const CAM_DEFAULT_Z = 3.0;
 /** Full zoom-in (close-up of a country region) */
 const CAM_ZOOM_Z = 1.3;
-/** Shorter pin distances keep the same animation beats but require less scroll. */
-const SCIENTIST_SCROLL_END = "+=180%";
-const LAST_SCIENTIST_SCROLL_END = "+=167%";
+
+/*
+ * ─── Scroll choreography ───
+ *
+ * Nothing here is pinned. The globe is a `position: sticky` layer at the top
+ * of the section (see .globe-sticky-container) and every scientist is a
+ * 160svh block in normal flow whose 100svh "stage" is itself sticky — so the
+ * page height is final on first paint, the document scrolls as one surface,
+ * and each scene simply holds still for ~60vh of scroll while it's centred.
+ *
+ * Each scientist has one timeline scrubbed from "top bottom" to "bottom top"
+ * of its 160svh block. In that progress space:
+ *   0.385 → block top hits viewport top (stage sticks)
+ *   0.615 → block bottom hits viewport bottom (stage releases)
+ * The stage is stationary between those two, which is where the content
+ * plateaus. The windows below are chosen so the globe hand-off between two
+ * adjacent scientists never has two timelines writing the camera at once:
+ * scientist N zooms back out by 0.72, and scientist N+1 only starts rotating
+ * at its own 0.16 — which is N's 0.775.
+ */
+/*
+ * ─── Direction-aware playback ───
+ *
+ * Same trick as the intro: scrolling down "plays the video" — the timeline is
+ * eased smoothly toward the scroll position, so the globe glides. Scrolling
+ * up never plays the timeline in reverse; instead the progress is snapped to
+ * a fixed frame grid and written directly, frame after frame, with no easing
+ * lag. Reverse playback is the case that gets expensive, and discrete frames
+ * are cheap and never fall behind the scroll.
+ */
+/** Smoothing window (seconds) while playing forward. */
+const FORWARD_SMOOTHING = 0.6;
+/** Frame grid for backward stepping — 120 frames per scene. */
+const REVERSE_FRAME_STEP = 1 / 120;
+
+const T = {
+  rotateStart: 0.16,
+  rotateDur: 0.22,
+  globeOutStart: 0.26,
+  globeOutDur: 0.12,
+  countryInStart: 0.3,
+  countryInDur: 0.1,
+  spreadStart: 0.37,
+  spreadDur: 0.09,
+  textStart: 0.42,
+  textDur: 0.08,
+  contentOutStart: 0.6,
+  contentOutDur: 0.08,
+  globeBackStart: 0.62,
+  globeBackDur: 0.1,
+} as const;
 
 /* ─── Component ─── */
 
 export default function WomenInStem() {
   const globeRef = useRef<Globe3DHandle>(null);
   const globeContainerRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let matchMedia: gsap.MatchMedia | undefined;
-    /* The scientist timelines live inside `matchMedia`, so revert() disposes
-       them. This one is created outside it and has to be killed by hand. */
-    let visibilityST: ScrollTrigger | undefined;
+    // Globe3D wires up `group`/`camera` in its own effect, and children's
+    // effects run before the parent's, so the handle is ready here.
+    const globe = globeRef.current;
+    const globeEl = globeContainerRef.current;
+    const root = rootRef.current;
+    if (!globe?.group || !globe?.camera || !globeEl || !root) return;
 
-    const timer = setTimeout(() => {
-      const globe = globeRef.current;
-      if (!globe?.group || !globe?.camera) return;
+    const group = globe.group;
+    const camera = globe.camera;
+    const globeEdgeFadeEl = globeEl.querySelector<HTMLElement>(".globe-edge-fade");
 
-      const group = globe.group;
-      const camera = globe.camera;
-      const globeEl = globeContainerRef.current;
-      const globeEdgeFadeEl = globeEl?.querySelector(
-        ".globe-edge-fade",
-      ) as HTMLElement | null;
-      if (!globeEl || !globeEdgeFadeEl) return;
+    /* The globe is fully scroll-driven — no idle auto-rotate phase. */
+    globe.setAutoRotate(false);
+    globe.setDragEnabled(false);
 
-      /* The feathered rim is a static gradient overlay; only its opacity moves,
-         so a scroll frame costs one compositor-level property write. (It used to
-         re-generate a mask-image on the canvas from four CSS variables per
-         frame, which re-rastered the whole globe layer every time.) */
-      let lastEdgeStrength = -1;
-      const clearGlobeSoftEdge = () => {
-        if (lastEdgeStrength === 0) return;
-        lastEdgeStrength = 0;
-        globeEdgeFadeEl.style.opacity = "0";
-      };
-      const setGlobeSoftEdge = (progress: number) => {
-        const fadeIn = gsap.utils.clamp(0, 1, (progress - 0.04) / 0.08);
-        const fadeOut = gsap.utils.clamp(0, 1, (0.28 - progress) / 0.08);
-        const rawStrength = Math.min(fadeIn, fadeOut);
-        const strength = rawStrength * rawStrength * (3 - 2 * rawStrength);
+    const matchMedia = gsap.matchMedia();
 
-        if (strength <= 0.001) {
-          clearGlobeSoftEdge();
-          return;
+    const cleanups: Array<() => void> = [];
+
+    const setupScientistTimelines = (mobile: boolean) => {
+      const sections = gsap.utils.toArray<HTMLElement>(".scientist-section", root);
+
+      sections.forEach((section, i) => {
+        const sci = scientists[i];
+        const isLast = i === sections.length - 1;
+
+        const { rotX: targetRotX, rotY: targetRotY, y: targetY } = lngLatToFocus(
+          sci.focus.lng,
+          sci.focus.lat,
+        );
+
+        const countryImg = section.querySelector<HTMLElement>(".country-img")!;
+        const photoFrame = section.querySelector<HTMLElement>(".photo-frame")!;
+        const textEl = section.querySelector<HTMLElement>(".scientist-text")!;
+
+        gsap.set(countryImg, {
+          xPercent: -50,
+          yPercent: -50,
+          opacity: 0,
+          scale: 0.3,
+          x: 0,
+          y: 0,
+        });
+        gsap.set(photoFrame, {
+          xPercent: -50,
+          yPercent: -50,
+          opacity: 0,
+          y: mobile ? "2vh" : "4vh",
+          x: 0,
+          rotation: sci.photoRotation,
+        });
+        gsap.set(textEl, {
+          yPercent: mobile ? 0 : -50,
+          xPercent: mobile ? -50 : 0,
+          opacity: 0,
+          x: mobile ? 0 : "4vw",
+          y: 0,
+        });
+
+        // Paused and driven by hand from the ScrollTrigger below, rather than
+        // via `scrub`, so forward and backward can use different playback.
+        const tl = gsap.timeline({ defaults: { ease: "none" }, paused: true });
+
+        /* Spin + tilt the globe onto the country, and push the camera in. */
+        tl.to(
+          group.rotation,
+          { y: targetRotY, x: targetRotX, duration: T.rotateDur, ease: "power2.inOut" },
+          T.rotateStart,
+        );
+        tl.to(
+          group.position,
+          { y: targetY, duration: T.rotateDur, ease: "power2.inOut" },
+          T.rotateStart,
+        );
+        tl.to(
+          camera.position,
+          { z: CAM_ZOOM_Z, duration: T.rotateDur, ease: "power2.in" },
+          T.rotateStart,
+        );
+        if (globeEdgeFadeEl) {
+          tl.to(globeEdgeFadeEl, { opacity: 1, duration: T.rotateDur * 0.6 }, T.rotateStart + 0.04);
         }
 
-        // Skip sub-perceptual writes so a stalled scrub doesn't churn styles.
-        if (Math.abs(strength - lastEdgeStrength) < 0.002) return;
-        lastEdgeStrength = strength;
-        globeEdgeFadeEl.style.opacity = strength.toFixed(3);
-      };
+        /* Globe dissolves into the country silhouette. */
+        tl.to(globeEl, { opacity: 0, duration: T.globeOutDur, ease: "power1.inOut" }, T.globeOutStart);
+        tl.to(
+          countryImg,
+          {
+            opacity: mobile ? 0.55 : 0.3,
+            scale: mobile ? 0.85 : 1,
+            duration: T.countryInDur,
+            ease: "power1.out",
+          },
+          T.countryInStart,
+        );
 
-      /* The globe is fully scroll-driven — no idle auto-rotate phase. */
-      globe.setAutoRotate(false);
-      globe.setDragEnabled(false);
-
-      /* ─── Globe visibility: show while women-in-stem is active ───
-         Starts at "top bottom" so the big globe is revealed as the
-         TitleCard scrolls away, with no idle scroll span before the
-         first scientist section pins and drives the rotation.
-
-         refreshPriority: -1 is load-bearing. On refresh ScrollTrigger strips
-         all pin-spacing, then re-measures each trigger in start order and
-         re-applies the spacing as it goes. This trigger starts earliest, so by
-         default it measured #women-in-stem BEFORE any of the five scientist
-         pins had put their spacers back — 500vh instead of ~2140vh. "bottom
-         top" then resolved roughly a fifth of the way in, the trigger went
-         inactive partway through Marie Curie, and visibility was pinned to
-         hidden for every scientist after her. A negative priority refreshes
-         this last, once the pinned height is real. */
-      visibilityST = ScrollTrigger.create({
-        trigger: "#women-in-stem",
-        start: "top bottom",
-        end: "bottom top",
-        refreshPriority: -1,
-        onToggle: ({ isActive }) => {
-          globeEl.style.visibility = isActive ? "visible" : "hidden";
-        },
-        onRefresh: ({ isActive }) => {
-          globeEl.style.visibility = isActive ? "visible" : "hidden";
-        },
-      });
-
-      /* ─── Scientist scroll sections (desktop vs mobile layouts) ─── */
-      const sections = gsap.utils.toArray<HTMLElement>(".scientist-section");
-
-      const setupScientistTimelines = (mobile: boolean) => {
-        sections.forEach((section, i) => {
-          const sci = scientists[i];
-          const isLast = i === sections.length - 1;
-
-          const {
-            rotX: targetRotX,
-            rotY: targetRotY,
-            y: targetY,
-          } = lngLatToFocus(
-            sci.focus.lng,
-            sci.focus.lat,
-          );
-
-          const countryImg = section.querySelector(
-            ".country-img",
-          ) as HTMLElement;
-          const photoFrame = section.querySelector(
-            ".photo-frame",
-          ) as HTMLElement;
-          const textEl = section.querySelector(
-            ".scientist-text",
-          ) as HTMLElement;
-
-          gsap.set(countryImg, {
-            xPercent: -50,
-            yPercent: -50,
-            opacity: 0,
-            scale: 0.3,
-            x: 0,
-            y: 0,
-          });
-          gsap.set(photoFrame, {
-            xPercent: -50,
-            yPercent: -50,
-            opacity: 0,
-            y: mobile ? "2vh" : "4vh",
-            x: 0,
-            rotation: sci.photoRotation,
-          });
-          gsap.set(textEl, {
-            yPercent: mobile ? 0 : -50,
-            xPercent: mobile ? -50 : 0,
-            opacity: 0,
-            x: mobile ? 0 : "4vw",
-            y: 0,
-          });
-
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: section,
-              start: "top top",
-              end: isLast ? LAST_SCIENTIST_SCROLL_END : SCIENTIST_SCROLL_END,
-              scrub: 1,
-              pin: true,
-              anticipatePin: 1,
-              onUpdate: (self) => {
-                setGlobeSoftEdge(self.progress);
-              },
-              onLeave: () => {
-                clearGlobeSoftEdge();
-              },
-              onLeaveBack: () => {
-                clearGlobeSoftEdge();
-              },
-            },
-          });
-
-          tl.to(
-            group.rotation,
-            {
-              y: targetRotY,
-              x: targetRotX,
-              duration: 2.0,
-              ease: "power2.inOut",
-            },
-            0,
-          );
-          tl.to(
-            group.position,
-            {
-              y: targetY,
-              duration: 2.0,
-              ease: "power2.inOut",
-            },
-            0,
-          );
-          tl.to(
-            camera.position,
-            { z: CAM_ZOOM_Z, duration: 2.8, ease: "power2.in" },
-            0.5,
-          );
-
-          tl.to(globeEl, { opacity: 0, duration: 2.6, ease: "power1.inOut" }, 1.4);
+        /* Silhouette slides aside, photo and text come in. */
+        if (mobile) {
           tl.to(
             countryImg,
-            {
-              opacity: mobile ? 0.55 : 0.3,
-              scale: mobile ? 0.85 : 1,
-              duration: 1.8,
-            },
-            3.2,
+            { y: "-22vh", x: 0, opacity: 0.65, scale: 0.75, duration: T.spreadDur, ease: "power2.out" },
+            T.spreadStart,
           );
+          tl.to(
+            photoFrame,
+            { opacity: 1, x: 0, y: "-4vh", duration: T.spreadDur, ease: "power2.out" },
+            T.spreadStart + 0.02,
+          );
+          tl.to(textEl, { opacity: 1, duration: T.textDur, ease: "power1.out" }, T.textStart);
+        } else {
+          tl.to(
+            countryImg,
+            { x: "-22vw", opacity: 0.85, duration: T.spreadDur, ease: "power2.out" },
+            T.spreadStart,
+          );
+          tl.to(
+            photoFrame,
+            { opacity: 1, x: "-18vw", y: 0, duration: T.spreadDur, ease: "power2.out" },
+            T.spreadStart + 0.02,
+          );
+          tl.to(textEl, { opacity: 1, x: 0, duration: T.textDur, ease: "power1.out" }, T.textStart);
+        }
 
-          if (mobile) {
-            tl.to(
-              countryImg,
-              { y: "-22vh", x: 0, opacity: 0.65, scale: 0.75, duration: 2 },
-              5,
-            );
-            tl.to(
-              photoFrame,
-              { opacity: 1, x: 0, y: "-4vh", duration: 1.6 },
-              5.6,
-            );
-            tl.to(textEl, { opacity: 1, duration: 1.4 }, 7);
-          } else {
-            tl.to(
-              countryImg,
-              { x: "-22vw", opacity: 0.85, duration: 2 },
-              5,
-            );
-            tl.to(
-              photoFrame,
-              { opacity: 1, x: "-18vw", y: 0, duration: 1.6 },
-              5.6,
-            );
-            tl.to(textEl, { opacity: 1, x: 0, duration: 1.4 }, 7);
+        /* Hand back to the globe for the next scientist. The last one just
+           scrolls away with the sticky globe still dissolved. */
+        if (!isLast) {
+          tl.to(
+            [countryImg, photoFrame, textEl],
+            { opacity: 0, duration: T.contentOutDur, ease: "power1.in" },
+            T.contentOutStart,
+          );
+          tl.to(globeEl, { opacity: 1, duration: T.globeBackDur, ease: "power1.inOut" }, T.globeBackStart);
+          tl.to(
+            camera.position,
+            { z: CAM_DEFAULT_Z, duration: T.globeBackDur, ease: "power2.out" },
+            T.globeBackStart,
+          );
+          if (globeEdgeFadeEl) {
+            tl.to(globeEdgeFadeEl, { opacity: 0, duration: T.globeBackDur }, T.globeBackStart);
           }
+        }
 
-          if (!isLast) {
-            tl.to(
-              [countryImg, photoFrame, textEl],
-              { opacity: 0, duration: 1.2 },
-              9.2,
-            );
-            tl.to(globeEl, { opacity: 1, duration: 1 }, 10.2);
-            tl.to(
-              camera.position,
-              { z: CAM_DEFAULT_Z, duration: 1.2 },
-              10.2,
-            );
-          }
+        // Every scene must be exactly one progress unit long, otherwise the
+        // scroll range maps to the wrong span.
+        tl.set({}, {}, 1);
+
+        let forwardTween: gsap.core.Tween | null = null;
+        const snapFrame = (p: number) =>
+          Math.round(p / REVERSE_FRAME_STEP) * REVERSE_FRAME_STEP;
+
+        const trigger = ScrollTrigger.create({
+          trigger: section,
+          start: "top bottom",
+          end: "bottom top",
+          onUpdate(self) {
+            const target = self.progress;
+            if (self.direction === 1) {
+              /* Scrolling down → play forward, smoothly. */
+              forwardTween = gsap.to(tl, {
+                progress: target,
+                duration: FORWARD_SMOOTHING,
+                ease: "power1.out",
+                overwrite: true,
+              });
+            } else {
+              /* Scrolling up → step back frame by frame, no easing. */
+              forwardTween?.kill();
+              forwardTween = null;
+              tl.progress(snapFrame(target));
+            }
+          },
+          onRefresh(self) {
+            forwardTween?.kill();
+            forwardTween = null;
+            tl.progress(self.progress);
+          },
         });
-      };
 
-      matchMedia = gsap.matchMedia();
-      matchMedia.add("(min-width: 48.0625rem)", () => {
-        setupScientistTimelines(false);
+        cleanups.push(() => {
+          forwardTween?.kill();
+          trigger.kill();
+          tl.kill();
+        });
       });
-      matchMedia.add("(max-width: 48rem)", () => {
-        setupScientistTimelines(true);
-      });
-    }, 120);
+    };
+
+    const runCleanups = () => {
+      cleanups.splice(0).forEach((fn) => fn());
+    };
+
+    matchMedia.add("(min-width: 48.0625rem)", () => {
+      setupScientistTimelines(false);
+      return runCleanups;
+    });
+    matchMedia.add("(max-width: 48rem)", () => {
+      setupScientistTimelines(true);
+      return runCleanups;
+    });
 
     return () => {
-      clearTimeout(timer);
-      matchMedia?.revert();
-      visibilityST?.kill();
+      matchMedia.revert();
     };
   }, []);
 
   /* ─── Render ─── */
 
   return (
-    <div className="bg-[#fff9e9] text-[#580A0A] overflow-x-hidden">
-      {/* ── Fixed globe ── */}
-      <div
-        ref={globeContainerRef}
-        className="globe-fixed-container women-in-stem-globe-container"
-      >
-        <Globe3D
-          ref={globeRef}
-          className="globe-soft-edge"
-          size={GLOBE_SIZE}
-          lineColor="#5d0f14"
-          sphereColor="#fff9e9"
-          rotationSpeed={0.002}
-          initialRotX={GLOBE_BASE_ROT_X}
-          initialRotY={0}
-          enableDrag={false}
-        />
-        {/* Feathers the globe's rim into the page background — see .globe-edge-fade */}
-        <div className="globe-edge-fade" aria-hidden="true" />
+    <div ref={rootRef} className="women-in-stem">
+      {/* ── Sticky globe (see .globe-sticky-container) ── */}
+      <div ref={globeContainerRef} className="globe-sticky-container">
+        <div className="globe-stage">
+          <Globe3D
+            ref={globeRef}
+            className="globe-soft-edge"
+            size={GLOBE_SIZE}
+            lineColor="#5d0f14"
+            sphereColor="#fff9e9"
+            rotationSpeed={0.002}
+            initialRotX={GLOBE_BASE_ROT_X}
+            initialRotY={0}
+            enableDrag={false}
+          />
+          {/* Feathers the globe's rim into the page background — see .globe-edge-fade */}
+          <div className="globe-edge-fade" aria-hidden="true" />
+        </div>
       </div>
 
       {/* ── Scientists ── */}
       {scientists.map((sci) => (
-        <section
-          key={sci.name}
-          className="scientist-section relative z-10 h-screen w-full overflow-hidden"
-        >
+        <section key={sci.name} className="scientist-section">
+          <div className="scientist-stage">
+            {/* Country silhouette */}
+            <img
+              className="country-img absolute top-1/2 left-1/2 pointer-events-none opacity-0"
+              src={sci.country}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style={{ width: sci.countryWidth }}
+            />
 
-          {/* Country silhouette */}
-          <img
-            className="country-img absolute top-1/2 left-1/2 pointer-events-none opacity-0"
-            src={sci.country}
-            alt=""
-            style={{ width: sci.countryWidth }}
-          />
+            {/* Scientist photo */}
+            <img
+              className="photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0"
+              src={sci.photo}
+              alt={sci.name}
+              loading="lazy"
+              decoding="async"
+            />
 
-          {/* Scientist photo */}
-          <img
-            className="photo-frame absolute top-1/2 left-1/2 pointer-events-none opacity-0"
-            src={sci.photo}
-            alt={sci.name}
-          />
-
-          {/* Text */}
-          <div
-            className="scientist-text absolute top-1/2 opacity-0 left-[55%] w-[38%] max-w-[35rem] max-md:left-1/2 max-md:top-auto max-md:bottom-[16vh] max-md:w-[88vw] max-md:max-w-none max-md:-translate-x-1/2 max-md:translate-y-0 max-md:text-center max-md:z-[3] max-md:px-2 max-[30rem]:w-[92vw] max-[30rem]:bottom-[14vh]"
-          >
-            <h2 className="scientist-name">{sci.name}</h2>
-            <p className="scientist-subtitle">{sci.title}</p>
-            <p className="scientist-desc">{sci.text}</p>
+            {/* Text */}
+            <div className="scientist-text absolute top-1/2 opacity-0 left-[55%] w-[38%] max-w-[35rem] max-md:left-1/2 max-md:top-auto max-md:bottom-[16vh] max-md:w-[88vw] max-md:max-w-none max-md:-translate-x-1/2 max-md:translate-y-0 max-md:text-center max-md:z-[3] max-md:px-2 max-[30rem]:w-[92vw] max-[30rem]:bottom-[14vh]">
+              <h2 className="scientist-name">{sci.name}</h2>
+              <p className="scientist-subtitle">{sci.title}</p>
+              <p className="scientist-desc">{sci.text}</p>
+            </div>
           </div>
         </section>
       ))}

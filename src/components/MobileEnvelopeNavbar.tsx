@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import closedEnv from "../assets/closed.svg";
 import openEnv from "../assets/open.svg";
@@ -21,32 +20,10 @@ function scrollToSection(href: string) {
   if (!target) return;
 
   const navOffset = 56;
-  const titleCardOffset = href === "#title-card-section" ? 24 : 0;
   const targetTop =
-    target.getBoundingClientRect().top +
-    window.scrollY -
-    navOffset +
-    titleCardOffset;
+    target.getBoundingClientRect().top + window.scrollY - navOffset;
 
   window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
-
-  const refreshAfterScroll = () => {
-    ScrollTrigger.refresh();
-
-    const globeEl = document.querySelector(
-      ".globe-fixed-container",
-    ) as HTMLElement | null;
-    if (globeEl && href !== "#women-in-stem") {
-      globeEl.style.visibility = "hidden";
-      globeEl.style.pointerEvents = "none";
-    }
-  };
-
-  if ("onscrollend" in window) {
-    window.addEventListener("scrollend", refreshAfterScroll, { once: true });
-  } else {
-    globalThis.setTimeout(refreshAfterScroll, 650);
-  }
 }
 
 export default function MobileEnvelopeNavbar() {
