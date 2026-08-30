@@ -1,13 +1,16 @@
 {
   "name": "acm-w",
   "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node --experimental-strip-types node_modules/vite/bin/vite.js --config vite.config.ts --configLoader native",
+    "dev": "vite",
     "blogs": "node scripts/fetch-blogs.mjs",
     "prebuild": "node scripts/fetch-blogs.mjs",
-    "build": "tsc -b && node --experimental-strip-types node_modules/vite/bin/vite.js build --config vite.config.ts --configLoader native",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "dev:cloudflare": "npm run build && wrangler pages dev dist",
