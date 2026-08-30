@@ -13,11 +13,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "dev:cloudflare": "npm run build && wrangler pages dev dist",
+    "dev:cloudflare": "npm run build && wrangler dev",
     "cf:contact:dev": "wrangler --config=wrangler.contact.jsonc dev",
     "cf:contact:deploy": "wrangler --config=wrangler.contact.jsonc deploy",
-    "cf:pages:deploy": "npm run build && wrangler pages deploy dist --project-name acm-w",
-    "cf:deploy": "npm run cf:pages:deploy && npm run cf:contact:deploy"
+    "cf:site:deploy": "npm run build && wrangler deploy",
+    "cf:deploy": "npm run cf:site:deploy && npm run cf:contact:deploy"
   },
   "dependencies": {
     "@types/three": "^0.184.1",
